@@ -16,7 +16,6 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 
 const RateModal = ({ show, onClose, onApply, joblist }) => {
-  console.log('joblist: ', joblist);
   const [rateType, setRateType] = useState('percent');
   const [value, setValue] = useState('');
   const [errorMsg, setErrorMsg] = useState('');

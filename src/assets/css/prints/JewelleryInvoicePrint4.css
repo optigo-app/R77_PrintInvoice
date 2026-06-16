@@ -1,0 +1,317 @@
+.invoice-page {
+    background: #fff;
+  }
+  
+  .invoice-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .invoice-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .invoice-title {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  
+  .invoice-trn {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .bill-section {
+    margin-bottom: 20px;
+  }
+  
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  
+  .bill-text {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  
+  .meta-box {
+    display: flex;
+    border: 1px solid #bdbdbd;
+  }
+  
+  .meta-box.second {
+    border-top: none;
+    margin-bottom: 20px;
+  }
+  
+  .meta-col {
+    flex: 1;
+    border-right: 1px solid #bdbdbd;
+  }
+  
+  .meta-col.large {
+    flex: 2;
+  }
+  
+  .meta-col:last-child {
+    border-right: none;
+  }
+  
+  .meta-head {
+    background: #f5f5f5;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    border-bottom: 1px solid #bdbdbd;
+  }
+  
+  .meta-value {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  
+  .table-wrapper {
+    border: 1px solid #bdbdbd;
+  }
+  
+  .table-row {
+    display: flex;
+  }
+  
+  .table-header {
+    background: #f5f5f5;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  
+  .table-header div {
+    padding: 8px 5px;
+    border-right: 1px solid #bdbdbd;
+    text-align: center;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .table-cell {
+    border-right: 1px solid #bdbdbd;
+    border-top: 1px solid #bdbdbd;
+    padding: 6px;
+    font-size: 11px;
+    text-align: center;
+  }
+  
+  .no-border {
+    border-right: none !important;
+  }
+  
+  .desc-cell {
+    text-align: left;
+  }
+  
+  .sub-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #666;
+    display: inline-block;
+    width: 70px;
+  }
+  
+  .img-box {
+    width: 55px;
+  
+    background: #eee;
+    border-radius: 4px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #aaa;
+  }
+  
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #555;
+    border-radius: 2px;
+    margin: auto;
+  }
+  
+  /* widths */
+  
+  .w-sno {
+    width: 5%;
+  }
+  
+  .w-lot {
+    width: 7%;
+  }
+  
+  .w-img {
+    width: 7%;
+  }
+  
+  .w-desc {
+   width: 19%;
+  }
+  
+  .w-small {
+    width: 7%;
+  }
+  
+  .w-card {
+    width: 6%;
+  }
+  
+  .w-pcs {
+    width: 4%;
+  }
+  
+  .w-price {
+    width: 8%;
+  }
+  
+  
+  .div-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .instruction {
+    font-size: 14px;
+    padding: 5px;
+    color: #575757;
+  }
+  
+  .printbtn {
+    width: 1200px !important;
+    margin: 0 auto;
+  }
+   
+  
+  /* bottom table footer  */
+  
+  /* Container Box */
+  .ob-form-container {
+    border-top: 1px solid #bdbdbd;
+    border-left: 1px solid #bdbdbd;
+    width: 100%;
+    /* margin-top: 10px; */
+    box-sizing: border-box;
+  }
+  
+  /* Structural Layouts */
+  .ob-form-row {
+    display: flex;
+    width: 100%;
+  }
+  
+  .ob-form-col-50 {
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+  }
+  
+  /* Cell Variations */
+  .ob-form-cell {
+    border-bottom: 1px solid #bdbdbd;
+    border-right: 1px solid #bdbdbd;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .ob-form-cell.ob-form-sub-header-bg {
+    padding: 2px 8px;
+    background-color: #f2f2f2;
+  }
+  
+  /* Unique Cell Sizing & Alignments */
+  .ob-form-w-50 { width: 50%; }
+  .ob-form-w-65 { width: 65%; }
+  .ob-form-w-35 { width: 35%; }
+  
+  .ob-form-h-30  { height: 30px; }
+  .ob-form-h-80  { height: 80px; }
+  .ob-form-h-120 { height: 80px; }
+  
+  .ob-form-center-content {
+    justify-content: center;
+  }
+  
+  /* Typography styles */
+  .ob-form-cell-header {
+    font-size: 11px;
+    font-weight: bold;
+    font-family: sans-serif;
+    text-transform: uppercase;
+    color: #333;
+   
+    background: #f2f2f2;
+    padding: 3px 0px
+  }
+  
+  .ob-form-cell-text {
+    font-size: 11px;
+    font-family: sans-serif;
+    color: #000;
+    min-height: 93px;
+  }
+  
+  @media print {
+    .printbtn {
+      display: none !important;
+    }
+  
+    .sub-label {
+      font-size: 7px !important;
+    }
+    .invoice-container{
+      padding: 0px !important;
+    }
+  
+    .table-cell {
+      font-size: 9px !important;
+    }
+  
+    .table-header {
+  
+      font-size: 8px !important;
+  
+    }
+  
+    .meta-value {
+  
+      font-size: 9px !important;
+    }
+  
+    .meta-head {
+  
+      font-size: 8px !important;
+  
+    }
+  
+    .bill-text {
+      font-size: 9px !important;
+  
+    }
+  
+    .section-label {
+      font-size: 9px !important;
+  
+    }
+  
+    .table-cell {
+      font-size: 9px !important;
+  
+    }
+  }

@@ -166,6 +166,7 @@ export const printConditions = [
   {printName: 'material sale print', etpType: 'print', componentName: 'MaterialSalePrint'},
   {printName: 'estimate print k', etpType: 'print', componentName: 'EstimatePrintK'},
   {printName: 'estimate 1', etpType: 'print', componentName: 'Estimation1'},
+  { printName: 'jewellery invoice 4', etpType: 'print', componentName: 'JewelleryInvoicePrint4' }, // amish
 ];
 
 export const SaleReturn = [

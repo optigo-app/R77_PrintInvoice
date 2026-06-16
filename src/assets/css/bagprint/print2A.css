@@ -18,7 +18,7 @@
     border-radius: 8px;
     margin-top: 1.7rem;
     margin-left: 1.3rem;
-    font-size: 15px;
+    font-size: 12px;
 }
 
 .print2AMaterialCG {
@@ -32,7 +32,7 @@
     justify-content: space-between;
     align-items: center;
     width: 270px;
-    font-size: 12px;
+    font-size: 11px;
     height: 19px;
 
 }
@@ -97,7 +97,7 @@
 }
 
 .cst2A {
-    width: 72px;
+    width: 76px;
     height: 20px;
     border: 1px solid;
     display: flex;
@@ -116,7 +116,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: bold;
     border-top: 0px;
     border-left: 0px;
@@ -129,7 +129,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 13px;
+    font-size: 11px;
     border-top: 0px;
     border-left: 0px;
 }
@@ -333,7 +333,7 @@
 }
 
 .pcswt2A {
-    width: 70px;
+    width: 64px;
     border-right: 1px solid;
     display: flex;
     flex-direction: column;
@@ -341,8 +341,16 @@
     align-items: center;
 }
 
+.pcswt2A2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+   
+}
+
 .pcs2A {
-    width: 25px;
+    width: 43px;
     height: 14px;
     display: flex;
     justify-content: flex-end;
@@ -356,7 +364,7 @@
     font-size: 12px;
     justify-content: space-between;
     align-items: center;
-    width: 70px;
+    width: 64px;
 }
 
 .EmptyPcsWt2A {
@@ -401,7 +409,7 @@
 .barcodeprint2A >  .barcode_sticker{
     box-sizing: border-box;
     display: block;
-    height: 7.529167mm !important;
+    height: 5.529167mm !important;
     margin: 0 auto;
     max-width: 140.79375mm;
     object-fit: cover;
@@ -413,7 +421,7 @@
     z-index: 1;
   }
   .fonts2A{
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
   }
 
@@ -426,11 +434,14 @@
     align-items: center;
   }
   .total2Afont{
-    font-size:  10px;
+    font-size:  8px;
     line-height: 7px;
   }
   .pad1_2A{
     padding-right: 1px;
+  }
+  .metalbarcode svg{
+     height: 26px !important;
   }
 @media print {
 

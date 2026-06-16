@@ -41,6 +41,7 @@ const MRPBill = () => {
   const [searchVal, setSearchVal] = useState("");
   const [selectVal, setSelectVal] = useState("");
   const [selectLocker, setSelectLocker] = useState("");
+  const [selectTaxProfile, setSelectTaxProfile] = useState("");
   const [selectBook, setSelectBook] = useState("");
   const [jobnoVal, setJobnoVal] = useState("");
   const [isJobPresent, setIsJobPresent] = useState(false);
@@ -51,7 +52,12 @@ const MRPBill = () => {
   const [dateRemarkFlag, setDateRemarkFlag] = useState(false);
   const [currencyData, setCurrencyData] = useState([]);
   const [lockerData, setLockerData] = useState([]);
+  const [taxProfileData, setTaxProfileData] = useState([]);
+  const [taxProfileDT1, setTaxProfileDT1] = useState([]);
+  const [customerDefaultTaxProfileId, setCustomerDefaultTaxProfileId] = useState(null);
   const [customerData, setCustomerData] = useState([]);
+  const [jobHSNNo, setJobHSNNo] = useState('');
+  const [failedJobs, setFailedJobs] = useState([]);
   const [bookData, setBookData] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [jobDetail, setJobDetail] = useState(null);
@@ -64,6 +70,7 @@ const MRPBill = () => {
   const [currencyRate, setCurrencyRate] = useState('');
   const [lockerId, setLockerId] = useState('');
   const [bookId, setBookId] = useState('');
+  const [taxProfileId, setTaxProfileId] = useState('');
   const [jobList, setJobList] = useState([]);
   const [billNo, setBillNo] = useState(0);
   const [billSavedFlag, setBillSavedFlag] = useState(false);
@@ -71,10 +78,12 @@ const MRPBill = () => {
   const [lockerErrorMsg, setLockerErrorMsg] = useState('');
   const [currErrorMsg, setCurrErrorMsg] = useState('');
   const [bookErrorMsg, setBookErrorMsg] = useState('');
+  const [taxProfileErrorMsg, setTaxProfileErrorMsg] = useState('');
   const [disableSelect, setDisableSelect] = useState(false);
   const [disableSelect2, setDisableSelect2] = useState(false);
   const [disableSelect3, setDisableSelect3] = useState(false);
   const [disableSelect4, setDisableSelect4] = useState(false);
+  const [disableSelect5, setDisableSelect5] = useState(false);
   const [editableFlag, setEditTableFlag] = useState(false);
   const [deleteFlag, setDeleteFlag] = useState(true);
   const [inpAutoFocus, setInpAutoFocus] = useState(true);
@@ -94,6 +103,7 @@ const MRPBill = () => {
   const params = new URLSearchParams(queryParam);
   const inputRef = useRef(null);
   const custRef = useRef(null);
+  const isInitialTaxProfileLoad = useRef(true);
   const [url, setUrl] = useState('');
   const tkn = params.get('tkn');
   const pid = params.get('pid');
@@ -104,13 +114,13 @@ const MRPBill = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [roundType, setRoundType] = useState("less");
   const [roundValue, setRoundValue] = useState("");
+  const [dueDays, setDueDays] = useState('');
   const [pendingNote, setPendingNote] = useState(true);
   const [showRateModal, setShowRateModal] = useState(false);
   const [totalAmount, setTotalAmount] = useState('');
   const [roundUpTotalAmount, setRoundUpTotalAmount] = useState('');
   const [finalTotalAmount, setFinalTotalAmount] = useState('');
   const [remarkFlag, setRemarkFlag] = useState(0);
-  console.log('remarkFlag: ', remarkFlag);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -165,17 +175,43 @@ const MRPBill = () => {
     setFinalTotalAmount('');
   };
 
+  // Helper to compute total including taxes
+  const getTotalWithTax = () => {
+    const subtotal = parseFloat(totalAmount || 0);
+    const selectedTP = taxProfileData?.find((tp) => tp.id == taxProfileId);
+    const isGSTProfile = selectedTP?.GSTProfileid > 0;
+    const gstProfileId = selectedTP?.GSTProfileid;
+    const gstTaxEntry = isGSTProfile && taxProfileDT1?.find((entry) => entry.HSN_No === jobHSNNo);
+    let totalTax = 0;
+    if (isGSTProfile && gstTaxEntry) {
+      if (gstProfileId === 1) {
+        totalTax = (subtotal * (parseFloat(gstTaxEntry.CGST) || 0)) / 100 + (subtotal * (parseFloat(gstTaxEntry.SGST) || 0)) / 100;
+      } else if (gstProfileId === 2) {
+        totalTax = (subtotal * (parseFloat(gstTaxEntry.IGST) || 0)) / 100;
+      }
+    } else if (!isGSTProfile && selectedTP) {
+      [1, 2, 3, 4, 5].forEach((n) => {
+        const taxValue = parseFloat(selectedTP[`tax${n}_value`] || 0);
+        if (taxValue > 0 && selectedTP[`tax${n}_taxname`]) {
+          totalTax += (subtotal * taxValue) / 100;
+        }
+      });
+    }
+    return subtotal + totalTax;
+  };
+
   const handleValueChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     if (!validateTwoDecimalPlaces(value)) {
       return;
     }
     setRoundValue(value);
+    const totalWithTax = getTotalWithTax();
     let roundup = 0;
     if (roundType === 'less') {
-      roundup = totalAmount - value;
+      roundup = totalWithTax - value;
     } else {
-      roundup = totalAmount + value;
+      roundup = totalWithTax + value;
     }
     setTimeout(() => {
       setRoundUpTotalAmount(parseFloat(roundup.toFixed(2)));
@@ -184,19 +220,23 @@ const MRPBill = () => {
 
 
   const handleRoundup = () => {
-    const amount = parseFloat(totalAmount || 0);
-    const decimalPart = parseFloat((amount % 1).toFixed(2));
+    const totalWithTax = getTotalWithTax();
 
-    setRoundValue(decimalPart);
+    let roundedAmount;
+    let diff;
+    if (roundType === 'less') {
+      roundedAmount = Math.floor(totalWithTax);
+      diff = parseFloat((totalWithTax - roundedAmount).toFixed(2));
+    } else {
+      roundedAmount = Math.ceil(totalWithTax);
+      diff = parseFloat((roundedAmount - totalWithTax).toFixed(2));
+    }
+
+    setRoundValue(diff);
     setPendingNote(false);
 
-    const roundup =
-      roundType === "less"
-        ? parseFloat((amount - decimalPart).toFixed(2))
-        : parseFloat((amount + decimalPart).toFixed(2));
-
     setTimeout(() => {
-      setRoundUpTotalAmount(roundup);
+      setRoundUpTotalAmount(parseFloat(roundedAmount.toFixed(2)));
     }, 50);
   };
 
@@ -267,6 +307,10 @@ const MRPBill = () => {
             if (args === 'customer' && resData?.DT1?.length > 0) {
               setRemarkFlag(resData?.DT1[0]?.IsRemarkRequiredInMRPandBill ?? 0);
             }
+            // ✅ NEW: Handle DT1 for taxprofile (HSN-based GST rates)
+            if (args === 'taxprofile' && resData?.DT1?.length > 0) {
+              setTaxProfileDT1(resData.DT1);
+            }
           } else {
             setData([]);
             console.log(response?.data?.Data);
@@ -287,6 +331,9 @@ const MRPBill = () => {
 
       // Fetch customer data
       await fetchData("GetBook", setBookData, 'book');
+
+      // Fetch tax profile data
+      await fetchData("GetTaxProfile", setTaxProfileData, 'taxprofile');  
 
     } catch (error) {
       console.log("An error occurred while fetching data:", error);
@@ -372,6 +419,38 @@ const MRPBill = () => {
           if (response?.status === 200 && response?.data?.Status === '200') {
             if (!isEmptyObject(response?.data?.Data)) {
               if (response?.data?.Data?.DT?.length > 0) {
+                const selectedTP = taxProfileData.find((tp) => tp.id == taxProfileId);
+                const jobHSN = response?.data?.Data?.DT[0]?.HSN_No;
+                if (selectedTP?.GSTProfileid > 0) {
+                  const failedJob = response?.data?.Data?.DT[0];
+                  if (!jobHSN) {
+                    setFailedJobs((prev) => {
+                      if (prev.some((j) => j.stockBarcode === failedJob?.StockBarcode)) return prev;
+                      return [...prev, { stockBarcode: failedJob?.StockBarcode, description: failedJob?.Description, reason: 'No HSN No found' }];
+                    });
+                    setMsg('Invalid job - No HSN No found');
+                    setIsLoading(false);
+                    setDisableInp(false);
+                    inputRef.current.focus();
+                    setJobnoVal('');
+                    return;
+                  }
+                  if (jobHSNNo && jobHSN !== jobHSNNo) {
+                    setFailedJobs((prev) => {
+                      if (prev.some((j) => j.stockBarcode === failedJob?.StockBarcode)) return prev;
+                      return [...prev, { stockBarcode: failedJob?.StockBarcode, description: failedJob?.Description, reason: 'HSN mismatch' }];
+                    });
+                    setMsg('Items with different HSN cannot be added in the same voucher!');
+                    setIsLoading(false);
+                    setDisableInp(false);
+                    inputRef.current.focus();
+                    setJobnoVal('');
+                    return;
+                  }
+                  if (!jobHSNNo) {
+                    setJobHSNNo(jobHSN);
+                  }
+                }
                 if (jobList?.length > 0) {
                   let isJobPresent = jobList?.find((al) => al?.StockBarcode === response?.data?.Data?.DT[0]?.StockBarcode);
                   let isJobPresent2 = jobList?.some((al) => al?.StockBarcode === response?.data?.Data?.DT[0]?.StockBarcode);
@@ -393,6 +472,7 @@ const MRPBill = () => {
                     setDisableSelect2(true);
                     setDisableSelect3(true);
                     setDisableSelect4(true);
+                    setDisableSelect5(true);
                     setDisableInp(false);
                   } else {
                     setJobDetail(response?.data?.Data?.DT)
@@ -404,6 +484,7 @@ const MRPBill = () => {
                     setDisableSelect2(true);
                     setDisableSelect3(true);
                     setDisableSelect4(true);
+                    setDisableSelect5(true);
                     setMsg('')
                     setJobnoVal('');
                     setIsJobPresent(false);
@@ -423,7 +504,8 @@ const MRPBill = () => {
                   setDisableSelect(true);
                   setDisableSelect2(true);
                   setDisableSelect3(true);
-                  setDisableSelect4(true);
+                    setDisableSelect4(true);
+                    setDisableSelect5(true);
                   setIsLoading(false);
                   setDisableInp(false);
 
@@ -516,6 +598,8 @@ const MRPBill = () => {
     setCustID(customer?.id);
     setSearchCust(customer?.TypoLabel);
     setSearchVal(customer?.TypoLabel);
+    setCustomerDefaultTaxProfileId(customer?.taxprofileid || null);
+    setDueDays(customer?.DueDays || '');
 
     setFilteredCustomers([]);
 
@@ -547,28 +631,6 @@ const MRPBill = () => {
         setFilteredCustomers([]); // Hide the dropdown
       }
     }
-    // else if(searchVal){
-    //   if (searchValue) {
-    //     // Split the search value into separate words
-    //     const searchWords = searchValue?.split(" ")?.filter(word => word);
-
-    //     const filtered = customerData?.filter(customer => {
-    //       const customerName = customer?.TypoLabel?.toLowerCase();
-
-    //       // Check if all search words are present in the customer name in order
-    //       return searchWords?.every((word, index) => {
-    //         const wordIndex = customerName.indexOf(word);
-    //         if (wordIndex === -1) return false;
-
-    //         // Remove the found word and the preceding part for the next word search
-    //         customerName = customerName?.slice(wordIndex + word.length);
-    //         return true;
-    //       });
-    //     });
-
-    //     setFilteredCustomers(filtered);
-    //   }
-    // } 
     else {
       setFilteredCustomers([]);
     }
@@ -599,6 +661,8 @@ const MRPBill = () => {
         setSearchCust(filteredCustomers[selectedIndex]?.TypoLabel);
         setSearchVal(filteredCustomers[selectedIndex]?.TypoLabel);
         setCustID(filteredCustomers[selectedIndex]?.id);
+        setCustomerDefaultTaxProfileId(filteredCustomers[selectedIndex]?.taxprofileid || null);
+        setDueDays(filteredCustomers[selectedIndex]?.DueDays || '');
         setFilteredCustomers([]);
         inputRef.current?.focus();
         setTimeout(() => {
@@ -636,6 +700,16 @@ const MRPBill = () => {
     setDisableInp(false);
   }
 
+  const handleTaxProfileChange = (e) => {
+    setTaxProfileErrorMsg('');
+    setSelectTaxProfile(e.target.value);
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const taxProfileId = selectedOption.getAttribute('data-taxProfileId');
+    setTaxProfileId(taxProfileId);
+    setJobnoVal('');
+    setDisableInp(false);
+  }
+
   //save bill logic
   const saveMRP = async (args) => {
     let IsForEst = 0;
@@ -668,7 +742,6 @@ const MRPBill = () => {
     if (jobList?.length > 0) {
       let isEveryNot0 = jobList?.every((e) => e?.salePrice !== 0 || e?.salePrice !== '' || e?.salePrice !== null);
       if (isEveryNot0) {
-        debugger
         const bill_detail = jobList?.map((e) => {
           return {
             STB: e?.StockBarcode,
@@ -678,7 +751,7 @@ const MRPBill = () => {
           };
         })
         const body = {
-          "Token": `${atob(tkn)}`, "ReqData": `[{\"Token\":\"${atob(tkn)}\",\"Mode\":\"BillSave\",\"CustomerId\":\"${custId}\",\"LockerId\":\"${lockerId}\",\"BookId\":\"${bookId}\",\"CurrencyId\":\"${currencyId}\",\"CurrencyRate\":\"${currencyRate}\",\"IsForEst\":\"${IsForEst}\",\"loginid\":\"${lid}\",\"userid\":\"${luid}\",\"date\":\"${formatedDate}\",\"remark\":\"${formatedRemark}\",\"RoundupType\":\"${roundType}\",\"RoundupValue\":\"${roundValue}\",\"BillDetail\":${JSON.stringify(bill_detail)},\"luid\":\"${luid ?? ""}\"}]`
+          "Token": `${atob(tkn)}`, "ReqData": `[{\"Token\":\"${atob(tkn)}\",\"Mode\":\"BillSave\",\"CustomerId\":\"${custId}\",\"LockerId\":\"${lockerId}\",\"BookId\":\"${bookId}\",\"CurrencyId\":\"${currencyId}\",\"CurrencyRate\":\"${currencyRate}\",\"IsForEst\":\"${IsForEst}\",\"loginid\":\"${lid}\",\"userid\":\"${luid}\",\"date\":\"${formatedDate}\",\"remark\":\"${formatedRemark}\",\"RoundupType\":\"${roundType}\",\"RoundupValue\":\"${roundValue}\",\"orderduedays\":\"${dueDays}\",\"taxprofileid\":\"${taxProfileId}\",\"BillDetail\":${JSON.stringify(bill_detail)},\"luid\":\"${luid ?? ""}\"}]`
         }
         try {
           setIsLoading(true);
@@ -735,6 +808,7 @@ const MRPBill = () => {
     } else {
       setBookErrorMsg('');
     }
+
     return isValid;
   };
 
@@ -761,10 +835,14 @@ const MRPBill = () => {
     setLockerErrorMsg('');
     setCustErrorMsg('');
     setBookErrorMsg('');
+    setTaxProfileErrorMsg('');
+    setSelectTaxProfile('');
+    setTaxProfileId('');
 
     setDisableSelect2(false);
     setDisableSelect3(false);
     setDisableSelect4(false);
+    setDisableSelect5(false);
     custRef.current?.focus();
     setTimeout(() => {
       custRef.current?.focus();
@@ -776,6 +854,10 @@ const MRPBill = () => {
     setCustomerEnterDate('');
     setCustomerEnteredRemark('');
     setDateRemarkFlag(false);
+    setDueDays('');
+    setCustomerDefaultTaxProfileId(null);
+    setJobHSNNo('');
+    setFailedJobs([]);
 
     setNoJobAdd(false);
 
@@ -802,6 +884,21 @@ const MRPBill = () => {
     }
   }, [cid, customerData])
 
+  // Auto-select customer default tax profile when data loads
+  useEffect(() => {
+    if (isInitialTaxProfileLoad.current) {
+      isInitialTaxProfileLoad.current = false;
+      return;
+    }
+    if (customerDefaultTaxProfileId && taxProfileData?.length > 0) {
+      const matched = taxProfileData.find((tp) => tp.id == customerDefaultTaxProfileId);
+      if (matched) {
+        setTaxProfileId(String(matched.id));
+        setSelectTaxProfile(matched.Taxtype);
+      }
+    }
+  }, [custId, customerDefaultTaxProfileId, taxProfileData]);
+
   //job list variable set up of disable
   useEffect(() => {
     if (jobList?.length === 0) {
@@ -809,7 +906,10 @@ const MRPBill = () => {
       setDisableSelect2(false);
       setDisableSelect3(false);
       setDisableSelect4(false);
+      setDisableSelect5(false);
       setEditTableFlag(false);
+      setJobHSNNo('');
+      setFailedJobs([]);
     }
   }, [jobList]);
 
@@ -855,7 +955,8 @@ const MRPBill = () => {
 
   //continue button logic
   const handleContinue = () => {
-    debugger
+    setFailedJobs([]);
+    setMsg('');
     setEditTableFlag(true);
     setScanOff(true);
     setTimeout(() => {
@@ -868,11 +969,12 @@ const MRPBill = () => {
     setDateRemarkFlag(true);
     setDeleteFlag(false);
     setRoundValue('');
+    const totalWithTax = getTotalWithTax();
     let roundup = 0;
     if (roundType === 'less') {
-      roundup = totalAmount - roundValue;
+      roundup = totalWithTax - roundValue;
     } else {
-      roundup = totalAmount + roundValue;
+      roundup = totalWithTax + roundValue;
     }
     setRoundUpTotalAmount(
       parseFloat(isNaN(Number(roundup)) ? 0 : Number(roundup).toFixed(2))
@@ -954,6 +1056,36 @@ const MRPBill = () => {
         if (response?.status === 200 && response?.data?.Status === '200') {
           if (!isEmptyObject(response?.data?.Data)) {
             if (response?.data?.Data?.DT?.length > 0) {
+              const selectedTP = taxProfileData.find((tp) => tp.id == taxProfileId);
+              const jobHSN = response?.data?.Data?.DT[0]?.HSN_No;
+              if (selectedTP?.GSTProfileid > 0) {
+                const failedJob = response?.data?.Data?.DT[0];
+                if (!jobHSN) {
+                  setFailedJobs((prev) => {
+                    if (prev.some((j) => j.stockBarcode === failedJob?.StockBarcode)) return prev;
+                    return [...prev, { stockBarcode: failedJob?.StockBarcode, description: failedJob?.Description, reason: 'No HSN No found' }];
+                  });
+                  setMsg('Invalid job - No HSN No found');
+                  setIsLoading(false);
+                  setJobnoVal('');
+                  inputRef.current.focus();
+                  return;
+                }
+                if (jobHSNNo && jobHSN !== jobHSNNo) {
+                  setFailedJobs((prev) => {
+                    if (prev.some((j) => j.stockBarcode === failedJob?.StockBarcode)) return prev;
+                    return [...prev, { stockBarcode: failedJob?.StockBarcode, description: failedJob?.Description, reason: 'HSN mismatch' }];
+                  });
+                  setMsg('Items with different HSN cannot be added in the same voucher!');
+                  setIsLoading(false);
+                  setJobnoVal('');
+                  inputRef.current.focus();
+                  return;
+                }
+                if (!jobHSNNo) {
+                  setJobHSNNo(jobHSN);
+                }
+              }
               if (jobList?.length > 0) {
                 let isJobPresent = jobList?.find((al) => al?.StockBarcode === response?.data?.Data?.DT[0]?.StockBarcode);
                 if (isJobPresent) {
@@ -975,6 +1107,7 @@ const MRPBill = () => {
                   setDisableSelect2(true);
                   setDisableSelect3(true);
                   setDisableSelect4(true);
+                  setDisableSelect5(true);
                 } else {
                   setJobDetail(response?.data?.Data?.DT)
                   let newobj = { ...response?.data?.Data?.DT[0] };
@@ -985,6 +1118,7 @@ const MRPBill = () => {
                   setDisableSelect2(true);
                   setDisableSelect3(true);
                   setDisableSelect4(true);
+                  setDisableSelect5(true);
                   setMsg('')
                   setJobnoVal('');
                   setIsJobPresent(false);
@@ -1003,6 +1137,7 @@ const MRPBill = () => {
                 setDisableSelect2(true);
                 setDisableSelect3(true);
                 setDisableSelect4(true);
+                setDisableSelect5(true);
                 setIsLoading(false);
 
               }
@@ -1236,6 +1371,27 @@ const MRPBill = () => {
             <div className="text-danger">{custErrorMsg}</div>
           </div>
           <div className="grid-item pd10_mrp min_h_92_mrp">
+            <label htmlFor="taxProfile" className="pe-3 cust_name_title">
+              TAX PROFILE
+            </label>
+            <select
+              name="taxProfile"
+              id="taxProfile"
+              value={selectTaxProfile}
+              className="form-select w-100 b1_9898px"
+              onChange={(e) => handleTaxProfileChange(e)}
+              disabled={disableSelect5}
+            >
+              <option value="">Select</option>
+              {
+                taxProfileData?.map((e, i) => {
+                  return <option key={i} data-taxProfileId={e?.id} value={e?.Taxtype}>{e?.Taxtype}</option>
+                })
+              }
+            </select>
+            <div className="text-danger">{taxProfileErrorMsg}</div>
+          </div>
+          <div className="grid-item pd10_mrp min_h_92_mrp">
             <label htmlFor="locker" className="pe-3 cust_name_title">
               LOCKER
             </label>
@@ -1362,6 +1518,27 @@ const MRPBill = () => {
               <button className="btn_go" disabled={jobnoVal === ''} onClick={() => handleGoClick()}>GO</button>
             </div>
             <div className="text-danger px-2 msg_h_mrpbill">{msg}</div>
+            {jobList?.length > 0 && failedJobs?.length > 0 && !editableFlag && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginTop: '12px', width: '100%', maxWidth: '200px', marginLeft:'40px' }}>
+                {failedJobs.map((fj, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: '#fff',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>{fj.stockBarcode}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {billSavedFlag !== true && <div className="tableDiv_mrp d-flex flex-column">
             <div className="d-flex justify-content-end mb-2 w-100" style={{ maxWidth: '1000px' }}>
@@ -1391,10 +1568,15 @@ const MRPBill = () => {
                   roundUpTotalAmount={roundUpTotalAmount}
                   roundType={roundType}
                   roundValue={roundValue}
+                  dueDays={dueDays}
                   pendingNote={pendingNote}
+                  selectedTaxProfile={taxProfileData?.find(tp => tp.id == taxProfileId)}
+                  taxProfileDT1={taxProfileDT1}
+                  jobHSNNo={jobHSNNo}
                   onToggleChange={handleToggleChange}
                   onValueChange={handleValueChange}
                   onRoundup={handleRoundup}
+                  onDueDaysChange={(e) => setDueDays(e.target.value)}
                 />
               </div>
             }
