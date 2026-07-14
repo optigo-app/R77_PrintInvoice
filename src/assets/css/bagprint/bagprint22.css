@@ -1,0 +1,474 @@
+
+.bagprint22{
+    width: 200mm;
+    height: 143mm;
+    display: flex;
+ 
+}
+
+.dcf-page {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 20px;
+  }
+  
+  .dcf-wrapper {
+    border: 2px solid #000;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .dcf-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    border-bottom: 1px solid #000;
+  }
+  .dcf-row:last-child {
+    border-bottom: none;
+  }
+  
+  .dcf-cell {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-right: 1px solid #000;
+    box-sizing: border-box;
+  }
+  .dcf-cell:last-child {
+    border-right: none;
+  }
+  
+  /* ---- Top title bar ---- */
+  .dcf-title-bar {
+    /* background: #7a1fa2; */
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    flex: 1;
+    padding: 4px;
+  }
+  
+  /* ---- Header info rows ---- */
+  .dcf-label {
+    flex: 0 0 25%;
+    font-weight: bold;
+    background: #fff;
+  }
+  .dcf-value {
+    flex: 0 0 25%;
+  }
+  .dcf-value-red {
+    flex: 0 0 25%;
+    
+    font-weight: bold;
+  }
+  .dcf-spacer {
+    flex: 1;
+  }
+  .dcf-karat {
+    flex: 0 0 60px;
+    justify-content: center;
+    font-weight: bold;
+    background: #fff200;
+    border-left: 1px solid #000;
+  }
+  .dcf-karat-pink {
+    flex: 0 0 60px;
+    justify-content: center;
+    font-weight: bold;
+    background: #ff2fb0;
+    color: #fff;
+    border-left: 1px solid #000;
+  }
+  .dcf-barcode {
+    flex: 0 0 200px;
+    justify-content: center;
+    letter-spacing: 2px;
+  
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+  }
+  
+  /* ---- Section header ---- */
+  .dcf-section-header {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px;
+  }
+  
+  /* ---- Table column widths ---- */
+  /* .dcf-col-material { flex: 0 0 70px; font-weight: bold; }
+  .dcf-col-rmtype   { flex: 0 0 90px; font-weight: bold; }
+  .dcf-col-rmshape  { flex: 0 0 90px; font-weight: bold; }
+  .dcf-col-rmqty    { flex: 0 0 90px; font-weight: bold; }
+  .dcf-col-sizegroup{ flex: 0 0 110px; font-weight: bold; }
+  .dcf-col-rmsize   { flex: 0 0 150px; font-weight: bold; }
+  .dcf-col-pcs      { flex: 0 0 55px; justify-content: center; font-weight: bold; }
+  .dcf-col-wt       { flex: 0 0 55px; justify-content: center; font-weight: bold; } */
+
+  /* ---- Table column widths in % ---- */
+.dcf-col-material   { flex: 0 0 9.72%; font-weight: bold; }  /* 70px / 720px */
+.dcf-col-rmtype     { flex: 0 0 12.5%; font-weight: bold; }  /* 90px / 720px */
+.dcf-col-rmshape    { flex: 0 0 12.5%; font-weight: bold; }  /* 90px / 720px */
+.dcf-col-rmqty      { flex: 0 0 12.5%; font-weight: bold; }  /* 90px / 720px */
+.dcf-col-sizegroup  { flex: 0 0 15.28%; font-weight: bold; } /* 110px / 720px */
+.dcf-col-rmsize     { flex: 0 0 9.84%; font-weight: bold; } /* 150px / 720px */
+.dcf-col-pcs      { flex: 0 0 6%; justify-content: center; font-weight: bold; } /* 30px / 720px */
+.dcf-col-wt       { flex: 0 0 7.17%; justify-content: center; font-weight: bold; }
+
+.barcode_img img{
+    object-fit: cover;
+     
+    height: 6mm !important;
+    
+    transform: translate(0px) rotate(0deg) !important;
+    width: 20mm !important;
+}
+ 
+ 
+  
+  .dcf-header-cell {
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    background: #fff;
+  }
+  
+  .dcf-actual-issue-row .dcf-col-pcs,
+  .dcf-actual-issue-row .dcf-col-wt {
+    font-weight: bold;
+  }
+  
+  /* colored data text like in original sheet */
+  .dcf-green-text {
+ 
+    font-weight: bold;
+  }
+  .dcf-blue-text {
+   
+    font-weight: bold;
+  }
+  .dcf-maroon-text {
+   
+    font-weight: bold;
+  }
+  .dcf-black-bold {
+    font-weight: bold;
+  }
+  
+  /* empty tall rows near bottom */
+  .dcf-empty-row {
+    height: 22px;
+  }
+  
+  /* instruction area */
+  .dcf-instruction-label {
+  
+    font-weight: bold;
+    padding: 4px 6px;
+  }
+  .dcf-instruction-box {
+    height: 60px;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* - Right side ---- */
+
+  .pcf-page {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px;
+    color: #000;
+    background: #fff;
+    /* padding: 20px; */
+  }
+  
+  .pcf-wrapper {
+    border: 2px solid #000;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    /* border-left: none; */
+  }
+  
+  /* ---- generic row / cell ---- */
+  .pcf-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 17px;
+    border-bottom: 1px solid #000;
+  }
+  .pcf-row:last-child {
+    border-bottom: none;
+  }
+  
+  .pcf-cell {
+    display: flex;
+    align-items: center;
+    padding-left: 3px;
+    border-right: 1px solid #000;
+    box-sizing: border-box;
+  }
+  .pcf-cell:last-child {
+    border-right: none;
+  }
+  
+  /* ---- Title bar ---- */
+  .pcf-title-bar {
+    background: #7a1fa2;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    flex: 1;
+    padding: 4px;
+  }
+  
+  /* ---- Top info block (left form + right image) ---- */
+  .pcf-header-block {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #000;
+  }
+  
+  .pcf-header-left {
+    flex: 0 0 70%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pcf-header-right {
+    flex: 0 0 30%;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #000;
+  }
+  
+  .pcf-info-row {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #000;
+  }
+  .pcf-info-row:last-child {
+    border-bottom: none;
+  }
+  
+  .pcf-info-label {
+    flex: 0 0 30%;
+    font-weight: bold;
+    padding: 2px;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-info-value {
+    flex: 0 0 30%;
+    padding: 2px;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-info-value-red {
+    flex: 0 0 30%;
+    padding: 2px;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+ 
+    font-weight: bold;
+  }
+  .pcf-info-label2 {
+    flex: 0 0 19%;
+    font-weight: bold;
+    padding: 2px;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-info-value2 {
+    flex: 0 0 21%;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-info-value-wide {
+    flex: 1;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* ---- right column: barcode / image / karat ---- */
+  .pcf-barcode-row {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #000;
+    letter-spacing: 2px;
+  
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+  }
+  
+  .pcf-image-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: Georgia, 'Times New Roman', serif;
+    border-bottom: 1px solid #000;
+  }
+  .pcf-image-box img{
+    height: 108px !important;
+  }
+  .pcf-karat-row {
+    display: flex;
+    flex-direction: row;
+    height: 22px;
+  }
+  .pcf-karat {
+    flex: 1;
+    justify-content: center;
+    font-weight: bold;
+    background: #fff200;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-karat-white {
+    flex: 1;
+    justify-content: center;
+    font-weight: bold;
+    background: #fff;
+    border-right: 1px solid #000;
+    display: flex;
+    align-items: center;
+  }
+  .pcf-karat-pink {
+    flex: 1;
+    justify-content: center;
+    font-weight: bold;
+    background: #ff2fb0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* ---- department table columns ---- */
+  .pcf-col-dept    { flex: 0 0 19.15%; font-weight: bold; }
+  .pcf-col-wrkr    { flex: 0 0 11.47%; }
+  .pcf-col-inwt    { flex: 0 0 11.47%; }
+  .pcf-col-outwt   { flex: 0 0 12.58%; }
+  .pcf-col-scrap   { flex: 0 0 13.68%; }
+  .pcf-col-dust    { flex: 0 0 11.47%; }
+  .pcf-col-qcsign  { flex: 0 0 20.18%; }
+  
+  .pcf-table-header-cell {
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    background: #fff;
+  }
+  
+  .pcf-dept-name {
+    font-weight: bold;
+  }
+  
+  .pcf-empty-row {
+    height: 14.5px;
+  }
+  
+  .pcf-final-weight-row {
+    height: 12px;
+  }
+  .pcf-final-weight-text {
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .pcf-sign-text {
+   
+    font-weight: bold;
+    font-size: 9px;
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .pcf-checkbox {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+  }
+  
+  /* ---- instruction area ---- */
+  .pcf-instruction-label {
+ 
+    font-weight: bold;
+    padding: 4px 6px;
+  }
+  .pcf-instruction-box {
+    height: 21px;
+  }
+
+
+
+
+
+
+  @media print{
+
+    @page{
+       padding-left: 15px;
+       padding-top: 15px;
+    }
+
+   
+
+    .dcf-page{
+      padding: 0px;
+    }
+   
+   .bagprint22{
+    margin-top: 0px;
+   }
+
+    .pcf-image-box img{
+        height: 70px !important;
+    }
+    .pcf-instruction-box{
+        height: 21px !important;
+    }
+  }

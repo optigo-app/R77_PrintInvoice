@@ -306,7 +306,7 @@ console.log("TCL: ",result )
                           {result?.header?.HSN_No !== "" && (
                             <div className="d-flex w-100">
                               <div className="w-50 end_dp3">
-                                {result?.header?.HSN_No_Label}&nbsp;&nbsp;&nbsp;:
+                                 HSN&nbsp;&nbsp;&nbsp;:
                               </div>
                               <div className="fw-bold w-50 start_dp3">
                                 {result?.header?.HSN_No}

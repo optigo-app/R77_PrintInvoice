@@ -122,7 +122,9 @@ const SummaryPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
               <div className='w-25'>Bill Statement of :<b>&nbsp;&nbsp;&nbsp;&nbsp;{result?.header?.CustName}</b></div>
               <div className='w-25'>  Date :<b>&nbsp;&nbsp;&nbsp;&nbsp;{result?.header?.EntryDate}</b></div>
               <div className='w-25'>Invoice No :<b>&nbsp;&nbsp;&nbsp;&nbsp;{result?.header?.InvoiceNo}</b></div>
-              <div className='w-25'>{result?.header?.HSN_No_Label} :<b>&nbsp;&nbsp;&nbsp;&nbsp;{result?.header?.HSN_No}</b></div>
+              {result?.header?.HSN_No &&(  
+                <div className='w-25'>HSN :<b>&nbsp;&nbsp;&nbsp;&nbsp;{result?.header?.HSN_No}</b></div>
+              )}  
             </div>
             <div>
               {/* <div className='d-flex border border-black mt-2 fw-bold bg_sp'>

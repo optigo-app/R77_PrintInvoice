@@ -392,7 +392,7 @@ const RetailInvoicePrintS = ({
   }, []);
 
   // console.log("data", data);
-  // console.log("headerData", headerData);
+  console.log("headerData", headerData);
   // console.log("total", total);
   // console.log("taxes", taxes);
 
@@ -411,7 +411,7 @@ const RetailInvoicePrintS = ({
 
   const decodedValue = atob(evn);
   const IsNotEvenSale = decodedValue === "Quote";
-  
+
 
   return (
     <>
@@ -474,20 +474,35 @@ const RetailInvoicePrintS = ({
                         {headerData?.CompanyState}({headerData?.CompanyCountry})
                       </div>
                       <div className="fslhJL">
-                        T {headerData?.CompanyTellNo} | TOLL FREE{" "}
-                        {headerData?.CompanyTollFreeNo}
+                        {headerData?.CompanyTellNo && (
+                          <>T {headerData.CompanyTellNo}</>
+                        )}
+
+                        {headerData?.CompanyTellNo && headerData?.CompanyTollFreeNo && " | "}
+
+                        {headerData?.CompanyTollFreeNo && (
+                          <>TOLL FREE {headerData.CompanyTollFreeNo}</>
+                        )}
                       </div>
                       <div className="fslhJL">
-                        {headerData?.CompanyEmail} |{headerData?.CompanyWebsite}
+                        {headerData?.CompanyEmail}
+
+                        {headerData?.CompanyEmail && headerData?.CompanyWebsite && " | "}
+
+                        {headerData?.CompanyWebsite}
                       </div>
                       {/* <div className='fslhpcl3'>{headerData?.Company_VAT_GST_No} | {headerData?.Cust_CST_STATE}-{headerData?.Company_CST_STATE_No} | PAN-EDJHF236D</div> */}
                       <div className="fslhJL">
-                        {headerData?.Company_VAT_GST_No}
-                        {headerData?.Company_CST_STATE_No !== "" &&
-                          headerData?.Company_CST_STATE !== "" &&
-                          `| ${headerData?.Company_CST_STATE}-${headerData?.Company_CST_STATE_No}`}
-                        {headerData?.Com_pannumber !== "" &&
-                          ` | PAN-${headerData?.Com_pannumber}`}
+                        {[
+                          headerData?.Company_VAT_GST_No,
+                          headerData?.Company_CST_STATE_No &&
+                          headerData?.Company_CST_STATE &&
+                          `${headerData.Company_CST_STATE}-${headerData.Company_CST_STATE_No}`,
+                          headerData?.Com_pannumber &&
+                          `PAN-${headerData.Com_pannumber}`,
+                        ]
+                          .filter(Boolean)
+                          .join(" | ")}
                       </div>
                     </div>
                     <div className="col-2 d-flex align-items-center justify-content-center">
@@ -568,15 +583,17 @@ const RetailInvoicePrintS = ({
                         </div>
                         <div className="col-6">{headerData?.EntryDate}</div>
                       </div>
+                      {headerData?.HSN_No !== ""&& headerData?.HSN_No !="-Select-"  && (
                       <div className="d-flex">
                         <div className="col-6">
                           <b className="JL13">HSN</b>
                         </div>
                         <div className="col-6">{headerData?.HSN_No}</div>
                       </div>
+                      )}
                     </div>
                   </div>
-                  
+
                   {/* Product Details */}
                   <div className="table_jts printJL">
                     <div className="thead_jts fs2_jts1">
@@ -612,18 +629,20 @@ const RetailInvoicePrintS = ({
                             </div>
                             <div className="col3_jts d-flex flex-column align-items-start justify-content-start p-1 brr_jts text-break">
                               <div className="d-flex align-items-start">
-                                {e?.MetalTypePurity} {e?.MetalColor} |{" "}
+                                {e?.MetalTypePurity} {e?.MetalColor} {(e?.diamonds?.[0]?.Color_Code || e?.diamonds?.[0]?.Quality_Code)
+  ? ` - ${e?.diamonds?.[0]?.Color_Code || ""} ${e?.diamonds?.[0]?.Quality_Code || ""}`
+  : ""}  |{" "}
                                 {e?.grosswt?.toFixed(3)} gms GW |{" "}
                                 {e?.NetWt?.toFixed(3)} gms NW
                                 {e?.diamondWt === 0
-                                ? ""
-                                : ` | DIA : ${e?.diamondWt.toFixed(3)} Cts `}
+                                  ? ""
+                                  : ` | DIA : ${e?.diamondWt.toFixed(3)} Cts `}
                                 {e?.colorStoneWt === 0
                                   ? ""
                                   : ` | CS : ${e?.colorStoneWt.toFixed(3)} Cts `}
-                                {e?.miscsWt === 0
-                                  ? ""
-                                  : ` | MISC : ${e?.miscsWt.toFixed(3)} gms `}
+                                {e?.miscsWt !== 0 && e?.ismiscwtaddingrossweight === 1
+                                  ? ` | MISC : ${e?.miscsWt.toFixed(3)} gms`
+                                  : ""}
                               </div>
                               <div className="d-flex align-items-start">{e?.Categoryname} {e?.SubCategoryname}</div>
                               <div className="d-flex align-items-start">
@@ -632,7 +651,7 @@ const RetailInvoicePrintS = ({
                                   .map((el, id) => {
                                     const shapeNameAfterCertification = el?.ShapeName?.split("Certification_")[1]; // Extract the part after 'Certification_'
                                     return shapeNameAfterCertification ? <div key={id}>{shapeNameAfterCertification}-</div> : null;
-                                })}
+                                  })}
                                 {e?.CertificateNo}
                               </div>
                             </div>
@@ -650,7 +669,7 @@ const RetailInvoicePrintS = ({
                       })}
                     </div>
                   </div>
-                  
+
                   {/* Total Row */}
                   <div className={`${style?.minHeight20RetailinvoicePrint3} border-start border-end border-bottom d-flex no_break`}>
                     <div className={`col1_jts border-end`}></div>
@@ -685,16 +704,16 @@ const RetailInvoicePrintS = ({
                                 acc +
                                 +cObj?.amount /
                                 headerData?.CurrencyExchRate,
-                                0
-                              ) +
-                              headerData?.AddLess /
-                              headerData?.CurrencyExchRate
-                            )?.toFixed(2)
+                              0
+                            ) +
+                            headerData?.AddLess /
+                            headerData?.CurrencyExchRate
+                          )?.toFixed(2)
                           )}{" "}
                           Only
                         </span>
                       </div>
-                      {IsNotEvenSale ? ( "" ) : (
+                      {IsNotEvenSale ? ("") : (
                         <div className={`${style?.RemarkJewelleryInvoicePrintC} p-2`}>
                           <div className="d-flex ">
                             Remarks :{" "}
@@ -706,7 +725,7 @@ const RetailInvoicePrintS = ({
                             ></div>
                           </div>
                         </div>
-                      )} 
+                      )}
                     </div>
                     <div
                       className={`${style?.discountJewerryRetailInvoicePrint456} d-flex`}
@@ -734,7 +753,8 @@ const RetailInvoicePrintS = ({
                         <p className="pb-1 px-1 text-end">
                           Total Amt after Tax
                         </p>
-                        {headerData?.OldGoldAmount === 0 ? "" : <p className="pb-1 px-1 text-end">Old Gold</p> }
+                        {/* {headerData?.OldGoldAmount === 0 ? "" : <p className="pb-1 px-1 text-end">Old Gold</p> } */}
+                        {headerData?.OldGoldAmount === 0 ? "" : <p className="pb-1 px-1 text-end">Old Gold</p>}
                         {headerData?.CashReceived === 0 ? "" : <p className="pb-1 px-1 text-end">Recv. in Cash</p>}
                         {bank.length > 0 &&
                           bank.map((e, i) => {
@@ -754,11 +774,11 @@ const RetailInvoicePrintS = ({
                       <div
                         className={`${style?.wordsJewellryRetailInvoice4TaxesNumbers}`}
                       >
-                        {total?.discount === 0 ? "" : 
+                        {total?.discount === 0 ? "" :
                           <p className="text-end pb-1 px-1">
                             {NumberWithCommas(total?.discount, 2)}{/** Discount */}
                           </p>
-                        } 
+                        }
                         <p className="text-end pb-1 px-1">
                           {NumberWithCommas(
                             total?.beforeTax / headerData?.CurrencyExchRate,
@@ -791,12 +811,13 @@ const RetailInvoicePrintS = ({
                             2
                           )} {/** After Tax */}
                         </p>
-                        {headerData?.OldGoldAmount === 0 ? "" : 
+                        {headerData?.OldGoldAmount === 0 ? "" :
                           <p className="pb-1 px-1 text-end">
-                            {NumberWithCommas(headerData?.OldGoldAmount, 2)} {/** Old Gold */}
+                            {NumberWithCommas(headerData?.OldGoldAmount, 2)}
                           </p>
                         }
-                        {headerData?.CashReceived === 0 ? "" : 
+
+                        {headerData?.CashReceived === 0 ? "" :
                           <p className="pb-1 px-1 text-end">
                             {NumberWithCommas(headerData?.CashReceived, 2)} {/** Amount That Receive In Cash */}
                           </p>
@@ -810,7 +831,7 @@ const RetailInvoicePrintS = ({
                             );
                           })}
                         {/* <p className="pb-1 px-1 text-end">{NumberWithCommas(headerData?.BankReceived, 2)}</p> */}
-                        {headerData?.AdvanceAmount === 0 ? "" : 
+                        {headerData?.AdvanceAmount === 0 ? "" :
                           <p className="pb-1 px-1 text-end">
                             {NumberWithCommas(headerData?.AdvanceAmount, 2)} {/** Advance Given Amount */}
                           </p>
@@ -842,7 +863,7 @@ const RetailInvoicePrintS = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Declaration For Quotation */}
                   {IsNotEvenSale && (
                     <div className="border-start border-end border-bottom spinst">

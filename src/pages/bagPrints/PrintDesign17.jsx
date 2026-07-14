@@ -323,7 +323,7 @@ const PrintDesign17 = ({ queries, headers }) => {
                                           )}
                                         </div> */}
                                         <div className="code border_right border_bottom medium pl_3">
-                                          {`${e?.ConcatedFullShapeQualityColorCode?.charAt(0)} ${e?.MaterialTypeName} ${e?.ConcatedFullShapeQualityColorCode?.slice(1)}`.slice(0, 35)}
+                                          {`${e?.ConcatedFullShapeQualityColorCode?.charAt(0)} ${e?.MaterialTypeName?.charAt(0)} ${e?.ConcatedFullShapeQualityColorCode?.slice(1)}`.slice(0, 35)}
                                         </div>
                                         <div className="size border_right border_bottom medium  text_center">
                                           {e?.Sizename?.slice(0, 15)}

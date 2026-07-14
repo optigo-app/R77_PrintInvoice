@@ -520,11 +520,22 @@ const SolitairInvoiceMaterial = ({
               </div>
 
               {/** Instuction */}
-              {json0Data?.Declaration && (
+              {/* {json0Data?.Declaration && (
                 <div className="brbxAll pagBrkIsid" style={{ borderTop: "none" }}>
                   <div className="spinst" dangerouslySetInnerHTML={{ __html: json0Data?.Declaration, }}></div>
                 </div>
+              )} */}
+                {(json0Data?.Notes || json0Data?.Declaration) && (
+                <div className="brbxAll" style={{ borderTop: "none",padding:"5px" }}>
+                  <div
+                    className="spinst"
+                    dangerouslySetInnerHTML={{
+                      __html: json0Data?.Notes ? json0Data.Notes : json0Data?.Declaration,
+                    }}
+                  ></div>
+                </div>
               )}
+
 
               <div className="disflx brbxAll spfntbH pagBrkIsid" style={{ borderTop: "none" }}>
                 <div className="spbnkdtl spbrRht">

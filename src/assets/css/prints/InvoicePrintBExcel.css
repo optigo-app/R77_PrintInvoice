@@ -1,0 +1,31 @@
+.beluxecontainer {
+    width: 1200px;
+    margin: 0 auto;
+    font-family: Calibri, sans-serif !important;
+}
+
+.beluxe-table {
+    table-layout: fixed;
+}
+
+ 
+.srcol  { width: 5%; }
+.stycol { width: 10%; }
+.imgcol { width: 10%; }
+.descol { width: 25.1%; }
+.qtycol { width: 6.5%; }   
+.tagcol { width: 14.5%; }
+.discol { width: 14.5%; }
+.tlcol  { width: 14.5%; }
+.total  { width: 50.1%; }
+
+.titletext {
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.terms {
+    min-height: 35px !important;
+}
+
+ 

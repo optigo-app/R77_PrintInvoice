@@ -785,13 +785,16 @@ const PackingList7 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       <div className="w-25 fw-bold">DATE</div>
                       <div className="w-50">{result?.header?.EntryDate}</div>
                     </div>
-                    <div className="d-flex justify-content-start px-1">
-                      <div className="w-25 fw-bold">
-                        {" "}
-                        {result?.header?.HSN_No_Label}{" "}
-                      </div>
-                      <div className="w-50">{result?.header?.HSN_No}</div>
-                    </div>
+                    {result?.header?.HSN_No &&(
+                       <div className="d-flex justify-content-start px-1">
+                       <div className="w-25 fw-bold">
+                         {" "}
+                         HSN
+                       </div>
+                       <div className="w-50">{result?.header?.HSN_No}</div>
+                     </div>
+                    )}
+                   
                     {/* <div className="d-flex justify-content-end mt-5 px-2 fw-bold">
                       Gold Rate {result?.header?.MetalRate24K?.toFixed(2)} Per
                       Gram

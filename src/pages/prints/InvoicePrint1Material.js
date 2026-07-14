@@ -564,12 +564,23 @@ const InvoicePrint1Material = ({
 
               
               {/** Note */}
-              <div className="sprmrk brbxAll spfntbH pgbrkIsd">
+              {/* <div className="sprmrk brbxAll spfntbH pgbrkIsd">
                 <div className="spfntBld">NOTE :</div>
                 {json0Data?.Declaration && ( 
                   <div className="spinst" dangerouslySetInnerHTML={{ __html: json0Data?.Declaration,}}></div>
                 )}
-              </div>
+              </div> */}
+                {(json0Data?.Notes || json0Data?.Declaration) && (
+                <div className="brbxAll" style={{ borderTop: "none",padding:"5px" }}>
+                  <div
+                    className="spinst"
+                    dangerouslySetInnerHTML={{
+                      __html: json0Data?.Notes ? json0Data.Notes : json0Data?.Declaration,
+                    }}
+                  ></div>
+                </div>
+              )}
+
                 
               {/** Company Details */}
               <div className="brbxAll spfntbH spbnkdtl spbrRht spacTpm pgbrkIsd">

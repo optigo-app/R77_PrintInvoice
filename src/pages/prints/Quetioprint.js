@@ -442,13 +442,12 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                     <b style={{ width: "100px", display: "flex" }}>DATE </b>
                     {result?.header?.EntryDate}
                   </p>
+                 {result?.header?.HSN_No &&(  
                   <p className="qut1_address_box_p">
-                    <b style={{ width: "100px", display: "flex" }}>
-                      {" "}
-                      {result?.header?.HSN_No_Label}{" "}
-                    </b>
+                    <b style={{ width: "100px", display: "flex" }}>HSN  </b>{" "}
                     {result?.header?.HSN_No}
                   </p>
+                 )}  
                 </div>
               </div>
 

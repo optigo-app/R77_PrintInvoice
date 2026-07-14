@@ -115,6 +115,7 @@ const MRPBill = () => {
   const [roundType, setRoundType] = useState("less");
   const [roundValue, setRoundValue] = useState("");
   const [dueDays, setDueDays] = useState('');
+  const [dueDaysError, setDueDaysError] = useState('');
   const [pendingNote, setPendingNote] = useState(true);
   const [showRateModal, setShowRateModal] = useState(false);
   const [totalAmount, setTotalAmount] = useState('');
@@ -855,6 +856,7 @@ const MRPBill = () => {
     setCustomerEnteredRemark('');
     setDateRemarkFlag(false);
     setDueDays('');
+    setDueDaysError('');
     setCustomerDefaultTaxProfileId(null);
     setJobHSNNo('');
     setFailedJobs([]);
@@ -927,6 +929,19 @@ const MRPBill = () => {
       is_valid = false;
     } else {
       setCustomerEnteredRemarkError('');
+    }
+
+    if (!dueDays || dueDays === '') {
+      setDueDaysError('Due Days is required');
+      is_valid = false;
+    } else if (!/^\d+$/.test(dueDays)) {
+      setDueDaysError('Only numbers allowed');
+      is_valid = false;
+    } else if (dueDays.length > 4) {
+      setDueDaysError('Max 4 digits allowed');
+      is_valid = false;
+    } else {
+      setDueDaysError('');
     }
 
     if (is_valid) {
@@ -1576,7 +1591,25 @@ const MRPBill = () => {
                   onToggleChange={handleToggleChange}
                   onValueChange={handleValueChange}
                   onRoundup={handleRoundup}
-                  onDueDaysChange={(e) => setDueDays(e.target.value)}
+                  dueDaysError={dueDaysError}
+                  onDueDaysChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setDueDays('');
+                      setDueDaysError('');
+                      return;
+                    }
+                    if (!/^\d+$/.test(val)) {
+                      setDueDaysError('Only numbers allowed');
+                      return;
+                    }
+                    if (val.length > 4) {
+                      setDueDaysError('Max 4 digits allowed');
+                      return;
+                    }
+                    setDueDaysError('');
+                    setDueDays(val);
+                  }}
                 />
               </div>
             }

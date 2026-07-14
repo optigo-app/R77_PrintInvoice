@@ -12,6 +12,7 @@ const RoundOffBox = ({
     roundType,
     roundValue,
     dueDays,
+    dueDaysError,
     selectedTaxProfile,
     taxProfileDT1,
     jobHSNNo,
@@ -230,12 +231,19 @@ const RoundOffBox = ({
                 </Typography>
                 <TextField
                     size="small"
-                    type="number"
+                    type="text"
+                    inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 4 }}
                     fullWidth
                     value={dueDays ?? ''}
                     onChange={onDueDaysChange}
                     placeholder="Enter due days"
+                    error={!!dueDaysError}
                 />
+                {dueDaysError && (
+                    <Typography fontSize={12} color="error" sx={{ mt: 0.5 }}>
+                        {dueDaysError}
+                    </Typography>
+                )}
             </Box>
             {pendingNote == true && (
                 <Typography fontSize={12} color="error" sx={{ mt: 1 }}>

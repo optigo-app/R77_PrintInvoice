@@ -451,6 +451,10 @@ html {
     @page {
         margin: 25px 15px;
     }
+
+    .d-none-print {
+        display: none !important;
+    }
     .container_inv2{
         width: 100% !important;
         box-sizing: border-box;

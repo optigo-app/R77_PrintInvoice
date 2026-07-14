@@ -816,7 +816,7 @@ const BagPrint4A = ({ queries, headers }) => {
                                 <p
                                   style={{
                                     padding: '0px 10px',
-                                    fontSize: '13px',
+                                    fontSize: '11px',
                                     fontWeight: 600
                                   }}>
 
@@ -831,8 +831,14 @@ const BagPrint4A = ({ queries, headers }) => {
                                     [
                                       (e?.data?.stamping || e?.data?.Ustamping) &&
                                       ` ${e?.data?.stamping
-                                        ? e.data.stamping.slice(0, 12)
-                                        : e?.data?.Ustamping?.slice(0, 12)
+                                        ? e.data.stamping.slice(
+                                          0,
+                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 12 : 40
+                                        )
+                                        : e?.data?.Ustamping?.slice(
+                                          0,
+                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 12 : 40
+                                        )
                                       }`,
                                       e?.data?.IsDiamondPcs && ` ${"DPcs"}`,
                                       e?.data?.IsDiamondWt && ` ${"DWt"}`,

@@ -30,6 +30,82 @@ export const handleGlobalImgError = (e, img) => {
     e.target.src = img;
   }
 };
+
+export  function mergeFindings(data) {
+  const map = new Map();
+
+  data.forEach((item) => {
+    const key = [
+      item.Supplier,
+      item.Rate,
+      item.ShapeName,
+      item.Colorname,
+      item.QualityName,
+      item.FindingAccessories,
+      item.FindingTypename,
+    ].join("|");
+
+    if (map.has(key)) {
+      const existing = map.get(key);
+
+      existing.Pcs += Number(item.Pcs || 0);
+      existing.Wt += Number(item.Wt || 0);
+      existing.FineWt += Number(item.FineWt || 0);
+      existing.Amount += Number(item.Amount || 0);
+    } else {
+      map.set(key, {
+        ...item,
+        Pcs: Number(item.Pcs || 0),
+        Wt: Number(item.Wt || 0),
+        FineWt: Number(item.FineWt || 0),
+        Amount: Number(item.Amount || 0),
+      });
+    }
+  });
+
+  return [...map.values()];
+}
+
+export function mergeMetals(data) {
+const normalize = (v) =>
+  String(v ?? "").trim().toLowerCase();
+
+const map = new Map();
+
+data.forEach((item) => {
+  const key = [
+    normalize(item.ShapeName),
+    normalize(item.QualityName),
+    normalize(item.Colorname),
+    normalize(item.Supplier),
+    Number(item.Rate || 0),
+    Number(item.IsPrimaryMetal || 0),
+  ].join("|");
+  
+
+
+  if (map.has(key)) {
+    const existing = map.get(key);
+
+    existing.Pcs += Number(item.Pcs || 0);
+    existing.Wt += Number(item.Wt || 0);
+    existing.FineWt += Number(item.FineWt || 0);
+    existing.Amount += Number(item.Amount || 0);
+  } else {
+    map.set(key, {
+      ...item,
+      Pcs: Number(item.Pcs || 0),
+      Wt: Number(item.Wt || 0),
+      FineWt: Number(item.FineWt || 0),
+      Amount: Number(item.Amount || 0),
+    });
+  }
+});
+
+return [...map.values()].sort(
+  (a, b) => Number(b.IsPrimaryMetal) - Number(a.IsPrimaryMetal)
+);
+}
 //sentence words first char capital function
 export const CapitalizeWords = (text) => {
   const capitalizeFirstLetter = (word) => {

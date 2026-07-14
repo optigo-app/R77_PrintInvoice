@@ -147,6 +147,9 @@ const PrintDesign17 = ({ queries, headers }) => {
     window.print();
   };
 
+  
+  console.log("TCL: data", data)
+
   return (
     <div className="pad_60_allPrint">
       {data.length === 0 ? (
@@ -169,18 +172,20 @@ const PrintDesign17 = ({ queries, headers }) => {
                 index > 0 && (
                   <div
                     key={index}
-                    className="container_17_old mb_2 mt_2 pt_2 container_margin_left"
+                    className="container_17_old mb_2 mt_2 container_margin_left"
                   ></div>
                 )
             )}
             {data?.map((e, i) => {
+              
+              console.log("TCL:i ", e)
               return (
                 <React.Fragment key={i}>
                   {e?.additional?.chdata?.length > 0 ? (
                     e?.additional?.chdata?.map((chunk, index) => {
                       return (
                         <div
-                          className="container_17_old mb_2 mt_2 pt_2 container_margin_left"
+                          className="container_17_old mb_2 mt_2  container_margin_left"
                           key={index}
                         >
                           <div className=" border-black border-2">
@@ -462,7 +467,7 @@ const PrintDesign17 = ({ queries, headers }) => {
                       );
                     })
                   ) : (
-                    <div className="container_17_old mb_2 mt_2 pt_2 container_margin_left">
+                    <div className="container_17_old mb_2 mt_2  container_margin_left">
                       <div className=" border-black border-2">
                         <div className="print_sec d_flex">
                           <div className="print_text border_right">
@@ -722,7 +727,7 @@ const PrintDesign17 = ({ queries, headers }) => {
                       </div>
                     </div>
                   )}
-                  <div className="container_17_old mb_2 mt_2 pt_2 container_margin_left">
+                  <div className="container_17_old mb_2 mt_2 container_margin_left">
                     <div className=" border-black border-2     enime_17_old">
                       <div className="d_flex">
                         <div className="side_1_17">
@@ -904,7 +909,7 @@ const PrintDesign17 = ({ queries, headers }) => {
                                FIL.
                               </div>
                               <div className="width_66 border_right bold"></div>
-                              <div className="width_6 border_right pl_3 bold"></div>
+                              <div className="width_6 border_right pl_3 bold" style={{fontSize:"11px"}}> {e?.data?.rd?.NetWeight?.toFixed(3)}</div>
                               <div className="width_6 border_right pl_3 bold"></div>
                               <div className="width_6 border_right pl_3 bold"></div>
                               <div className="width_6 border_right pl_3 bold"></div>

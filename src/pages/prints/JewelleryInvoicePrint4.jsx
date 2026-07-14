@@ -21,6 +21,7 @@ import Loader from "../../components/Loader";
 import { cloneDeep } from "lodash";
 import { MetalShapeNameWiseArr } from "../../GlobalFunctions/MetalShapeNameWiseArr";
 
+
 export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, urls, evn, ApiVer }) {
     const [result, setResult] = useState(null);
     const [msg, setMsg] = useState("");
@@ -28,6 +29,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
     const [diamondWise, setDiamondWise] = useState([]);
     const toWords = new ToWords();
     const [vatamtFalg, setVatamtFalg] = useState(true);
+    const [arabicFalg, setArabicFalg] = useState(false);
 
     const evname = atob(evn);
     const [MetShpWise, setMetShpWise] = useState([]);
@@ -35,7 +37,83 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
     const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
     const [diamondDetails, setDiamondDetails] = useState([]);
     const [taxes, setTaxes] = useState([]);
+    const [activeType, setActiveType] = useState("TAX_INVOICE");
 
+    const originalAddress = result?.header?.CompanyAddress || "";
+    const [displayedAddress, setDisplayedAddress] = useState(originalAddress);
+
+
+
+
+    const [translatedData, setTranslatedData] = useState({
+        fullName: "",
+        address1: "",
+        address2: "",
+        cityStateCountry: "",
+        tollFreeText: "TOLL FREE"
+    });
+    const [loading, setLoading] = useState(false);
+
+
+    useEffect(() => {
+        const header = result?.header;
+
+        const englishData = {
+            fullName: header?.CompanyFullName || "",
+            address1: header?.CompanyAddress || "",
+            address2: header?.CompanyAddress2 || "",
+            cityStateCountry: `${header?.CompanyCity || ""}-${header?.CompanyPinCode || ""}, ${header?.CompanyState || ""}(${header?.CompanyCountry || ""})`,
+            tollFreeText: "TOLL FREE",
+            licence: `LICENSE NO: ${result?.header?.Com_pannumber}`,
+            trn: `TRN: ${result?.header?.Company_VAT_GST_No.substring(6)}`,
+            landline: `LANDLINE NO: ${result?.header?.CompanyTollFreeNo}`,
+        };
+
+        if (!arabicFalg || !header) {
+            setTranslatedData(englishData);
+            return;
+        }
+
+        // Use simple newlines (\n) instead of |||
+        const textToTranslate = [
+            englishData.fullName,
+            englishData.address1,
+            englishData.address2,
+            englishData.cityStateCountry,
+            englishData.licence,
+            englishData.landline,
+            englishData.trn,
+        ].join("\n");
+
+        setLoading(true);
+
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=${encodeURIComponent(textToTranslate)}`;
+
+        fetch(url)
+            .then((res) => res.json())
+            .then((data) => {
+                // Google splits multi-line requests into multiple entries inside data[0]
+                if (data && data[0]) {
+                    const translatedLines = data[0].map((item) => item[0]?.trim());
+
+                    setTranslatedData({
+                        fullName: translatedLines[0] || englishData.fullName,
+                        address1: translatedLines[1] || englishData.address1,
+                        address2: translatedLines[2] || englishData.address2,
+                        cityStateCountry: translatedLines[3] || englishData.cityStateCountry,
+                        licence: translatedLines[4] || englishData.licence,
+                        landline: translatedLines[5] || englishData.landline,
+                        trn: translatedLines[6] || englishData.trn,
+                    });
+                }
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Translation error:", error);
+                setTranslatedData(englishData);
+                setLoading(false);
+            });
+    }, [arabicFalg, result]);
 
     useEffect(() => {
         const sendData = async () => {
@@ -560,9 +638,16 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
         }
     };
 
+    const handleArabicFalgShow = () => {
+        if (arabicFalg) setArabicFalg(false);
+        else {
+            setArabicFalg(true);
+        }
+    };
+
     const Finalamount =
-        ((Number((result?.mainTotal?.total_unitcost+result?.header?.AddLess )/result?.header?.CurrencyExchRate) || 0) *
-            (1 + (Number(TotalTaxPercentage) || 0) / 100))  
+        ((Number((result?.mainTotal?.total_unitcost + result?.header?.AddLess) / result?.header?.CurrencyExchRate) || 0) *
+            (1 + (Number(TotalTaxPercentage) || 0) / 100))
 
     const integerPart = Math.floor(Finalamount);
     const filsPart = Math.round((Finalamount - integerPart) * 100);
@@ -600,7 +685,6 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
     const payments = [...bankPayments, ...cashPayments];
 
 
-    console.log("TCL: result", result)
     return (
         <>
             {loader ? (
@@ -611,6 +695,47 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                         <>
                             <div className="invoice-page">
                                 <div className="printbtn" style={{ display: "flex", gap: "10px", alignItems: "center", justifyContent: "flex-end", marginBottom: "10px" }}>
+
+                                    <div className="radio-group">
+                                        {["Tax", "Export", "Proforma"].map((label) => {
+                                            const value = label.toUpperCase().replace(" ", "_");
+                                            const isActive = activeType === value;
+                                            return (
+                                                <label key={value} className="checkbox-radio-label">
+                                                    <input
+                                                        type="radio"
+                                                        name="tableType"
+                                                        value={value}
+                                                        checked={isActive}
+                                                        onChange={() => setActiveType(value)}
+                                                        className="hidden-radio"
+                                                    />
+                                                    {/* Custom Styled Checkbox Square Visual */}
+                                                    <span className={`checkbox-box ${isActive ? "checked" : ""}`}>
+                                                        {isActive && <span className="checkmark">✓</span>}
+                                                    </span>
+                                                    <span className="checkbox-text-label">
+                                                        {/* Format exact casing representation to match "With Pcs" image theme */}
+                                                        {label === "PACKING_LIST" || label === "Packing List" ? "Packing List" : label}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="checkbox"
+                                            className="me-1"
+                                            value={arabicFalg}
+                                            checked={arabicFalg}
+                                            onChange={(e) => handleArabicFalgShow(e)}
+                                            id="arabicFalg"
+                                        />
+                                        <label htmlFor="arabicFalg" style={{ fontSize: "13px" }}>
+                                            {" "}
+                                            <div className="pb-2">UAE Font</div>
+                                        </label>
+                                    </div>
                                     <div>
                                         <input
                                             type="checkbox"
@@ -634,42 +759,158 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                 </div>
                                 <div className="invoice-container">
 
-                                    {/* Header */}
-                                    <div className="invoice-header">
-                                        <div className="invoice-title"> {result?.header?.PrintHeadLabel}</div>
-                                        {
-                                            result?.header?.Company_VAT_GST_No && (
 
-                                                <div className="invoice-trn">TRN: {result?.header?.Company_VAT_GST_No.substring(6)}</div>
-                                            )
-                                        }
+                                    <div className="d-flex w-100 invoice-address" style={{ justifyContent: "center" }}>
+
+                                        <div className=" d-flex align-items-center justify-content-center" style={{ width: "26%" }}>
+
+                                            {result?.header?.PrintLogo !== "" && (
+                                                <img
+                                                    src={result?.header?.PrintLogo}
+                                                    alt=""
+                                                    className={`d-block ms-auto`}
+
+                                                    height={120}
+                                                    width={150}
+                                                    style={{ width: "160px" }}
+                                                />
+                                            )}
+                                        </div>
+                                        <div
+                                            className=""
+                                            style={{
+                                                width: "41%",
+                                                textAlign: "center",
+
+                                            }}
+                                        >
+                                            {/* Company Name */}
+
+                                            {arabicFalg && (
+                                                <>
+                                                    <div className="fslhJL">
+                                                        <h5>
+                                                            <b style={{ fontSize: "16px", color: "black" }}>
+                                                                {translatedData.fullName}
+                                                            </b>
+                                                        </h5>
+                                                    </div>
+
+                                                    {/* Address Line 1 */}
+                                                    <div className="fslhJL">{translatedData?.address1} {translatedData?.address2} {translatedData?.cityStateCountry}</div>
+
+                                                    {result?.header?.Com_pannumber && (
+
+                                                        <div className="fslhJL">{translatedData?.licence}</div>
+                                                    )}
+
+                                                    {result?.header?.CompanyTollFreeNo && (
+                                                        <div className="fslhJL">{translatedData?.landline}</div>
+
+                                                    )}
+
+                                                    {result?.header?.Company_VAT_GST_No && (
+                                                        <div className="fslhJL">{translatedData?.trn}</div>
+
+                                                    )}
+
+
+                                                </>
+                                            )}
+                                            <div className="fslhJL">
+                                                <h5>
+                                                    <b style={{ fontSize: "16px", color: "black" }}>
+                                                        {result?.header?.CompanyFullName}
+                                                    </b>
+                                                </h5>
+                                            </div>
+
+                                            {/* Address Line 1 */}
+                                            <div className="fslhJL">{result?.header?.CompanyAddress} {result?.header?.CompanyAddress2}  {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode}, {result?.header?.CompanyState}({result?.header?.CompanyCountry})</div>
+
+                                            {/* Address Line 2 */}
+                                            {/* {result?.header?.CompanyAddress2 !== "" && <div className="fslhJL">{result?.header?.CompanyAddress2}</div>} */}
+
+                                            {/* City, State, Pin, Country */}
+                                            {/* <div className="fslhJL">
+                                                    {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode},
+                                                    {result?.header?.CompanyState}({result?.header?.CompanyCountry})
+                                                    </div> */}
+
+                                            {/* Telephone & Toll Free */}
+                                            {result?.header?.CompanyTollFreeNo && (
+
+                                                <div className="fslhJL">
+                                                    LANDLINE NO {": "} {result?.header?.CompanyTollFreeNo}
+                                                </div>
+                                            )}
+
+                                            {/* Telephone & Toll Free */}
+                                            {result?.header?.Com_pannumber && (
+
+                                                <div className="fslhJL">
+                                                    LICENSE NO {": "} {result?.header?.Com_pannumber}
+                                                </div>
+                                            )}
+
+
+
+                                            <div className="fslhJL">
+                                                {
+                                                    result?.header?.Company_VAT_GST_No && (
+
+                                                        <div className="invoice-trn"> TRN: {result?.header?.Company_VAT_GST_No.substring(6)}</div>
+                                                    )
+                                                }
+                                            </div>
+
+
+
+
+                                        </div>
+                                    </div>
+
+                                    {/* Header */}
+                                    <div className="invoice-header" style={{ fontWeight: "bold" }}>
+                                        {activeType === "TAX" ? "TAX INVOICE" : activeType === "EXPORT" ? "EXPORT INVOICE" : activeType === "PROFORMA" ? "PROFORMA INVOICE" : ""}
                                     </div>
 
                                     {/* Bill To */}
                                     <div className="bill-section">
                                         <div className="section-label"> {result?.header?.lblBillTo}:</div>
 
-                                        <div className="bill-text">
+
+                                        <div className="bill-text" style={{ width: "30%" }}>
+                                            <div>{result?.header?.customerfirmname}</div>
+                                            <div>{result?.header?.CustName}</div>
                                             <div>
-                                                {result?.header?.CustName}
+                                                {[
+
+
+                                                    result?.header?.customerAddress1,
+                                                    result?.header?.customerAddress2,
+                                                    result?.header?.customerAddress3
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(', ')}
                                             </div>
 
                                             <div>
-                                                {result?.header?.customerAddress1}
-                                            </div>
 
-                                            <div>
-                                                {result?.header?.customerAddress2}
+
                                             </div>
                                             <div>
-                                                {result?.header?.customerAddress3}
+                                                {[
+                                                    result?.header?.customercity1,
+                                                    result?.header?.State,
+                                                    result?.header?.customercountry
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(", ")}
                                             </div>
                                             <div>
 
-                                                {result?.header?.customercity1}
-                                            </div>
-                                            <div>
-                                                {result?.header?.State},{result?.header?.customercountry}
+                                                {result?.header?.customeremail1}
                                             </div>
 
                                             <div>
@@ -822,19 +1063,19 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
 
                                                     <div className="table-cell w-small div-center">{(e?.grosswt * (e?.BulkPurchaseQTY ? e?.BulkPurchaseQTY : e?.Quantity))?.toFixed(2)}</div>
 
-                                                    <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%" }}>{NumberWithCommas(e?.UnitCost/result?.header?.CurrencyExchRate, 2)}</div>
+                                                    <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%" }}>{NumberWithCommas(e?.UnitCost / result?.header?.CurrencyExchRate, 2)}</div>
 
-                                                    <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%", borderRight: "1px solid #bdbdbd" }}>{NumberWithCommas((e?.UnitCost/result?.header?.CurrencyExchRate)  * (e?.BulkPurchaseQTY ? e?.BulkPurchaseQTY : e?.Quantity), 2)}</div>
+                                                    <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%", borderRight: "1px solid #bdbdbd" }}>{NumberWithCommas((e?.UnitCost / result?.header?.CurrencyExchRate) * (e?.BulkPurchaseQTY ? e?.BulkPurchaseQTY : e?.Quantity), 2)}</div>
 
                                                     {vatamtFalg && (<div className="table-cell w-card div-center">
                                                         {NumberWithCommas(
-                                                            ((Number(e?.UnitCost/result?.header?.CurrencyExchRate)  || 0) *
+                                                            ((Number(e?.UnitCost / result?.header?.CurrencyExchRate) || 0) *
                                                                 ((Number(TotalTaxPercentage) || 0) / 100)), 2
                                                         )}
                                                     </div>
                                                     )}
 
-                                                    <div className="table-cell w-price no-border div-center">{NumberWithCommas(((Number(e?.UnitCost/result?.header?.CurrencyExchRate)  || 0) *
+                                                    <div className="table-cell w-price no-border div-center">{NumberWithCommas(((Number(e?.UnitCost / result?.header?.CurrencyExchRate) || 0) *
                                                         (1 + (Number(TotalTaxPercentage) || 0) / 100)), 2)}</div>
 
                                                 </div>
@@ -862,7 +1103,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                             <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%" }}> </div>
                                             {/* <div className="table-cell w-price div-center">{NumberWithCommas(result?.mainTotal?.total_unitcost, 2)}</div> */}
 
-                                            <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%", borderRight: "1px solid #dbdbdb" }}>{NumberWithCommas(result?.mainTotal?.total_unitcost /result?.header?.CurrencyExchRate, 2)}</div>
+                                            <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8%" : "10%", borderRight: "1px solid #dbdbdb" }}>{NumberWithCommas(result?.mainTotal?.total_unitcost / result?.header?.CurrencyExchRate, 2)}</div>
                                             {
                                                 vatamtFalg && (<div className="table-cell w-card div-center">
                                                     {/* <div className="checkbox"></div> */}
@@ -870,7 +1111,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                                 )
                                             }
                                             <div className="table-cell w-price no-border div-center">
-                                                {NumberWithCommas(((Number(result?.mainTotal?.total_unitcost /result?.header?.CurrencyExchRate) || 0) *
+                                                {NumberWithCommas(((Number(result?.mainTotal?.total_unitcost / result?.header?.CurrencyExchRate) || 0) *
                                                     (1 + (Number(TotalTaxPercentage) || 0) / 100)), 2)}</div>
 
                                         </div>
@@ -916,7 +1157,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                         {result?.header?.AddLess != 0 && <div className="table-row" style={{ height: "28px", fontWeight: "bold" }}>
                                             <div className="table-cell   div-center" style={{ width: vatamtFalg ? "78%" : "85%", justifyContent: "flex-end" }}> SPECIAL DISCOUNT </div>
                                             <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8.1%" : "10%", borderRight: "1px solid #dbdbdb", justifyContent: "flex-end" }}>
-                                                 
+
                                                 {NumberWithCommas(
                                                     result?.header?.AddLess /
                                                     result?.header?.CurrencyExchRate,
@@ -933,8 +1174,8 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                         <div className="table-row" style={{ fontWeight: "bold" }}>
                                             <div className="table-cell   div-center" style={{ width: vatamtFalg ? "78%" : "85%", justifyContent: "flex-end" }}> TOTAL ({result?.header?.CurrencyCode})</div>
                                             <div className="table-cell w-price div-center" style={{ width: vatamtFalg ? "8.1%" : "10%", borderRight: "1px solid #dbdbdb", justifyContent: "flex-end" }}>
-                                                {NumberWithCommas((Number((result?.mainTotal?.total_unitcost+ result?.header?.AddLess)/result?.header?.CurrencyExchRate) || 0) *
-                                                    (1 + (Number(TotalTaxPercentage) || 0) / 100) ,
+                                                {NumberWithCommas((Number((result?.mainTotal?.total_unitcost + result?.header?.AddLess) / result?.header?.CurrencyExchRate) || 0) *
+                                                    (1 + (Number(TotalTaxPercentage) || 0) / 100),
                                                     2
                                                 )}
                                             </div>
@@ -956,9 +1197,10 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                     </div>
 
                                     {result?.header?.Declaration && <div className="ob-form-container" style={{ width: "100%", border: "1px solid #bdbdbd ", borderBottom: "none", padding: "5px", marginRight: "0px" }}>
-                                        <p className="fw-bold" style={{ fontSize: "12px" }}>Terms & Condition:</p>
+                                        <p className="fw-bold" style={{ fontSize: "10px" }}>Terms & Condition:</p>
                                         <div
                                             className="tb_fs_pclsINS"
+                                            style={{ fontSize: "12px" }}
                                             dangerouslySetInnerHTML={{
                                                 __html: result?.header?.Declaration,
                                             }}
@@ -983,7 +1225,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                                             Payment Term/Method
                                                         </div>
 
-                                                        <div className="ob-form-cell-text" style={{padding: '0px 5px'}}>
+                                                        <div className="ob-form-cell-text" style={{ padding: '0px 5px' }}>
                                                             {payments.map((item, index) => (
                                                                 <div key={index}>
                                                                     {item.method} - {item.amount}
@@ -1003,7 +1245,7 @@ export default function JewelleryInvoicePrint4({ token, invoiceNo, printName, ur
                                                             Payment Reference
                                                         </div>
 
-                                                        <div className="ob-form-cell-text" style={{padding: '0px 5px'}}>
+                                                        <div className="ob-form-cell-text" style={{ padding: '0px 5px' }}>
                                                             {payments.map((item, index) => (
                                                                 <div key={index}>
                                                                     {item.reference}

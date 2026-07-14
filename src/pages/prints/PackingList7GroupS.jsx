@@ -848,13 +848,15 @@ const PackingList7GroupS = ({
                       <div className="w-25 fw-bold">DATE</div>
                       <div className="w-50">{result?.header?.EntryDate}</div>
                     </div>
-                    <div className="d-flex justify-content-start px-1">
+                    {result?.header?.HSN_No &&(  
+                      <div className="d-flex justify-content-start px-1">
                       <div className="w-25 fw-bold">
                         {" "}
-                        {result?.header?.HSN_No_Label}{" "}
+                         HSN{" "}
                       </div>
                       <div className="w-50">{result?.header?.HSN_No}</div>
                     </div>
+                    )}  
                   </div>
                 </div>
                 {/* table */}
