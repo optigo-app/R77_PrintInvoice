@@ -372,9 +372,7 @@ const JewelleryTaxInvoiceMemo = ({ urls, token, invoiceNo, printName, evn, ApiVe
                 
                 { !imgFlag && <>
                   {json0Data?.customermobileno !== "" && (
-                    // <p className="lh-1 pb-1">Tel : {json0Data?.customermobileno}</p>
                     <p className="lh-1 pb-1">Tel : {json0Data?.country_code && "+"}{json0Data?.country_code}{" "} {json0Data?.customermobileno}</p>
-
                     )}
                   <p className="lh-1 pb-1">{json0Data?.customeremail1}</p>
                 </>}

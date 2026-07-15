@@ -13,7 +13,8 @@ import {
   isObjectEmpty,
   NumberWithCommas,
   mergeMetals,
-  mergeFindings
+  mergeFindings,
+  mergedBySeetingRate
 } from "../../GlobalFunctions";
 import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
 import "../../assets/css/prints/detailprint10.css";
@@ -284,6 +285,7 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
 
 
+ 
 
 
   return (
@@ -598,6 +600,9 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
                       const mergedMetals = mergeMetals(e?.metal);
                       const mergedFindings = mergeFindings(e?.finding);
+                      
+                      
+                      const mergedBySettingRate = mergedBySeetingRate(mergedFindings);
                       const totalSetAmt = mergedFindings.reduce((sum, item) => {
                         return sum + (Number(item?.SettingAmount) || 0);
                       }, 0);
@@ -917,7 +922,7 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         <div key={ind}> </div>
                                       ))}
 
-                                      {mergedFindings?.map((val, ind) => (
+                                      {mergedBySettingRate?.map((val, ind) => (
                                         <div key={ind}>
                                           <div>{val?.SettingRate?.toFixed(2)}</div>
                                         </div>
@@ -941,7 +946,7 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         <div key={ind}> </div>
                                       ))}
 
-                                      {mergedFindings?.map((val, ind) => (
+                                      {mergedBySettingRate?.map((val, ind) => (
                                         <div key={ind}>
                                           <div>{val?.SettingAmount?.toFixed(2)}</div>
                                         </div>
@@ -1206,6 +1211,7 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     <div className="tocol7 end_dp10  d-flex align-items-center brR_dp10 pr_dp10">
                       {formatAmount(
                         result?.mainTotal?.total_labour?.labour_amount +
+                        findingRateFlag ? result?.mainTotal?.finding?.SettingAmount : 0 +
                         result?.mainTotal?.total_TotalDiaSetcost +
                         result?.mainTotal?.total_TotalCsSetcost
                       )}

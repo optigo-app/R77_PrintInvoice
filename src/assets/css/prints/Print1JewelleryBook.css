@@ -11,6 +11,10 @@
   gap: 10px 15px;
 }
 
+.MrgnSpac {
+  margin-bottom: 4.5rem;
+}
+
 .disflx {
   display: flex;
 }
@@ -195,11 +199,16 @@
     gap: 10px 10px;
   }
 
+  .MrgnSpac {
+    margin-bottom: 0rem;
+  }
+
   .col1 {
     flex: 0 0 18.50%;
     max-width: 18.50%;
     box-sizing: border-box;
   }
+
   .fil_sec{
     display: none;
   }

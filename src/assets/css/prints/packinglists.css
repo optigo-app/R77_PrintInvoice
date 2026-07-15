@@ -87,7 +87,8 @@
 /* table head */
 
 .tb_fs_pcls{
-    font-size: 11px;
+    font-size: 12px;
+ 
 }
 
 .thead_pcls{
@@ -208,6 +209,11 @@
     font-size: 14px;
 }
 
+/* .linHig10{
+    line-height: 10px;
+    padding-top: 3px;
+} */
+
 @media print {
     .fs_16_pcls{
         font-size: 13px;
@@ -224,12 +230,12 @@
         box-sizing: border-box;
         padding: 0px;
         padding-bottom: 5rem;
-        font-size: 6px;
+        font-size: 8px;
         line-height: 9px;
     }
     .tb_fs_pcls{
-        font-size: 6px;
-        line-height: 7px;
+        font-size: 7px;
+        line-height: 8px;
     }
     .pbia_s{
         page-break-inside: avoid !important;
@@ -267,5 +273,11 @@
     .fs_h_head2{
         font-size: 10px;
     }
-    
+    .GoldRet-cont{
+        padding-left: 5px !important;
+        padding-bottom: 5px !important;
+    }
+    .GoldRet{
+        font-size: 14px !important;
+    }
 }

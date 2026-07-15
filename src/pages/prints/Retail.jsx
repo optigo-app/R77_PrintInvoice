@@ -354,6 +354,7 @@ const Retail = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     let gmwt = 0;
     let ctwwt = 0;
     datas?.resultArray?.forEach((e) => {
+      console.log('datas: ', datas);
         e?.misc?.forEach((el) => {
             totmiscwt += el?.Wt;
             gmwt += el?.Wt;

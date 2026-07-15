@@ -140,7 +140,7 @@ const Print2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     htmlFor="withAMT"
                                     className="mx-2 user-select-none"
                                 >
-                                    With Amount
+                                    With Amount 
                                 </label>
                             </div>
                             : ""

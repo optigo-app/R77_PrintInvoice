@@ -8,6 +8,9 @@
     color: black;
     font-family: Calibri;
 }
+.text-center{
+    text-align: center;
+}
 .fs_ri{
     font-size: 13px;
     line-height: 15px;
@@ -44,45 +47,90 @@
     align-items: center;
     padding: 10px;
     border: 1px solid black;
-    width: 25%;
+    width: 24.5%;
 }
 
-.col1_ri{
-    width: 12%;
-}
-.col2_ri{
-    width: 6%;
-}
-.col3_ri{
-    width: 6%;
-}
-.col4_ri{
-    width: 7%;
-}
-.col5_ri{
-    width: 7%;
-}
-.col6_ri{
-    width: 7%;
-}
-.col7_ri{
-    width: 7%;
-}
-.col8_ri{
+.col1_ri_disflag{
     width: 10%;
 }
-.col9_ri{
+.col2_ri_disflag{
+    width: 7%;
+}
+.col3_ri_disflag{
     width: 8%;
 }
-.col10_ri{
+.col4_ri_disflag{
+    width: 9%;
+}
+.col5_ri_disflag{
     width: 10%;
 }
-.col11_ri{
+.col6_ri_disflag{
+    width: 9%;
+}
+.col7_ri_disflag{
+    width: 9%;
+}
+.col8_ri_disflag{
+    width: 13%;
+}
+.col9_ri_disflag{
     width: 10%;
+}
+.col10_ri_disflag{
+    width: 11%;
+}
+.col11_ri_disflag{
+    width: 11%;
+}
+.col12_ri_disflag{
+    width: 11%;
+}
+
+
+
+
+
+.col1_ri{
+    width: 10%;
+}
+.col2_ri{
+    width: 7%;
+}
+.col3_ri{
+    width: 5%;
+}
+.col4_ri{
+    width: 8%;
+}
+.col5_ri{
+    width: 8%;
+}
+.col6_ri{
+    width: 8%;
+}
+.col7_ri{
+    width: 8%;
+}
+.col8_ri{
+    width: 8%;
+}
+.col9_ri{
+    width: 9%;
+}
+.col10_ri{
+    width: 11%;
+}
+.col11_ri{
+    width: 11%;
 }
 .col12_ri{
     width: 10%;
 }
+
+
+
+
 .note_ri *{
     font-size: 13px;
     line-height: 18px;

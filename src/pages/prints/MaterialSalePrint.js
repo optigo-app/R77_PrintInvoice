@@ -77,12 +77,12 @@ const MaterialSalePrint = ({
 
   return (
     <>
-    dfsffdsfffff
+    
       {loader ? (
         <Loader />
       ) : msg === "" ? (
         <div>
-          <div>demooocxzccfddddddddddddddddddddddoooo</div>
+          <div></div>
         </div>
       ) : (
         <p className="text-danger fs-2 fw-bold mt-5 text-center w-50 mx-auto">

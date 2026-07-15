@@ -1,0 +1,27 @@
+.bisLogo{
+    width: 40px;
+    height: 40px;
+}
+
+.bisLogoContainer{
+    position: absolute;
+    top: -40px;
+    right: 15px;
+}
+
+.barcodeSection{
+    position: relative;
+}
+.barcode img{
+    width: 100px;
+    height: 72px;
+}
+@media print{
+     @page{
+        height: 25mm;
+        margin: 0;
+     }
+     .printbtn{
+        display: none !important;
+    }
+}

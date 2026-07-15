@@ -165,6 +165,8 @@ const BagPrint10J = ({ queries, headers }) => {
                 return (
                   <React.Fragment key={i}>
                     {(e?.additional?.pages?.length > 0 ? e?.additional?.pages : [{}]).map((ele, index) => {
+                      
+                      
                       return (
                         <>
                           {/* Left Side */}
@@ -385,7 +387,7 @@ const BagPrint10J = ({ queries, headers }) => {
                             {/* Instuction */}
                             <div className="w-100 Higt0 BrderBtomDRK FntSize0 SpacLft0 SpacLft1">
                               <div className="d-flex FntSize2">
-                                <div className="fw-bold spbrWord">INSTRUCTION :&nbsp;{e?.data?.rd?.QuoteRemark?.slice(0, 149)}</div>
+                                <div className="fw-bold spbrWord">INSTRUCTION :&nbsp;{e?.data?.rd?.QuoteRemark?.slice(0, 174)}</div>
                               </div>
                             </div>
 
@@ -419,6 +421,11 @@ const BagPrint10J = ({ queries, headers }) => {
                                 {/* Table Data */}
                                 {ele?.data?.map((a, i) => {
                                   const TheDataLen = e?.additional?.pages?.[0]?.data?.length ?? 0;
+                                  
+
+                                  
+                                  // console.log("TCL:e?.additional?.pages ",e?.additional?.pages )
+                                  
                                   // console.log("TheDataLen", TheDataLen);
                                   const TheDif = TheDataLen <= 21 ? 21 - TheDataLen : 0;
                                   // console.log("TheDif", TheDif);
@@ -455,7 +462,7 @@ const BagPrint10J = ({ queries, headers }) => {
                                 {/* Empty Rows */}
                                 {Array.from({ length: 21 - (e?.additional?.pages?.[0]?.data?.length || 0) }, (_, index) => {
                                   const TheDataLen = e?.additional?.pages?.[0]?.data?.length ?? 0;
-                                  // console.log("TheDataLen", TheDataLen);
+                                  // console.log("TheDataLen niche", TheDataLen);
                                   const TheDif = TheDataLen <= 21 ? 21 - TheDataLen : 0;
                                   // console.log("TheDif", TheDif);
                                   const isLastRow = index === TheDif - 1;

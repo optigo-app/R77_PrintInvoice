@@ -16,7 +16,6 @@ export const GetFgSaleData = async (queries,body ) => {
     const response = await axios.post( queries?.url, body, { headers: header });
     
  
- console.log("TCL: GetFgSaleData ->response ", response)
     return response?.data;
 
   } catch (error) {

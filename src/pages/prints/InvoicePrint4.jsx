@@ -1133,7 +1133,7 @@ useEffect(() => {
                     <div className="text-break" dangerouslySetInnerHTML={{ __html: result?.header?.PrintRemark }}></div>
                   </div>
                   <div className="declarationinvp4" style={{borderBottom:'1px solid #e8e8e8'}}>
-                    <div className="fw-bold fs12invp4">DECLARATION :</div>
+                    <div className="fw-bold fs12invp4" style={{fontWeight:"bold"}}>DECLARATION :</div>
                     <div style={{ fontWeight: "bold" }} className="text-break dec_invp4_fs" dangerouslySetInnerHTML={{ __html: result?.header?.Declaration }} ></div>
                   </div>
                   <div className="d-flex brright_invp4 brbottom_invp4 brleft_invp4 footer_invp4_box">

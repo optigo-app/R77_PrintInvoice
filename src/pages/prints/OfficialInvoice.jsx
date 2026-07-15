@@ -192,7 +192,7 @@ const OfficialInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                             <div className='col3_jts center_jts brr_jts'>DESCRIPTION</div>
                                             <div className='col4_jts center_jts brr_jts'>AMOUNT  </div>
                                             <div className='col4_jts center_jts brr_jts' style={{width:"10%"}}>Discount  </div>
-                                            <div className='col4_jts center_jts' style={{width:"16%"}}>Final AMT ({result?.header?.CurrencyCode})</div>
+                                            <div className='col4_jts center_jts' style={{width:"16%"}}>Final AMOUNT ({result?.header?.CurrencyCode})</div>
                                         </div>
                                         <div className='tbody_jts'>
                                             {/* {

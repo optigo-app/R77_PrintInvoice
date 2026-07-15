@@ -476,11 +476,15 @@ const TaxInvoice3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         dangerouslySetInnerHTML={{ __html: headerData?.Declaration }}
       ></div>
       {/* remarks */}
-      <div className={`d-flex border-start border-end p-2 ${style?.font_14}`}>
+      <div className={` border-start border-end p-2 ${style?.font_14}`}>
         <p>
           <span className="fw-bold">REMARKS : </span>
           {headerData?.PrintRemark}
         </p>
+        <div className="py-1 pbias2 fsh2_s2" style={{lineHeight: '1.2'}}><span className="fw-bold">TERMS INCLUDED</span> :
+                  <span dangerouslySetInnerHTML={{ __html: headerData?.SalesRepPolicyTermsDescription }}></span>
+                  {/* {result?.header?.SalesRepPolicyTermsDescription} */}
+        </div>
       </div>
       {footer}
     </div>

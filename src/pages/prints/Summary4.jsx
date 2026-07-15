@@ -42,7 +42,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   const [header, setHeader] = useState(true);
   const [makingColumShow, setMakingColumShow] = useState(false);
   const [image, setimage] = useState(true);
-  const [summary, setSummary] = useState(true);
+  const [summary, setSummary] = useState(false);
   const [metalType, setMetaltype] = useState([]);
   const [result, setResult] = useState(null);
   const [MetShpWise, setMetShpWise] = useState([]);
@@ -116,32 +116,63 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     setSummaryDetail(countsArray);
   };
 
+  // const countDiamondRate = (materialId, arr) => {
+  //   let findArr = findMaterialWise(
+  //     "MasterManagement_DiamondStoneTypeid",
+  //     materialId,
+  //     arr
+  //   );
+  //   const rateSumMap = {};
+  //   findArr.forEach((item) => {
+  //     const { Rate, Wt, Amount } = item;
+  //     if (!rateSumMap[Rate]) {
+  //       rateSumMap[Rate] = {
+  //         totalWeight: 0,
+  //         totalAmount: 0,
+  //       };
+  //     }
+  //     rateSumMap[Rate].totalWeight += Wt;
+  //     rateSumMap[Rate].totalAmount += Amount;
+  //   });
+
+  //   const result = Object.keys(rateSumMap).map((rate) => ({
+  //     rate: rate,
+  //     totalWeight: rateSumMap[rate].totalWeight.toFixed(3),
+  //     totalAmount: rateSumMap[rate].totalAmount.toFixed(3),
+  //   }));
+  //   return result;
+  // };
+
   const countDiamondRate = (materialId, arr) => {
     let findArr = findMaterialWise(
       "MasterManagement_DiamondStoneTypeid",
       materialId,
       arr
     );
+  
     const rateSumMap = {};
+  
     findArr.forEach((item) => {
-      const { Rate, Wt, Amount } = item;
-      if (!rateSumMap[Rate]) {
-        rateSumMap[Rate] = {
+      const { Rate, Wt, Amount, IsSolGem } = item;
+  
+      const key = `${Rate}_${IsSolGem}`;
+  
+      if (!rateSumMap[key]) {
+        rateSumMap[key] = {
+          Rate,
+          IsSolGem,
           totalWeight: 0,
           totalAmount: 0,
         };
       }
-      rateSumMap[Rate].totalWeight += Wt;
-      rateSumMap[Rate].totalAmount += Amount;
+  
+      rateSumMap[key].totalWeight += Number(Wt || 0);
+      rateSumMap[key].totalAmount += Number(Amount || 0);
     });
-
-    const result = Object.keys(rateSumMap).map((rate) => ({
-      rate: rate,
-      totalWeight: rateSumMap[rate].totalWeight.toFixed(3),
-      totalAmount: rateSumMap[rate].totalAmount.toFixed(3),
-    }));
-    return result;
+  
+    return Object.values(rateSumMap);
   };
+  
 
   const countTotalAmount = (arr) => {
     const totalSum = arr.reduce(
@@ -181,7 +212,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
     let taxValue = taxGenrator(taxJson, resultObj.amount);
     console.log("taxJson", taxJson);
-    
+
     setTaxes(taxValue);
     taxValue.forEach((e, i) => {
       resultObj.afterTaxAmt += +e?.amount;
@@ -207,68 +238,123 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const rateSumMap = {};
     if (materialId === 1) {
       findArr.forEach((item) => {
-        const { Rate, Wt, Amount } = item;
-        let record = json1Arr.find((e, i) => e.SrJobno === item?.StockBarcode);
-        if (!rateSumMap[Rate]) {
-          rateSumMap[Rate] = {
+        const { Rate, Wt, Amount, IsSolGem } = item;
+    
+        let record = json1Arr.find(
+          (e) => e.SrJobno === item?.StockBarcode
+        );
+    
+        const key = `${Rate}_${IsSolGem}`; // Separate Diamond & Solitaire
+    
+        if (!rateSumMap[key]) {
+          rateSumMap[key] = {
             totalWeight: 0,
             totalAmount: 0,
-            name: "DIAMOND",
-            discount: record.Discount,
+            name: IsSolGem === 1 ? "SOLITAIRE" : "DIAMOND",
+            discount: record?.Discount || 0,
+            rate: Rate,
+            IsSolGem,
           };
         }
-        rateSumMap[Rate].totalWeight += Wt;
-        rateSumMap[Rate].totalAmount += Amount;
-        rateSumMap[Rate].name = "DIAMOND";
-        rateSumMap[Rate].discount = record.Discount;
+    
+        rateSumMap[key].totalWeight += Number(Wt || 0);
+        rateSumMap[key].totalAmount += Number(Amount || 0);
       });
-
-      const result = Object.keys(rateSumMap).map((rate) => ({
-        rate: rate,
-        totalWeight: rateSumMap[rate].totalWeight.toFixed(3),
-        totalAmount: rateSumMap[rate].totalAmount.toFixed(3),
-        name: "DIAMOND",
-        discount: rateSumMap[rate].discount,
+    
+      const result = Object.values(rateSumMap).map((item) => ({
+        rate: item.rate,
+        totalWeight: item.totalWeight.toFixed(3),
+        totalAmount: item.totalAmount.toFixed(3),
+        name: item.name,
+        discount: item.discount,
+        IsSolGem: item.IsSolGem,
       }));
-
+    
       let obj = { ...lastDiamondTableTotal };
-      result.forEach((e, i) => {
-        obj.diaCtw += +e?.totalWeight;
-        obj.diamondAmount += +e?.totalAmount;
+    
+      result.forEach((e) => {
+        obj.diaCtw += +e.totalWeight;
+        obj.diamondAmount += +e.totalAmount;
       });
+    
       setLastDiamondTableTotal(obj);
       setLastDiamondTable(result);
     }
+    // if (materialId === 2) {
+    //   findArr.forEach((item) => {
+    //     const { Rate, Wt, Amount } = item;
+    //     let record = json1Arr.find((e, i) => e.SrJobno === item?.StockBarcode);
+    //     if (!rateSumMap[Rate]) {
+    //       rateSumMap[Rate] = {
+    //         totalWeight: 0,
+    //         totalAmount: 0,
+    //         name: "COLOR STONE",
+    //         discount: record.Discount,
+    //       };
+    //     }
+    //     rateSumMap[Rate].totalWeight += Wt;
+    //     rateSumMap[Rate].totalAmount += Amount;
+    //     rateSumMap[Rate].name = "COLOR STONE";
+    //     rateSumMap[Rate].discount = record.Discount;
+    //   });
+
+    //   const result = Object.keys(rateSumMap).map((rate) => ({
+    //     rate: rate,
+    //     totalWeight: rateSumMap[rate].totalWeight.toFixed(3),
+    //     totalAmount: rateSumMap[rate].totalAmount.toFixed(3),
+    //     name: "COLOR STONE",
+    //     discount: rateSumMap[rate].discount,
+    //   }));
+    //   let obj = { ...lastColorStoneTableTotal };
+    //   result.forEach((e, i) => {
+    //     obj.clrCtw += +e?.totalWeight;
+    //     obj.colorStoneAmount += +e?.totalAmount;
+    //   });
+    //   setLastColorStoneTableTotal(obj);
+    //   setLastColorStoneTable(result);
+    // }
+
     if (materialId === 2) {
       findArr.forEach((item) => {
-        const { Rate, Wt, Amount } = item;
-        let record = json1Arr.find((e, i) => e.SrJobno === item?.StockBarcode);
-        if (!rateSumMap[Rate]) {
-          rateSumMap[Rate] = {
+        const { Rate, Wt, Amount, IsSolGem } = item;
+    
+        let record = json1Arr.find(
+          (e) => e.SrJobno === item?.StockBarcode
+        );
+    
+        const key = `${Rate}_${IsSolGem}`;
+    
+        if (!rateSumMap[key]) {
+          rateSumMap[key] = {
+            rate: Rate,
+            IsSolGem,
             totalWeight: 0,
             totalAmount: 0,
-            name: "COLOR STONE",
-            discount: record.Discount,
+            name: IsSolGem === 1 ? "GEMSTONE" : "COLOR STONE",
+            discount: record?.Discount || 0,
           };
         }
-        rateSumMap[Rate].totalWeight += Wt;
-        rateSumMap[Rate].totalAmount += Amount;
-        rateSumMap[Rate].name = "COLOR STONE";
-        rateSumMap[Rate].discount = record.Discount;
+    
+        rateSumMap[key].totalWeight += Number(Wt || 0);
+        rateSumMap[key].totalAmount += Number(Amount || 0);
       });
-
-      const result = Object.keys(rateSumMap).map((rate) => ({
-        rate: rate,
-        totalWeight: rateSumMap[rate].totalWeight.toFixed(3),
-        totalAmount: rateSumMap[rate].totalAmount.toFixed(3),
-        name: "COLOR STONE",
-        discount: rateSumMap[rate].discount,
+    
+      const result = Object.values(rateSumMap).map((item) => ({
+        rate: item.rate,
+        totalWeight: item.totalWeight.toFixed(3),
+        totalAmount: item.totalAmount.toFixed(3),
+        name: item.name,
+        discount: item.discount,
+        IsSolGem: item.IsSolGem,
       }));
+    
       let obj = { ...lastColorStoneTableTotal };
-      result.forEach((e, i) => {
-        obj.clrCtw += +e?.totalWeight;
-        obj.colorStoneAmount += +e?.totalAmount;
+    
+      result.forEach((e) => {
+        obj.clrCtw += +e.totalWeight;
+        obj.colorStoneAmount += +e.totalAmount;
       });
+    
       setLastColorStoneTableTotal(obj);
       setLastColorStoneTable(result);
     }
@@ -342,7 +428,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       const key6Value = obj?.MetalAmount;
       const key7Value = obj?.Tunch;
       const key8Value = +((obj?.Tunch * key5Value) / 100).toFixed(3);
-      const foundIndex = result.findIndex( 
+      const foundIndex = result.findIndex(
         (item) => item.metalType === key1Value
       );
       nWt += obj?.NetWt;
@@ -626,6 +712,51 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   console.log("sortedData", sortedData);
   // console.log("taxes", taxes);
 
+  function getTunchWiseSummary(BillPrint_Json1) {
+
+    const result = {};
+    let total = {
+        Gwt: 0,
+        NetWt: 0,
+        PureWt: 0,
+        Amount: 0
+    };
+
+    BillPrint_Json1.forEach(item => {
+
+        const key = item.MetalTypePurity + "_" + item.Tunch;
+
+        if (!result[key]) {
+            result[key] = {
+                MetalType: item.MetalTypePurity,
+                Gwt: 0,
+                NetWt: 0,
+                Tunch: item.Tunch,
+                PureWt: 0,
+                GoldAmount: 0
+            };
+        }
+
+        result[key].Gwt += Number(item.grosswt || 0);
+        result[key].NetWt += Number(item.NetWt || 0);
+        result[key].PureWt += Number(item.PureNetWt || 0);
+        result[key].GoldAmount += Number(item.MetalAmount || 0);
+
+        total.Gwt += Number(item.grosswt || 0);
+        total.NetWt += Number(item.NetWt || 0);
+        total.PureWt += Number(item.PureNetWt || 0);
+        total.Amount += Number(item.MetalAmount || 0);
+    });
+
+    return {
+        summary: Object.values(result),
+        total: total
+    };
+}
+
+const metalSummarey=getTunchWiseSummary(BillPrintJson1);
+
+
   return (
     <>
       {loader ? (
@@ -697,7 +828,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     {billPrintJson?.CompanyAddress2}{" "}
                   </p>
                   <p className="address_para_sum4 lh-1 pb-1">
-                    {billPrintJson?.CompanyCity} {billPrintJson?.CompanyPinCode}{" "}
+                    {billPrintJson?.CompanyCity}-{billPrintJson?.CompanyPinCode},{" "}
                     {billPrintJson?.CompanyState}{" "}
                     {billPrintJson?.CompanyCountry}{" "}
                   </p>
@@ -881,12 +1012,14 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <p> {1 + i} </p>{" "}
                           </div>
                           <div className="border-end summury4_col2 p-1">
+                            <div style={{display:'flex',justifyContent:"space-between"}}>
                             <p className="fw-bold">{e?.SrJobno} - </p>
                             {e?.Categoryname && (
-                              <p className="fw-bold design_name_show">
+                              <p className="fw-bold design_name_show" style={{wordBreak:'break-all'}}>
                                 {e?.Categoryname}
                               </p>
                             )}
+                            </div>
                             {image && (
                               <div
                                 style={{
@@ -923,7 +1056,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 </p>
                               </p>
                             )}
-                            {e?.CertificateNo !== "" && (<p className="border-top"/>)}
+                            {e?.CertificateNo !== "" && (<p className="border-top" />)}
                             {e?.CertificateNo !== "" && (
                               <p className="p-1">
                                 <strong>IGI-</strong> -
@@ -941,6 +1074,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.diamondsRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
+                                    {ele?.IsSolGem===1? "S:":""}
                                     {fixedValues(ele?.totalWeight, 3)}
                                   </p>
                                 );
@@ -952,7 +1086,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.diamondsRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
-                                    {NumberWithCommas(ele?.rate,2)}
+                                    {NumberWithCommas(ele?.rate, 2)}
                                   </p>
                                 );
                               })}
@@ -965,7 +1099,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.diamondsRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
-                                    {NumberWithCommas(ele?.totalAmount,2)}
+                                    {NumberWithCommas(ele?.totalAmount, 2)}
                                   </p>
                                 );
                               })}{" "}
@@ -984,7 +1118,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             {" "}
                             <p>
                               {" "}
-                              {NumberWithCommas(e?.otherAmountDetail,2)}{" "}
+                              {NumberWithCommas(e?.otherAmountDetail, 2)}{" "}
                             </p>{" "}
                           </div>
                           <div className={`border-end p-1 text-end ${makingColumShow ? "summury4_col10" : "summury4_col10m"}`}>
@@ -992,6 +1126,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.colorStoneRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
+                                    {ele?.IsSolGem===1? "G:":""}
                                     {fixedValues(ele?.totalWeight, 3)}
                                   </p>
                                 );
@@ -1003,7 +1138,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.colorStoneRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
-                                    {NumberWithCommas(ele?.rate,2)}
+                                    {NumberWithCommas(ele?.rate, 2)}
                                   </p>
                                 );
                               })}{" "}
@@ -1015,7 +1150,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               e.colorStoneRate.map((ele, indd) => {
                                 return (
                                   <p key={indd}>
-                                    {NumberWithCommas(ele?.totalAmount,2)}
+                                    {NumberWithCommas(ele?.totalAmount, 2)}
                                   </p>
                                 );
                               })}{" "}
@@ -1023,7 +1158,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
                           {makingColumShow && (
                             <div className="border-end p-1 text-end summury4_col13">
-                              {formatAmount(e?.MaKingCharge_Unit,2)}
+                              {formatAmount(e?.MaKingCharge_Unit, 2)}
                             </div>
                           )}
                           {makingColumShow && (
@@ -1032,8 +1167,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 e?.MakingAmount +
                                 e?.TotalDiaSetcost +
                                 e?.TotalCsSetcost,
-                                0
-                              ,2)}
+                                2)}
                             </div>
                           )}
 
@@ -1144,9 +1278,9 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   </div>
                   {makingColumShow && (<>
                     <div className={`p-1 ${makingColumShow ? "summury4_col13" : "summury4_col13m"} border-end text-end  bg_total_sum4 fw-bold`}>
-                    {" "}
-                    <p> </p>{" "}
-                  </div>
+                      {" "}
+                      <p> </p>{" "}
+                    </div>
                     <div
                       className={`p-1 ${makingColumShow ? "summury4_col14" : "summury4_col14m"} border-end text-end bg_total_sum4 fw-bold`}
                       style={{
@@ -1155,7 +1289,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       }}
                     >
                       {" "}
-                      <p> 
+                      <p>
                         {NumberWithCommas(
                           result?.mainTotal?.total_labour?.labour_amount +
                           result?.mainTotal?.total_TotalDiaSetcost +
@@ -1165,7 +1299,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         )}
                       </p>{" "}
                     </div>
-                    </>
+                  </>
                   )}
                   <div
                     className={`p-1 ${makingColumShow ? "summury4_col15" : "summury4_col15m"} border-end text-end  bg_total_sum4 fw-bold`}
@@ -1333,15 +1467,29 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         <div className="d-flex w-100">
                           <div className="w-50 fw-bold ps-2">DIAMOND WT</div>
                           <div className="w-50 text-end pe-2">
-                            {totalSummary?.diamondpcs} /{" "}
-                            {fixedValues(total?.diaWt, 3)} ctw
+                             {NumberWithCommas(result?.mainTotal?.diamonds?.Pcs -result?.mainTotal?.solitaire?.Pcs, 0)} / {NumberWithCommas(result?.mainTotal?.diamonds?.Wt - result?.mainTotal?.solitaire?.Wt, 3)} cts
+                                                   
                           </div>
                         </div>
-                        <div className="d-flex w-100 mb-3">
+                        <div className="d-flex w-100">
+                          <div className="w-50 fw-bold ps-2">SOLITAIRE WT</div>
+                          <div className="w-50 text-end pe-2">
+                          {result?.mainTotal?.solitaire?.Pcs  } /{" "}
+                          {result?.mainTotal?.solitaire?.Wt?.toFixed(3)} cts
+                          </div>
+                        </div>
+                        <div className="d-flex w-100">
                           <div className="w-60 fw-bold ps-2">STONE WT</div>
                           <div className="w-40 text-end pe-2">
-                            {totalSummary?.colorStonePcs} /{" "}
-                            {fixedValues(total?.csWt, 3)} ctw
+                          {result?.mainTotal?.colorstone?.Pcs - result?.mainTotal?.gemstone?.Pcs} /{" "}
+                          {(result?.mainTotal?.colorstone?.Wt - result?.mainTotal?.gemstone?.Wt)?.toFixed(3)} cts
+                          </div>
+                        </div>
+                        <div className="d-flex w-100 mb-1">
+                          <div className="w-50 fw-bold ps-2">GEMSTONE WT</div>
+                          <div className="w-50 text-end pe-2">
+                          {result?.mainTotal?.gemstone?.Pcs} /{" "}
+                          {result?.mainTotal?.gemstone?.Wt?.toFixed(3)} cts
                           </div>
                         </div>
                       </div>
@@ -1350,7 +1498,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           <div className="w-50 fw-bold ps-2">GOLD</div>
                           <div className="w-50 text-end pe-2">
                             {NumberWithCommas(
-                              total.goldAmt - notGoldMetalTotal,
+                              total.goldAmt,
                               2
                             )}
                           </div>
@@ -1370,13 +1518,37 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         <div className="d-flex w-100">
                           <div className="w-50 fw-bold ps-2">DIAMOND</div>
                           <div className="w-50 text-end pe-2">
-                            {NumberWithCommas(total?.diaAmt, 2)}
+                           {formatAmount(
+                                                       result?.mainTotal?.diamonds?.Amount - result?.mainTotal?.solitaire?.Amount /
+                                                       result?.header?.CurrencyExchRate
+                               ,2)}
+                          </div>
+                        </div>
+                        <div className="d-flex w-100">
+                          <div className="w-50 fw-bold ps-2">SOLITAIRE</div>
+                          <div className="w-50 text-end pe-2">
+                             {formatAmount(
+                                                        result?.mainTotal?.solitaire?.Amount /
+                                                        result?.header?.CurrencyExchRate
+                                                      ,2)}
                           </div>
                         </div>
                         <div className="d-flex w-100">
                           <div className="w-50 fw-bold ps-2">CST</div>
                           <div className="w-50 text-end pe-2">
-                            {NumberWithCommas(total.csAmt, 2)}
+                             {formatAmount(
+                                                       result?.mainTotal?.colorstone?.Amount - result?.mainTotal?.gemstone?.Amount/
+                                                       result?.header?.CurrencyExchRate
+                                                     ,2)}
+                          </div>
+                        </div>
+                        <div className="d-flex w-100">
+                          <div className="w-50 fw-bold ps-2">GEMSTONE</div>
+                          <div className="w-50 text-end pe-2">
+                            {formatAmount(
+                                                        result?.mainTotal?.gemstone?.Amount /
+                                                        result?.header?.CurrencyExchRate
+                                                      ,2)}
                           </div>
                         </div>
                         <div className="d-flex w-100">
@@ -1503,7 +1675,15 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     ></p>
                   </div>
                 )}
-                <p className="fw-bold pb-1 font_14_sum4">TERMS INCLUDED :</p>
+                <p className="fw-bold pb-1 font_14_sum4">
+                  TERMS INCLUDED : &nbsp;
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: billPrintJson?.SalesRepPolicyTermsDescription,
+                    }}
+                    style={{ fontWeight: "400" }}
+                  />
+                </p>
                 <div className="d-flex border mb-2">
                   <div className="w-50 border-end height_65_sum4 d-flex justify-content-center align-items-end border-end">
                     <p className="fw-bold font_15_sum4">
@@ -1519,7 +1699,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 {summary && (
                   <>
                     <p className="fw-bold mt-10 font_14_sum4 deatil_SectionTitle">
-                      DETAIL :
+                      Summary Details
                     </p>
                     <div className="summary_table_sum4 w-100">
                       <div className="d-flex border height34Sum4">
@@ -1545,28 +1725,28 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           Gold Amount
                         </div>
                       </div>
-                      {sortedData.length > 0 ?
-                        (sortedData.map((e, i) => {
-                          const isLast = i === sortedData.length - 1;
+                      {metalSummarey?.summary?.length > 0 ?
+                        (metalSummarey?.summary?.map((e, i) => {
+                          const isLast = i === metalSummarey?.summary?.length - 1;
                           return (
                             <div
-                              className={`d-flex border-start border-end ${!isLast ? "border-bottom" : "" }`}
+                              className={`d-flex border-start border-end ${!isLast ? "border-bottom" : ""}`}
                               key={i}
                             >
                               <div className="metalTypeSum4 border-end d-flex justify-content-center pe-2">
-                                {e?.metalType}
+                                {e?.MetalType}
                               </div>
                               <div className="GwtSum4 border-end d-flex justify-content-center pe-2">
-                                {fixedValues(e?.grosswt, 3)}
+                                {fixedValues(e?.Gwt, 3)}
                               </div>
                               <div className="netWtSum4 border-end d-flex justify-content-center pe-2">
                                 {fixedValues(e?.NetWt, 3)}
                               </div>
                               <div className="tunchSum4 border-end d-flex justify-content-center pe-2">
-                                {NumberWithCommas(e?.tunch, 3)}
+                                {NumberWithCommas(e?.Tunch, 3)}
                               </div>
                               <div className="pureWtSum4 border-end d-flex justify-content-center pe-2">
-                                {fixedValues(e?.pureWt, 3)}
+                                {fixedValues(e?.PureWt, 3)}
                               </div>
                               <div className="goldPriceSum4 border-end d-flex justify-content-center pe-2">
                                 {NumberWithCommas(
@@ -1575,22 +1755,22 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 )}
                               </div>
                               <div className="goldAmtSum4 d-flex justify-content-center pe-2">
-                                {NumberWithCommas(e?.MetalAmount, 2)}
+                                {NumberWithCommas(e?.GoldAmount, 2)}
                               </div>
                             </div>
                           );
-                        })) 
+                        }))
                         : (
                           <div className={`d-flex border-start border-end`}>
-                              <div className="metalTypeSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="GwtSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="netWtSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="tunchSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="pureWtSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="goldPriceSum4 border-end d-flex justify-content-center pe-2"></div>
-                              <div className="goldAmtSum4 d-flex justify-content-center pe-2"></div>
-                            </div>
-                          )
+                            <div className="metalTypeSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="GwtSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="netWtSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="tunchSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="pureWtSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="goldPriceSum4 border-end d-flex justify-content-center pe-2"></div>
+                            <div className="goldAmtSum4 d-flex justify-content-center pe-2"></div>
+                          </div>
+                        )
                       }
                       <div className="d-flex border height34Sum4 bg_total_sum4 ">
                         <div className="metalTypeSum4 border-end d-flex align-items-center justify-content-center pe-2 fw-bold">
@@ -1637,7 +1817,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             const isLast = i === lastDiamondTable.length - 1;
                             return (
                               <div
-                                className={`d-flex border-start border-end ${!isLast ? "border-bottom" : "" }`}
+                                className={`d-flex border-start border-end ${!isLast ? "border-bottom" : ""}`}
                                 key={i}
                               >
                                 <div className="DiamondTypeSum4 d-flex justify-content-center align-items-center border-end">
@@ -1657,15 +1837,15 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 </div>
                               </div>
                             );
-                          })) 
+                          }))
                           : (
-                              <div className="d-flex border-bottom border-start border-end">
-                                <div className="DiamondTypeSum4 d-flex justify-content-center align-items-center border-end"></div>
-                                <div className="DiamondCtwSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
-                                <div className="DiamondPriceSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
-                                <div className="DiamondDiscountSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
-                                <div className="DiamondAmountSum4 d-flex justify-content-center pe-2 align-items-center"></div>
-                              </div>
+                            <div className="d-flex border-bottom border-start border-end">
+                              <div className="DiamondTypeSum4 d-flex justify-content-center align-items-center border-end"></div>
+                              <div className="DiamondCtwSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
+                              <div className="DiamondPriceSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
+                              <div className="DiamondDiscountSum4 d-flex justify-content-center pe-2 align-items-center border-end"></div>
+                              <div className="DiamondAmountSum4 d-flex justify-content-center pe-2 align-items-center"></div>
+                            </div>
                           )
                         }
                         <div className="d-flex height34Sum4 border bg_total_sum4">
@@ -1705,7 +1885,7 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             const isLast = i === lastColorStoneTable.length - 1;
                             return (
                               <div
-                                className={`d-flex border-start border-end ${!isLast ? "border-bottom" : "" }`}
+                                className={`d-flex border-start border-end ${!isLast ? "border-bottom" : ""}`}
                                 key={i}
                               >
                                 <div className="cstypeTextSum4 border-end d-flex justify-content-center">
@@ -1723,16 +1903,16 @@ const Summary4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               </div>
                             );
                           }))
-                          : 
-                            (
-                              <div className="d-flex border-start border-end" style={{ height: "15px" }}>
-                                <div className="cstypeTextSum4 border-end d-flex justify-content-center"></div>
-                                <div className="cstypeTextSum4 border-end d-flex justify-content-center pe-2"></div>
-                                <div className="cstypeTextSum4 border-end d-flex justify-content-center pe-2"></div>
-                                <div className="cstypeTextSum4 d-flex justify-content-center pe-2"></div>
-                              </div>
-                            )
-                          }
+                          :
+                          (
+                            <div className="d-flex border-start border-end" style={{ height: "15px" }}>
+                              <div className="cstypeTextSum4 border-end d-flex justify-content-center"></div>
+                              <div className="cstypeTextSum4 border-end d-flex justify-content-center pe-2"></div>
+                              <div className="cstypeTextSum4 border-end d-flex justify-content-center pe-2"></div>
+                              <div className="cstypeTextSum4 d-flex justify-content-center pe-2"></div>
+                            </div>
+                          )
+                        }
                         <div className="d-flex border bg_total_sum4 height34Sum4">
                           <div className="cstypeTextSum4 border-end d-flex justify-content-center fw-bold align-items-center"></div>
                           <div className="cstypeTextSum4 border-end d-flex justify-content-center pe-2 fw-bold align-items-center">

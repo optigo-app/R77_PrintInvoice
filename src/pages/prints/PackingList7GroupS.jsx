@@ -26,6 +26,7 @@ const PackingList7GroupS = ({
   ApiVer,
 }) => {
   const [result, setResult] = useState(null);
+  console.log("TCL: result", result)
   const [msg, setMsg] = useState("");
   const [loader, setLoader] = useState(true);
   const [diamondWise, setDiamondWise] = useState([]);
@@ -39,7 +40,7 @@ const PackingList7GroupS = ({
     pureWt: 0,
     MetalAmount: 0,
     fineWt: 0
-  });  
+  });
   const [summaryDetail, setSummaryDetail] = useState([]);
 
   const [MetShpWise, setMetShpWise] = useState([]);
@@ -507,10 +508,10 @@ const PackingList7GroupS = ({
 
     const getTotalMetalSummaryByType = (resultArray) => {
       const summaryMap = {};
-    
+
       resultArray?.forEach((item) => {
         const metalType = item?.MetalTypePurity?.trim() || "UNKNOWN";
-    
+
         if (!summaryMap[metalType]) {
           summaryMap[metalType] = {
             metalType,
@@ -525,28 +526,28 @@ const PackingList7GroupS = ({
             _tunchCount: 0,
           };
         }
-    
+
         item?.metal?.forEach((metalItem) => {
           summaryMap[metalType].MetalAmount += metalItem?.Amount || 0;
         });
-        
+
         summaryMap[metalType].pcs += item?.totals?.metal?.Pcs || 0;
         summaryMap[metalType].NetWt += item?.NetWt || 0;
         summaryMap[metalType].grosswt += item?.grosswt || 0;
         summaryMap[metalType].diaWt += item?.DiamondCTWwithLoss || 0;
         summaryMap[metalType].pureWt += item?.PureNetWt || 0;
-    
+
         if (item?.Tunch) {
           summaryMap[metalType].tunch += item?.Tunch;
           summaryMap[metalType]._tunchCount += 1;
         }
       });
-      
+
       const getKaratValue = (metalType = "") => {
         const match = metalType.match(/(\d+)[\s]*K/i);
         return match ? parseInt(match[1], 10) : null;
       };
-      
+
       const sortByMetalTypeDynamic = (a, b) => {
         const getTypeGroup = (type) => {
           if (type.toUpperCase().includes("GOLD")) return "GOLD";
@@ -555,43 +556,43 @@ const PackingList7GroupS = ({
           if (type.toUpperCase().includes("LITHIUM")) return "LITHIUM";
           return "OTHER";
         };
-      
+
         const groupA = getTypeGroup(a.metalType);
         const groupB = getTypeGroup(b.metalType);
-      
+
         // First sort by group
         if (groupA !== groupB) {
           return groupA.localeCompare(groupB);
         }
-      
+
         // If GOLD or other K-based metals, sort by karat value
         const karatA = getKaratValue(a.metalType);
         const karatB = getKaratValue(b.metalType);
-      
+
         if (karatA !== null && karatB !== null) {
           return karatA - karatB;
         }
-      
+
         // Fallback to alphabetical
         return a.metalType.localeCompare(b.metalType);
       };
-      
+
       // Convert to array & finalize tunch
       const result = Object.values(summaryMap).map((item) => {
         item.tunch = item._tunchCount > 0 ? item.tunch / item._tunchCount : 0;
         delete item._tunchCount;
         return item;
       });
-      
+
       return result.sort(sortByMetalTypeDynamic);
-      
+
     };
-    
+
     const findKeyValuePair = (array, firstName) => {
       const counts = {};
       array?.forEach(item => {
-          const key = `${item[firstName]}`;
-          counts[key] = (counts[key] || 0) + 1;
+        const key = `${item[firstName]}`;
+        counts[key] = (counts[key] || 0) + 1;
       });
       return counts;
     }
@@ -600,11 +601,11 @@ const PackingList7GroupS = ({
       let countArr = findKeyValuePair(data, "Categoryname");
 
       const countsArray = Object.entries(countArr)
-          .map(([key, value]) => ({ name: key, value }));
+        .map(([key, value]) => ({ name: key, value }));
 
       setSummaryDetail(countsArray);
     }
-    
+
 
     diarndotherarr5 = [...diaonlyrndarr6, diaObj];
     const sortedData = diarndotherarr5?.sort(customSort);
@@ -617,7 +618,7 @@ const PackingList7GroupS = ({
 
     setResult(datas);
   }
-  
+
   const handleCheckbox = () => {
     if (imgFlag) {
       setImgFlag(false);
@@ -678,21 +679,21 @@ const PackingList7GroupS = ({
 
   const formatMetalPurityCounts = (data) => {
     if (!Array.isArray(data)) return [];
-  
+
     const counts = {};
-  
+
     data.forEach(item => {
       const purity = item?.MetalTypePurity?.trim();
       if (purity) {
         counts[purity] = (counts[purity] || 0) + 1;
       }
     });
-  
+
     const formatted = Object.entries(counts).map(([purity, count]) => ({
-        MetalTypePurity: purity,
-        Count: count
+      MetalTypePurity: purity,
+      Count: count
     }));
-  
+
     return formatted;
   };
   const metalPcsQuote = formatMetalPurityCounts(result?.resultArray);
@@ -705,7 +706,7 @@ const PackingList7GroupS = ({
   // console.log("result", result);
   // console.log("metaltypeSum", metaltypeSum);
   // console.log("summaryDetail", summaryDetail);
-  
+
   return (
     <>
       {loader ? (
@@ -848,15 +849,16 @@ const PackingList7GroupS = ({
                       <div className="w-25 fw-bold">DATE</div>
                       <div className="w-50">{result?.header?.EntryDate}</div>
                     </div>
-                    {result?.header?.HSN_No &&(  
+                    {result?.header?.HSN_No && (
                       <div className="d-flex justify-content-start px-1">
                       <div className="w-25 fw-bold">
                         {" "}
-                         HSN{" "}
+                       HSN
                       </div>
                       <div className="w-50">{result?.header?.HSN_No}</div>
                     </div>
-                    )}  
+                    )}
+                    
                   </div>
                 </div>
                 {/* table */}
@@ -1071,8 +1073,8 @@ const PackingList7GroupS = ({
                                   {atob(evn)?.toLowerCase() === "quote"
                                     ? ""
                                     : e?.GroupJob !== ""
-                                    ? e?.GroupJob
-                                    : e?.SrJobno}
+                                      ? e?.GroupJob
+                                      : e?.SrJobno}
                                 </div>
                                 <div
                                   className=" centerdp10_pcl7 fsgdp10_pcl7"
@@ -1166,7 +1168,7 @@ const PackingList7GroupS = ({
                                       }}
                                     >
                                       {el?.ShapeName} {""}
-                                      { imgFlag3
+                                      {imgFlag3
                                         ? `${el?.QualityName} ${el?.Colorname}
                                           `
                                         : ""}
@@ -1194,11 +1196,13 @@ const PackingList7GroupS = ({
                                       style={{ width: "15.66%" }}
                                     >
                                       {/* {formatAmount(el?.Rate)} */}
-                                      {(
-                                        el?.Amount /
-                                        result?.header?.CurrencyExchRate /
-                                        el?.Wt
-                                      )?.toFixed(0)}
+                                      {el?.isRateOnPcs == 1 ?
+                                        `${el?.Rate}/pc`
+                                        : (
+                                          el?.Amount /
+                                          result?.header?.CurrencyExchRate /
+                                          el?.Wt
+                                        )?.toFixed(0)}
                                     </div>
                                     <div
                                       className="theadsubcol1_dp10_pcl7 fw-bold end_dp10_pcl7 pr_dp10_pcl7"
@@ -1206,7 +1210,7 @@ const PackingList7GroupS = ({
                                     >
                                       {formatAmount(
                                         el?.Amount /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0 // 👈 no decimal places
                                       )}
                                     </div>
@@ -1247,18 +1251,17 @@ const PackingList7GroupS = ({
                                       {el?.Rate?.toFixed(2)}
                                     </div>
                                     <div
-                                      className={`theadsubcol2_dp10_pcl7 centerdp10_pcl7 border-end h-100 pe-1 border-end-0 end_dp10_pcl7 pr_dp10_pcl7 ${
-                                        el?.IsPrimaryMetal === 1
-                                          ? "fw-bold"
-                                          : "fw-bold"
-                                      }`}
+                                      className={`theadsubcol2_dp10_pcl7 centerdp10_pcl7 border-end h-100 pe-1 border-end-0 end_dp10_pcl7 pr_dp10_pcl7 ${el?.IsPrimaryMetal === 1
+                                        ? "fw-bold"
+                                        : "fw-bold"
+                                        }`}
                                       style={{ width: "21%" }}
                                     >
                                       {formatAmount(
                                         el?.IsPrimaryMetal === 1
                                           ? (el?.Wt - e?.LossWt) * el?.Rate
                                           : el?.Amount /
-                                              result?.header?.CurrencyExchRate
+                                          result?.header?.CurrencyExchRate
                                       )}
                                     </div>
                                   </div>
@@ -1289,7 +1292,7 @@ const PackingList7GroupS = ({
                                   >
                                     {formatAmount(
                                       e?.LossAmt /
-                                        (e?.LossWt === 0 ? 1 : e?.LossWt)
+                                      (e?.LossWt === 0 ? 1 : e?.LossWt)
                                     )}
                                   </div>
                                   <div
@@ -1345,22 +1348,18 @@ const PackingList7GroupS = ({
                                       {el?.Wt?.toFixed(3)}
                                     </div>
                                     <div className="theadsubcol1_dp10_pcl7 end_dp10_pcl7">
-                                      {(
+                                      {`${(
                                         el?.Amount /
                                         result?.header?.CurrencyExchRate /
                                         (el?.isRateOnPcs === 0
-                                          ? el?.Wt === 0
-                                            ? 1
-                                            : el?.Wt
-                                          : el?.Pcs === 0
-                                          ? 1
-                                          : el?.Pcs)
-                                      )?.toFixed(0)}
+                                          ? (el?.Wt === 0 ? 1 : el?.Wt)
+                                          : (el?.Pcs === 0 ? 1 : el?.Pcs))
+                                      ).toFixed(0)}${el?.isRateOnPcs === 1 ? "/pc" : ""}`}
                                     </div>
                                     <div className="theadsubcol1_dp10_pcl7 end_dp10_pcl7 fw-bold pr_dp10_pcl7">
                                       {formatAmount(
                                         el?.Amount /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0
                                       )}
                                     </div>
@@ -1396,22 +1395,18 @@ const PackingList7GroupS = ({
                                       {el?.Wt?.toFixed(3)}
                                     </div>
                                     <div className="theadsubcol1_dp10_pcl7 end_dp10_pcl7">
-                                      {(
+                                      {`${(
                                         el?.Amount /
                                         result?.header?.CurrencyExchRate /
                                         (el?.isRateOnPcs === 0
-                                          ? el?.Wt === 0
-                                            ? 1
-                                            : el?.Wt
-                                          : el?.Pcs === 0
-                                          ? 1
-                                          : el?.Pcs)
-                                      )?.toFixed(0)}
+                                          ? (el?.Wt === 0 ? 1 : el?.Wt)
+                                          : (el?.Pcs === 0 ? 1 : el?.Pcs))
+                                      ).toFixed(0)}${el?.isRateOnPcs === 1 ? "/pc" : ""}`}
                                     </div>
                                     <div className="theadsubcol1_dp10_pcl7 end_dp10_pcl7 fw-bold pr_dp10_pcl7">
                                       {formatAmount(
                                         el?.Amount /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0
                                       )}
                                     </div>
@@ -1441,7 +1436,7 @@ const PackingList7GroupS = ({
                                     >
                                       {formatAmount(
                                         e?.MakingAmount /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0
                                       )}
                                     </div>
@@ -1470,7 +1465,7 @@ const PackingList7GroupS = ({
                                     >
                                       {formatAmount(
                                         e?.totals?.finding?.SettingAmount /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0
                                       )}
                                     </div>
@@ -1504,21 +1499,21 @@ const PackingList7GroupS = ({
                                 {e?.totals?.diamonds?.SettingAmount +
                                   e?.totals?.colorstone?.SettingAmount !==
                                   0 && (
-                                  <div className="d-flex align-items-center w-100 fsgdp10_pcl7">
-                                    <div className="w-50 text-start fsgdp10_pcl7">
-                                      Setting
-                                    </div>
-                                    <div className="w-50 pr_dp10_pcl7 text-end fsgdp10_pcl7">
-                                      {formatAmount(
-                                        (e?.totals?.diamonds?.SettingAmount +
-                                          e?.totals?.colorstone
-                                            ?.SettingAmount) /
+                                    <div className="d-flex align-items-center w-100 fsgdp10_pcl7">
+                                      <div className="w-50 text-start fsgdp10_pcl7">
+                                        Setting
+                                      </div>
+                                      <div className="w-50 pr_dp10_pcl7 text-end fsgdp10_pcl7">
+                                        {formatAmount(
+                                          (e?.totals?.diamonds?.SettingAmount +
+                                            e?.totals?.colorstone
+                                              ?.SettingAmount) /
                                           result?.header?.CurrencyExchRate,
-                                        0
-                                      )}
+                                          0
+                                        )}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
                                 {e?.TotalDiamondHandling !== 0 && (
                                   <div className="d-flex align-items-center w-100 fsgdp10_pcl7">
                                     <div className="w-50  text-start fsgdp10_pcl7">
@@ -1527,7 +1522,7 @@ const PackingList7GroupS = ({
                                     <div className="w-50 pr_dp10_pcl7 text-end fsgdp10_pcl7">
                                       {formatAmount(
                                         e?.TotalDiamondHandling /
-                                          result?.header?.CurrencyExchRate,
+                                        result?.header?.CurrencyExchRate,
                                         0
                                       )}
                                     </div>
@@ -1547,8 +1542,8 @@ const PackingList7GroupS = ({
                                           {e?.IsHSCOE === 3 &&
                                             formatAmount(
                                               e?.Amount /
-                                                result?.header
-                                                  ?.CurrencyExchRate,
+                                              result?.header
+                                                ?.CurrencyExchRate,
                                               0
                                             )}
                                         </div>
@@ -1613,7 +1608,7 @@ const PackingList7GroupS = ({
                                 {e?.totals?.diamonds?.Amount !== 0 &&
                                   formatAmount(
                                     e?.totals?.diamonds?.Amount /
-                                      result?.header?.CurrencyExchRate,
+                                    result?.header?.CurrencyExchRate,
                                     0
                                   )}
                               </div>
@@ -1637,7 +1632,7 @@ const PackingList7GroupS = ({
                               >
                                 {formatAmount(
                                   e?.totals?.metal?.Amount /
-                                    result?.header?.CurrencyExchRate
+                                  result?.header?.CurrencyExchRate
                                 )}
                               </div>
                             </div>
@@ -1652,7 +1647,7 @@ const PackingList7GroupS = ({
                                   e?.totals?.misc?.onlyIsHSCODE0_Pcs !==
                                   0 &&
                                   e?.totals?.colorstone?.Pcs +
-                                    e?.totals?.misc?.onlyIsHSCODE0_Pcs}
+                                  e?.totals?.misc?.onlyIsHSCODE0_Pcs}
                               </div>
                               <div className="theadsubcol1_dp10_pcl7 end_dp10_pcl7">
                                 {e?.totals?.colorstone?.Wt +
@@ -1673,7 +1668,7 @@ const PackingList7GroupS = ({
                                   formatAmount(
                                     (e?.totals?.colorstone?.Amount +
                                       e?.totals?.misc?.onlyIsHSCODE0_Amount) /
-                                      result?.header?.CurrencyExchRate,
+                                    result?.header?.CurrencyExchRate,
                                     0
                                   )}
                               </div>
@@ -1694,7 +1689,7 @@ const PackingList7GroupS = ({
                                     e?.TotalCsSetcost +
                                     e?.TotalDiaSetcost +
                                     e?.totals?.finding?.SettingAmount) /
-                                    result?.header?.CurrencyExchRate,
+                                  result?.header?.CurrencyExchRate,
                                   0
                                 )}
                               </div>
@@ -1753,7 +1748,7 @@ const PackingList7GroupS = ({
                         >
                           {formatAmount(
                             result?.mainTotal?.diamonds?.Amount /
-                              result?.header?.CurrencyExchRate,
+                            result?.header?.CurrencyExchRate,
                             0
                           )}
                         </div>
@@ -1772,7 +1767,7 @@ const PackingList7GroupS = ({
                         >
                           {formatAmount(
                             result?.mainTotal?.metal?.Amount /
-                              result?.header?.CurrencyExchRate
+                            result?.header?.CurrencyExchRate
                           )}
                         </div>
                       </div>
@@ -1796,7 +1791,7 @@ const PackingList7GroupS = ({
                           {formatAmount(
                             (result?.mainTotal?.colorstone?.Amount +
                               result?.mainTotal?.misc?.onlyIsHSCODE0_Amount) /
-                              result?.header?.CurrencyExchRate,
+                            result?.header?.CurrencyExchRate,
                             0
                           )}
                         </div>
@@ -1810,14 +1805,14 @@ const PackingList7GroupS = ({
                             result?.mainTotal?.total_TotalCsSetcost +
                             result?.mainTotal?.finding?.SettingAmount +
                             result?.mainTotal?.total_other_charges) /
-                            result?.header?.CurrencyExchRate,
+                          result?.header?.CurrencyExchRate,
                           0
                         )}
                       </div>
                       <div className="col8dp10_pcl7 end_dp10_pcl7  d-flex align-items-center pr_dp10_pcl7 border-start border-black">
                         {formatAmount(
                           result?.mainTotal?.total_unitcost /
-                            result?.header?.CurrencyExchRate
+                          result?.header?.CurrencyExchRate
                         )}
                       </div>
                     </div>
@@ -1838,242 +1833,241 @@ const PackingList7GroupS = ({
                             {result?.resultArray?.length}
                           </span>
                         </div>
-                        <div style={{display: "flex", gap: "5px"}}>
-                        <div className="d-flex flex-column sumdp10_pcl7">
-                          <div className="fw-bold bg_dp10_pcl7 w-100 centerdp10_pcl7  ball_dp10_pcl7">
-                            SUMMARY
-                          </div>
-                          <div className="d-flex w-100 fsgdp10_pcl7">
-                            <div className="w-50 bright_dp10_pcl7  bl_dp10_pcl7">
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">GOLD IN 24KT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {(
-                                    result?.mainTotal?.total_purenetwt -
-                                    notGoldMetalWtTotal
-                                  )?.toFixed(3)}{" "}
-                                  gm
-                                </div>
-                              </div>
-                              {MetShpWise?.map((e, i) => {
-                                return (
-                                  <div
-                                    className="d-flex justify-content-between px-1"
-                                    key={i}
-                                  >
-                                    <div className="w-50 fw-bold">
-                                      {e?.ShapeName}
-                                    </div>
-                                    <div className="w-50 end_dp10_pcl7 pe-1">
-                                      {e?.metalfinewt?.toFixed(3)} gm
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">GROSS WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.grosswt?.toFixed(3)} gm
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">NET WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.metal?.Wt?.toFixed(3)} gm
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">LOSS WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.lossWt?.toFixed(3)} gm
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">DIAMOND WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.diamonds?.Pcs} /{" "}
-                                  {result?.mainTotal?.diamonds?.Wt?.toFixed(3)}{" "}
-                                  cts
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">STONE WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.colorstone?.Pcs} /{" "}
-                                  {result?.mainTotal?.colorstone?.Wt?.toFixed(
-                                    3
-                                  )}{" "}
-                                  cts
-                                </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">MISC WT</div>
-                                <div className="w-50 end_dp10_pcl7 pe-1">
-                                  {result?.mainTotal?.misc?.onlyIsHSCODE0_Pcs} /{" "}
-                                  {result?.mainTotal?.misc?.onlyIsHSCODE0_Wt?.toFixed(
-                                    3
-                                  )}{" "}
-                                  gm
-                                </div>
-                              </div>
+                        <div style={{ display: "flex", gap: "5px" }}>
+                          <div className="d-flex flex-column sumdp10_pcl7">
+                            <div className="fw-bold bg_dp10_pcl7 w-100 centerdp10_pcl7  ball_dp10_pcl7">
+                              SUMMARY
                             </div>
-                            <div className="w-50 bright_dp10_pcl7 ">
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">GOLD</div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    (result?.mainTotal?.metal?.Amount -
-                                      notGoldMetalTotal) /
-                                      result?.header?.CurrencyExchRate
-                                  )}
+                            <div className="d-flex w-100 fsgdp10_pcl7">
+                              <div className="w-50 bright_dp10_pcl7  bl_dp10_pcl7">
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">GOLD IN 24KT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {(
+                                      result?.mainTotal?.total_purenetwt -
+                                      notGoldMetalWtTotal
+                                    )?.toFixed(3)}{" "}
+                                    gm
+                                  </div>
+                                </div>
+                                {MetShpWise?.map((e, i) => {
+                                  return (
+                                    <div
+                                      className="d-flex justify-content-between px-1"
+                                      key={i}
+                                    >
+                                      <div className="w-50 fw-bold">
+                                        {e?.ShapeName}
+                                      </div>
+                                      <div className="w-50 end_dp10_pcl7 pe-1">
+                                        {e?.metalfinewt?.toFixed(3)} gm
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">GROSS WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.grosswt?.toFixed(3)} gm
+                                  </div>
+                                </div>
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">NET WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.metal?.Wt?.toFixed(3)} gm
+                                  </div>
+                                </div>
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">LOSS WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.lossWt?.toFixed(3)} gm
+                                  </div>
+                                </div>
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">DIAMOND WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.diamonds?.Pcs} /{" "}
+                                    {result?.mainTotal?.diamonds?.Wt?.toFixed(3)}{" "}
+                                    cts
+                                  </div>
+                                </div>
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">STONE WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.colorstone?.Pcs} /{" "}
+                                    {result?.mainTotal?.colorstone?.Wt?.toFixed(
+                                      3
+                                    )}{" "}
+                                    cts
+                                  </div>
+                                </div>
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">MISC WT</div>
+                                  <div className="w-50 end_dp10_pcl7 pe-1">
+                                    {result?.mainTotal?.misc?.onlyIsHSCODE0_Pcs} /{" "}
+                                    {result?.mainTotal?.misc?.onlyIsHSCODE0_Wt?.toFixed(
+                                      3
+                                    )}{" "}
+                                    gm
+                                  </div>
                                 </div>
                               </div>
-                              {MetShpWise?.map((e, i) => {
-                                return (
-                                  <div
-                                    className="d-flex justify-content-between px-1"
-                                    key={i}
-                                  >
-                                    <div className="w-50 fw-bold">
-                                      {e?.ShapeName}
-                                    </div>
-                                    <div className="w-50 end_dp10_pcl7">
-                                      {formatAmount(
-                                        e?.Amount /
+                              <div className="w-50 bright_dp10_pcl7 ">
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">GOLD</div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      (result?.mainTotal?.metal?.Amount -
+                                        notGoldMetalTotal) /
+                                      result?.header?.CurrencyExchRate
+                                    )}
+                                  </div>
+                                </div>
+                                {MetShpWise?.map((e, i) => {
+                                  return (
+                                    <div
+                                      className="d-flex justify-content-between px-1"
+                                      key={i}
+                                    >
+                                      <div className="w-50 fw-bold">
+                                        {e?.ShapeName}
+                                      </div>
+                                      <div className="w-50 end_dp10_pcl7">
+                                        {formatAmount(
+                                          e?.Amount /
                                           result?.header?.CurrencyExchRate
-                                      )}
+                                        )}
+                                      </div>
                                     </div>
+                                  );
+                                })}
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">DIAMOND</div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      result?.mainTotal?.diamonds?.Amount /
+                                      result?.header?.CurrencyExchRate,
+                                      0
+                                    )}
                                   </div>
-                                );
-                              })}
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">DIAMOND</div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    result?.mainTotal?.diamonds?.Amount /
-                                      result?.header?.CurrencyExchRate,
-                                    0
-                                  )}
                                 </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">CST</div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    result?.mainTotal?.colorstone?.Amount /
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">CST</div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      result?.mainTotal?.colorstone?.Amount /
                                       result?.header?.CurrencyExchRate,
-                                    0
-                                  )}
+                                      0
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">MISC</div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    result?.mainTotal?.misc
-                                      ?.onlyIsHSCODE0_Amount /
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">MISC</div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      result?.mainTotal?.misc
+                                        ?.onlyIsHSCODE0_Amount /
                                       result?.header?.CurrencyExchRate,
-                                    0
-                                  )}
+                                      0
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">MAKING </div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    (result?.mainTotal?.misc?.isHSCODE123_amt +
-                                      result?.mainTotal?.finding
-                                        ?.SettingAmount +
-                                      result?.mainTotal?.total_labour
-                                        ?.labour_amount +
-                                      result?.mainTotal?.total_TotalDiaSetcost +
-                                      result?.mainTotal?.total_TotalCsSetcost) /
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">MAKING </div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      (result?.mainTotal?.misc?.isHSCODE123_amt +
+                                        result?.mainTotal?.finding
+                                          ?.SettingAmount +
+                                        result?.mainTotal?.total_labour
+                                          ?.labour_amount +
+                                        result?.mainTotal?.total_TotalDiaSetcost +
+                                        result?.mainTotal?.total_TotalCsSetcost) /
                                       result?.header?.CurrencyExchRate,
-                                    0
-                                  )}
+                                      0
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">OTHER </div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    result?.mainTotal?.total_other_charges +
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">OTHER </div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      result?.mainTotal?.total_other_charges +
                                       result?.mainTotal?.total_diamondHandling,
-                                    0
-                                  )}
+                                      0
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="d-flex justify-content-between px-1">
-                                <div className="w-50 fw-bold">
-                                  {result?.header?.AddLess > 0 ? "ADD" : "LESS"}
-                                </div>
-                                <div className="w-50 end_dp10_pcl7">
-                                  {formatAmount(
-                                    result?.header?.AddLess /
+                                <div className="d-flex justify-content-between px-1">
+                                  <div className="w-50 fw-bold">
+                                    {result?.header?.AddLess > 0 ? "ADD" : "LESS"}
+                                  </div>
+                                  <div className="w-50 end_dp10_pcl7">
+                                    {formatAmount(
+                                      result?.header?.AddLess /
                                       result?.header?.CurrencyExchRate
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="bg_dp10_pcl7 h_bd10_pcl7 ball_dp10_pcl7 d-flex fsgdp10_pcl7 ">
-                            <div className="w-50 h-100"></div>
-                            <div className="w-50 h-100 d-flex align-items-center bl_dp10_pcl7">
-                              <div className="fw-bold w-50 px-1">TOTAL</div>
-                              <div className="w-50 end_dp10_pcl7 px-1">
-                                {formatAmount(
-                                  result?.mainTotal?.total_amount /
+                            <div className="bg_dp10_pcl7 h_bd10_pcl7 ball_dp10_pcl7 d-flex fsgdp10_pcl7 ">
+                              <div className="w-50 h-100"></div>
+                              <div className="w-50 h-100 d-flex align-items-center bl_dp10_pcl7">
+                                <div className="fw-bold w-50 px-1">TOTAL</div>
+                                <div className="w-50 end_dp10_pcl7 px-1">
+                                  {formatAmount(
+                                    result?.mainTotal?.total_amount /
                                     result?.header?.CurrencyExchRate +
                                     result?.allTaxesTotal +
                                     result?.header?.FreightCharges /
-                                      result?.header?.CurrencyExchRate +
+                                    result?.header?.CurrencyExchRate +
                                     result?.header?.AddLess /
-                                      result?.header?.CurrencyExchRate
-                                )}
+                                    result?.header?.CurrencyExchRate
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="dia_sum_dp10_pcl7 d-flex flex-column  fsgdp10_pcl7 border-start border-end">
-                          <div className="h_bd10_pcl7 centerdp10_pcl7 bg_dp10_pcl7 fw-bold ball_dp10_pcl7">
-                            Diamond Detail
+                          <div className="dia_sum_dp10_pcl7 d-flex flex-column  fsgdp10_pcl7 border-start border-end">
+                            <div className="h_bd10_pcl7 centerdp10_pcl7 bg_dp10_pcl7 fw-bold ball_dp10_pcl7">
+                              Diamond Detail
+                            </div>
+                            <div className="d-flex flex-column justify-content-start h-100">
+                              {diamondDetails?.map((e, i) => {
+                                return (
+                                  e?.Wt !== undefined && (
+                                    <React.Fragment key={i}>
+                                      <div
+                                        className={`d-flex justify-content-between px-1 pb-1  align-items-center ${i === 0 && "pt-1"
+                                          }`}
+                                      >
+                                        <p className="fw-bold">
+                                          {e?.ShapeName === "OTHER" ? (
+                                            e?.ShapeName
+                                          ) : (
+                                            <>
+                                              {e?.ShapeName} {" "}
+                                              {imgFlag3 ? `${e?.QualityName} ${e?.Colorname}` : ""}
+                                            </>
+                                          )}
+                                        </p>
+                                        <p>
+                                          {NumberWithCommas(e?.Pcs, 0)}/
+                                          {NumberWithCommas(e?.Wt, 3)} Cts
+                                        </p>
+                                      </div>
+                                    </React.Fragment>
+                                  )
+                                );
+                              })}
+                            </div>
+                            <div className="d-flex justify-content-between px-1 bg_dp10_pcl7 h_bd10_pcl7  ball_dp10_pcl7">
+                              <div className="fw-bold w-50 h14_dp10_pcl7"></div>
+                              <div className="w-50"></div>
+                            </div>
                           </div>
-                          <div className="d-flex flex-column justify-content-start h-100">
-                            {diamondDetails?.map((e, i) => {
-                              return (
-                                e?.Wt !== undefined && (
-                                  <React.Fragment key={i}>
-                                    <div
-                                      className={`d-flex justify-content-between px-1 pb-1  align-items-center ${
-                                        i === 0 && "pt-1"
-                                      }`}
-                                    >
-                                      <p className="fw-bold">
-                                        {e?.ShapeName === "OTHER" ? (
-                                          e?.ShapeName
-                                        ) : (
-                                          <>
-                                            {e?.ShapeName} {" "}
-                                            {imgFlag3 ? `${e?.QualityName} ${e?.Colorname}` : ""}
-                                          </>
-                                        )}
-                                      </p>
-                                      <p>
-                                        {NumberWithCommas(e?.Pcs, 0)}/
-                                        {NumberWithCommas(e?.Wt, 3)} Cts
-                                      </p>
-                                    </div>
-                                  </React.Fragment>
-                                )
-                              );
-                            })}
-                          </div>
-                          <div className="d-flex justify-content-between px-1 bg_dp10_pcl7 h_bd10_pcl7  ball_dp10_pcl7">
-                            <div className="fw-bold w-50 h14_dp10_pcl7"></div>
-                            <div className="w-50"></div>
-                          </div>
-                        </div>
-                        <div className="oth_sum_dp10_pcl7 fsgdp10_pcl7">
+                          <div className="oth_sum_dp10_pcl7 fsgdp10_pcl7">
                             <div className="h_bd10 centerdp10_pcl7 bg_dp10_pcl7 fw-bold ball_dp10_pcl7">
                               OTHER DETAILS
                             </div>
@@ -2101,24 +2095,24 @@ const PackingList7GroupS = ({
                                 })}
                               </div>
                             </div>
-                        </div>
-                        <div className="remark_sum_dp10_pcl7 fsgdp10_pcl7">
-                              {result?.header?.PrintRemark === "" ? (
-                                ""
-                              ) : (
-                                  <>
-                                  <div className="h_bd10 centerdp10_pcl7 bg_dp10_pcl7 fw-bold ball_dp10_pcl7">
-                                    Remark
-                                  </div>
-                                  <div
-                                    className="ball_dp10_pcl7 border-top-0 p-1"
-                                    dangerouslySetInnerHTML={{
-                                      __html: result?.header?.PrintRemark,
-                                    }}
-                                  ></div>
-                                  </>
-                              )}
-                            </div>
+                          </div>
+                          <div className="remark_sum_dp10_pcl7 fsgdp10_pcl7">
+                            {result?.header?.PrintRemark === "" ? (
+                              ""
+                            ) : (
+                              <>
+                                <div className="h_bd10 centerdp10_pcl7 bg_dp10_pcl7 fw-bold ball_dp10_pcl7">
+                                  Remark
+                                </div>
+                                <div
+                                  className="ball_dp10_pcl7 border-top-0 p-1"
+                                  dangerouslySetInnerHTML={{
+                                    __html: result?.header?.PrintRemark,
+                                  }}
+                                ></div>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -2135,7 +2129,7 @@ const PackingList7GroupS = ({
                               <div className="w-50 end_dp10_pcl7 pr_dp10_pcl7">
                                 {formatAmount(
                                   result?.mainTotal?.total_discount_amount /
-                                    result?.header?.CurrencyExchRate
+                                  result?.header?.CurrencyExchRate
                                 )}
                               </div>
                             </div>
@@ -2147,7 +2141,7 @@ const PackingList7GroupS = ({
                             <div className="w-50 end_dp10_pcl7 pr_dp10_pcl7">
                               {formatAmount(
                                 result?.mainTotal?.total_amount /
-                                  result?.header?.CurrencyExchRate
+                                result?.header?.CurrencyExchRate
                               )}
                             </div>
                           </div>
@@ -2176,7 +2170,7 @@ const PackingList7GroupS = ({
                               <div className="w-50 end_dp10_pcl7 pr_dp10_pcl7">
                                 {formatAmount(
                                   result?.header?.AddLess /
-                                    result?.header?.CurrencyExchRate
+                                  result?.header?.CurrencyExchRate
                                 )}
                               </div>
                             </div>
@@ -2188,7 +2182,7 @@ const PackingList7GroupS = ({
                             <div className="w-50 end_dp10_pcl7 pr_dp10_pcl7">
                               {formatAmount(
                                 result?.header?.FreightCharges /
-                                  result?.header?.CurrencyExchRate
+                                result?.header?.CurrencyExchRate
                               )}
                             </div>
                           </div>
@@ -2201,12 +2195,12 @@ const PackingList7GroupS = ({
                           <div className="w-50 end_dp10_pcl7 pr_dp10_pcl7">
                             {formatAmount(
                               result?.mainTotal?.total_amount /
-                                result?.header?.CurrencyExchRate +
-                                result?.allTaxesTotal +
-                                result?.header?.FreightCharges /
-                                  result?.header?.CurrencyExchRate +
-                                result?.header?.AddLess /
-                                  result?.header?.CurrencyExchRate
+                              result?.header?.CurrencyExchRate +
+                              result?.allTaxesTotal +
+                              result?.header?.FreightCharges /
+                              result?.header?.CurrencyExchRate +
+                              result?.header?.AddLess /
+                              result?.header?.CurrencyExchRate
                             )}
                           </div>
                         </div>
@@ -2214,7 +2208,7 @@ const PackingList7GroupS = ({
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="d-flex mt-1 brall w-100 p-1">
                   <div className={` brall1 widh50 me-1 mXheit `}>
                     <div className="bg_total_sum4 d-flex py-1">
@@ -2270,30 +2264,30 @@ const PackingList7GroupS = ({
                         {atob(evn).toLowerCase() === "quote" ? totalMetalPcsQuote : totalPCS}
                       </div>
                       <div className="GWt_sum4 fw-bold text-center">
-                        
+
                       </div>
                       <div className="net_wt_sum4 fw-bold text-center">
-                        
+
                       </div>
                       <div className="fine_wt_sum4 fw-bold text-center">
-                        {fixedValues(totalPueWt,3)}
+                        {fixedValues(totalPueWt, 3)}
                       </div>
                       <div className="gold_amount_sum4 text-end pe-1 fw-bold">
-                        {NumberWithCommas(totalMetalAMT,2)}
+                        {NumberWithCommas(totalMetalAMT, 2)}
                       </div>
                     </div>
                   </div>
-                  <div className={`brall1 mXheit ${summaryDetail?.length <= 4 ? "widh15" : "MNwidh50" }`}>
+                  <div className={`brall1 mXheit ${summaryDetail?.length <= 4 ? "widh15" : "MNwidh50"}`}>
                     <div className="bg_total_sum4 py-1 ps-1 fw-bold mb-1">
                       Summary Detail
                     </div>
-                    <div className={`d-flex flex-wrap ${summaryDetail?.length <= 4 ? "flex-column" : "" }`}>
+                    <div className={`d-flex flex-wrap ${summaryDetail?.length <= 4 ? "flex-column" : ""}`}>
                       {summaryDetail.length > 0 && summaryDetail.map((elem, ind) => {
-                        return <div className={`d-flex ps-2 pb-2 ${summaryDetail?.length <= 4 ? "" : "widh33" }`} key={ind}>
-                          <div className={`${summaryDetail?.length <= 4 ? "" : "widh80" }`}>
+                        return <div className={`d-flex ps-2 pb-2 ${summaryDetail?.length <= 4 ? "" : "widh33"}`} key={ind}>
+                          <div className={`${summaryDetail?.length <= 4 ? "" : "widh80"}`}>
                             {elem.name}
                           </div>
-                          <div className={`${summaryDetail?.length <= 4 ? "" : "widh20" }`}>
+                          <div className={`${summaryDetail?.length <= 4 ? "" : "widh20"}`}>
                             : <b>{NumberWithCommas(elem.value)}</b>
                           </div>
                         </div>

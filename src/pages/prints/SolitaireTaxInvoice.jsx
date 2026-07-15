@@ -181,7 +181,8 @@ const SolitaireTaxInvoice = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                         <p>{headerData?.HSN_No_Label}: <span className="fw-bold">{headerData?.HSN_No}</span></p>
                         <p>PAN#: <span className="fw-bold">{headerData?.CustPanno}</span></p>
                         {headerData?.Cust_VAT_GST_No !== "" && <p> VAT <span className="fw-bold">{headerData?.Cust_VAT_GST_No}</span><span className="fw-bold">{headerData?.CustGstNo} | </span>{headerData?.Cust_CST_STATE} <span className="fw-bold">{headerData?.Cust_CST_STATE_No}</span></p>}
-                        <p>Ref.Name: <span className="fw-bold">{headerData?.SalPerName}</span></p>
+                        {/* <p>Ref.Name: <span className="fw-bold">{headerData?.SalPerName}</span></p> */}
+                        <p>Ref.Name: <span className="fw-bold">{headerData?.SalesRepName}</span></p>
                     </div>
                 </div>
                 {/* table header */}

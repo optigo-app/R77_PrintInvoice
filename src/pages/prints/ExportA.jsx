@@ -5,6 +5,7 @@ import { NumberWithCommas, apiCall, fixedValues, handlePrint, isObjectEmpty, num
 import Loader from '../../components/Loader';
 import { OrganizeDataPrint } from '../../GlobalFunctions/OrganizeDataPrint';
 import lodash, { cloneDeep } from 'lodash';
+
 import footer1 from "../../assets/css/footers/footer1.module.css";
 
 

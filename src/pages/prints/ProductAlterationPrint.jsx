@@ -213,6 +213,8 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       obj.OtherCharges = obj?.OtherCharges + obj?.TotalDiamondHandling;
       let findingTotal = 0;
       let diamonds = [];
+      let solitaires=[];
+      let gemstones =[];
       let metals = [];
       let colorStones = [];
       let mics = [];
@@ -268,6 +270,9 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             metals.push(ele);
           }
           if (ele?.MasterManagement_DiamondStoneTypeid === 2) {
+            if(ele?.IsSolGem ==1){
+              gemstones.push(ele);
+            }
             colorStones.push(ele);
             totals.stoneWt += ele?.Wt;
             totals.stonePcs += ele?.Pcs;
@@ -280,6 +285,10 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             colorStoness.Amount += ele?.Amount;
           }
           if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
+
+            if(ele?.IsSolGem ==1){
+              solitaires.push(ele);
+            }
             diamondTotals.Pcs += ele?.Pcs;
             diamondTotals.Wt += ele?.Wt;
             diamondTotals.Amount += ele?.Amount;
@@ -420,6 +429,8 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       obj.otherAmountDetails = otherAmountDetails;
       obj.mics = mics;
       obj.diamonds = diamonds;
+      obj.solitaires=solitaires;
+      obj.gemstones=gemstones;
       obj.totalSetttingAmount = totalSetttingAmount;
       obj.metals = metals;
       obj.finding = finding;
@@ -992,6 +1003,31 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
       e.diamonds = finalArr3;
 
+      // solitaire 
+      let sol = [];
+
+      e?.solitaires?.forEach((el) => {
+        let eem = cloneDeep(el);
+        let findrec = sol?.findIndex(
+          (a) =>
+            a?.Rate === eem?.Rate &&
+            a?.ShapeName === eem?.ShapeName &&
+            a?.SizeName === eem?.SizeName &&
+            a?.QualityName === eem?.QualityName &&
+            a?.Colorname === eem?.Colorname
+        );
+        if (findrec === -1) {
+          sol.push(eem);
+        } else {
+          sol[findrec].Wt += eem?.Wt;
+          sol[findrec].Pcs += eem?.Pcs;
+          sol[findrec].Amount += eem?.Amount;
+          sol[findrec].SizeName = eem?.SizeName;
+        }
+      });
+
+      e.solitaires = sol;
+
       let clr = [];
 
       e?.colorStones?.forEach((el) => {
@@ -1194,35 +1230,38 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           
                           {/* SOLITAIRE */}
                           {/* For Now Static 13/10/2025 */}
-                          <div className={``}>
-                              <div style={{ marginBottom: "15px" }}>
-                                  <div className="detlsContnt spBrdrAll spBrdrBtomNone retMatFont_18 spBold">Solitaire</div>
-                                  <div className="detlsContnt spBrdrAll retMatFont_14">
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SR#</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">TYPE</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SHAPE</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">QUALITY</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">COLOR</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SIZE</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">PCS.</div>
-                                      <div className="sFntStyl dimndNClrstn spBgColr">CTW</div>
-                                  </div>
-                                  {/* {e?.diamonds?.map((el, id) => {
-                                  return (
-                                      <div key={id} className="detlsContnt spBrdrRigt spBrdrBtom spBrdrLft retMatFont_13">
-                                          <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px" }}>{id + 1}</div>
-                                          <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px" }}>{el?.MaterialTypeName}</div>
-                                          <div className="spacCell dimndNClrstn spBrdrRigt d-flex justify-content-start align-items-center">{el?.ShapeName}</div>
-                                          <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.QualityName}</div>
-                                          <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.Colorname}</div>
-                                          <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.SizeName}</div>
-                                          <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-end align-items-center">{el?.Pcs}</div>
-                                          <div className="dimndNClrstn spacCell d-flex justify-content-end align-items-center">{fixedValues(el?.Wt, 3)}</div>
-                                      </div>
-                                      )
-                                  })} */}
-                              </div>
-                          </div>
+                          {e?.solitaires?.length > 0 && (
+                               <div className={``}>
+                               <div style={{ marginBottom: "15px" }}>
+                                   <div className="detlsContnt spBrdrAll spBrdrBtomNone retMatFont_18 spBold">Solitaire</div>
+                                   <div className="detlsContnt spBrdrAll retMatFont_14">
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SR#</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">TYPE</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SHAPE</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">QUALITY</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">COLOR</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SIZE</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">PCS.</div>
+                                       <div className="sFntStyl dimndNClrstn spBgColr">CTW</div>
+                                   </div>
+                                   {e?.solitaires?.map((el, id) => {
+                                   return (
+                                       <div key={id} className="detlsContnt spBrdrRigt spBrdrBtom spBrdrLft retMatFont_13">
+                                           <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px" }}>{id + 1}</div>
+                                           <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px" }}>{el?.MaterialTypeName}</div>
+                                           <div className="spacCell dimndNClrstn spBrdrRigt d-flex justify-content-start align-items-center">{el?.ShapeName}</div>
+                                           <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.QualityName}</div>
+                                           <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.Colorname}</div>
+                                           <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.SizeName}</div>
+                                           <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-end align-items-center">{el?.Pcs}</div>
+                                           <div className="dimndNClrstn spacCell d-flex justify-content-end align-items-center">{fixedValues(el?.Wt, 3)}</div>
+                                       </div>
+                                       )
+                                   })}
+                               </div>
+                           </div>
+                          )}
+                       
 
                           {/* COLORSTONES */}
                           <div className={``}>
@@ -1254,6 +1293,39 @@ const ProductPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                   })}
                               </div>
                           </div>
+
+                           {/* GEMSTONES */}
+                           {e?.gemstones?.length > 0 &&(
+                            <div className={``}>
+                            <div style={{ marginBottom: "15px" }}>
+                                <div className="detlsContnt spBrdrAll spBrdrBtomNone retMatFont_18 spBold">Gempstone</div>
+                                <div className="detlsContnt spBrdrAll retMatFont_14">
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt" style={{ width: "6.50%" }}>SR#</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt" style={{ width: "18.50%" }}>TYPE</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SHAPE</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">QUALITY</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">COLOR</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">SIZE</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr spBrdrRigt">PCS.</div>
+                                    <div className="sFntStyl dimndNClrstn spBgColr">CTW</div>
+                                </div>
+                                {e?.gemstones?.map((el, id) => {
+                                return (
+                                    <div key={id} className="detlsContnt d-flex spBrdrRigt spBrdrBtom spBrdrLft retMatFont_13">
+                                        <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px", width: "6.50%" }}>{id + 1}</div>
+                                        <div className="dimndNClrstn spBrdrRigt d-flex justify-content-center" style={{ paddingTop: "6px", width: "18.50%" }}>{el?.MaterialTypeName}</div>
+                                        <div className="spacCell dimndNClrstn spBrdrRigt d-flex justify-content-start align-items-center">{el?.ShapeName}</div>
+                                        <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.QualityName}</div>
+                                        <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.Colorname}</div>
+                                        <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.SizeName}</div>
+                                        <div className="dimndNClrstn spBrdrRigt spacCell d-flex justify-content-end align-items-center">{el?.Pcs}</div>
+                                        <div className="dimndNClrstn spacCell d-flex justify-content-end align-items-center">{fixedValues(el?.Wt, 3)}</div>
+                                    </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                           )}
 
                           {/* MISC */}
                           {e?.mics.length > 0 && (

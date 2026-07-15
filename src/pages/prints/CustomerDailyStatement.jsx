@@ -203,6 +203,8 @@ const CustomerDailyStatement = ({ token, invoiceNo, printName, urls, evn, ApiVer
                     </tr>
 
                     {data?.resultArray?.map((e, i) => {
+                        
+                        console.log("TCL: CustomerDailyStatement -> eeee",e )
                         return <tr key={i}>
                             {i === 0 && <td style={{ borderRight: "1px solid", borderBottom: "1px solid" }} className={`${style?.bill}`} rowSpan={data?.resultArray?.length}>
                                 <div>{headerData?.InvoiceNo}</div>

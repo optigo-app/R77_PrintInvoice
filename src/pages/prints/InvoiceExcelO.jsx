@@ -2,6 +2,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
+import "../../assets/css/prints/InvoiceExcelO.css";
 import ReactHTMLTableToExcel from 'react-html-table-to-excel';
 import { apiCall, checkMsg, fixedValues, formatAmount, handleImageError, isObjectEmpty, NumberWithCommas } from '../../GlobalFunctions';
 import Loader from '../../components/Loader';
@@ -261,7 +262,7 @@ const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     filename={`Invoice_ExcelO_${result?.header?.InvoiceNo}_${Date.now()}`}
                     sheet="tablexls"
                     buttonText="Download as XLS" />
-                    <table id="table-to-xls" className='d-none'>
+                    <table id="table-to-xls" className='d-none' style={{fontFamily: "sans-serif"}}>
                         <tbody>
                             <tr>
                                 <th width={80} style={{ ...hdSty, ...brRight, ...brBotm }}>SR NO</th>
@@ -273,7 +274,7 @@ const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <th width={140} style={{ ...hdSty, ...brRight, ...brBotm }}>ITEM DESCRIPTION</th>
                                 <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>METAL COLOUR</th>
                                 <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>GOLD KARAT</th>
-                                <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>GROWS WEIGHT</th>
+                                <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>GROSS WEIGHT</th>
                                 <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>NET WT</th>
                                 <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>GOLD RATE</th>
                                 <th width={100} style={{ ...hdSty, ...brRight, ...brBotm }}>GOLD VALUE</th>
@@ -343,7 +344,7 @@ const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                         }
                                     </td>
 
-                                    <td width={100} style={{ ...brRight, ...brBotm, ...txtTop, ...styBld }}><div>{e?.SrJobno}</div></td>
+                                    <td width={100} style={{ ...brRight, ...brBotm, ...txtTop, ...styBld }}><div>{`\u200B${e?.SrJobno}` }</div></td>
 
                                     <td width={100} style={{ ...brRight, ...brBotm, ...txtTop, ...styBld }}><div>{e?.designno}</div></td>
 

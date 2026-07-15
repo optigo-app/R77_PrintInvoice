@@ -145,7 +145,7 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
       let primaryMetalWt = 0;
       let netWtlossWt = 0;
       let counts = 0;
-      let str_discountOn = discountCriteria(e);
+      let str_discountOn = discountCriteriaList(e); 
       let otherMisc = e?.OtherCharges + e?.MiscAmount + e?.TotalDiamondHandling;
       let findMetal = e?.metal?.find((ele) => ele?.IsPrimaryMetal === 1);
       if (findMetal !== undefined) {
@@ -583,7 +583,14 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
     totalPcs: totalPcs1,
     totalWt: totalWt1,
   };
-
+  const discountCriteriaList = [
+    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond' ,disAmount:"DiamondDiscountAmount" },
+    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal' ,disAmount:"MetalDiscountAmount" },
+    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone' ,disAmount:"StoneDiscountAmount" },
+    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour' ,disAmount:"LabourDiscountAmount" },
+    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire' ,disAmount:"SolitaireDiscountAmount1" },
+    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc' ,disAmount:"MiscDiscountAmount" },
+  ];
   calculatedData.push(other);
 
   return (
@@ -877,6 +884,20 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
             </div>
             {/* data */}
             {finalD?.resultArray?.map((e, i) => {
+
+
+              const discountDisplay = discountCriteriaList
+              .filter(({ key }) => e?.[key] > 0)
+              .map(({ key, isAmountKey, label,disAmount }) => {
+                const num = Number(e[key]);  
+                const am= Number(e[disAmount])
+                const decimals = e[isAmountKey] === 1 ? 3 : 2;  
+                const val = num.toFixed(decimals);  
+                return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+              })
+              .join(', ');
+
+
               return (
                 <div key={i} className="recordDetailPrint1 detailPrint1L_font_11" >
                   <div className="d-flex w-100">
@@ -1003,6 +1024,7 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
                         </div>
                       </div>
                     </div>
+                  
                     <div className={`${ dpp ? "metalGoldDetailPrint1p" : "metalGoldDetailPrint1l" } border-end  position-relative pt-1 paddingLeftDetailPrint1 paddingRightDetailPrint1`} >
                       <div className="h-100 paddingBottomTotalDetailPrint1">
                         {e?.metal.length > 0 &&
@@ -1287,7 +1309,7 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
                       </div>
                     </div>
                   </div>
-                  {e?.Discount !== 0 && (
+                  {e?.DiscountAmt !== 0 && (
                     <div className="d-flex w-100">
                       <div className="srNoDetailprint11 border-end border-start  border-bottom">
                         <p className=" p-1"></p>
@@ -1313,11 +1335,11 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
                         } border-end position-relative border-bottom pt-1 lightGrey`}
                       >
                         <div className="d-grid">
-                          {e?.Discount !== 0 && (
+                          {e?.DiscountAmt !== 0 && (
                             <p className="p-1 text-end fw-bold paddingLeftDetailPrint1 paddingRightDetailPrint1">
                               {/* Discount{" "}
                               { NumberWithCommas(e?.Discount, 2)} {!detailPrintK && "%"} @Total Amount  */}
-                              Discount {formatAmount(e?.Discount)}% @ {e?.str_discountOn} Amount
+                              Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}
                               </p>
                           )}
                         </div>
@@ -1348,13 +1370,7 @@ const DetailPrint1LGroup = ({ token, invoiceNo, printName, urls, evn, ApiVer, })
                       </div>
                       <div className="totalAmountDetailPrint1 border-end  border-bottom d-flex align-tems-center justify-content-end lightGrey">
                         <p className="d-flex align-items-center">
-                          {!dp1lp && (
-                            <span
-                              dangerouslySetInnerHTML={{
-                                __html: json0Data?.Currencysymbol,
-                              }}
-                            ></span>
-                          )}
+                           
                           <span className="fw-bold">
                             {e?.TotalAmount !== 0 &&
                               NumberWithCommas(e?.TotalAmount, 2)}

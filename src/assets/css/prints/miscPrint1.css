@@ -62,17 +62,19 @@
 }
 
 @media print{
+    
     .d-flex.border-bottom.border-start.border-end{
         page-break-inside: avoid;
     }
+
     .printBtn_sec {
         display: none;
     }
 
-        .print_sec_sum4 {
-            display: none !important;
-          }
-          .d_none_pcl1{
-            display: none !important;
-          }
+    .print_sec_sum4 {
+        display: none !important;
+    }
+    .d_none_pcl1{
+        display: none !important;
+    }
 }

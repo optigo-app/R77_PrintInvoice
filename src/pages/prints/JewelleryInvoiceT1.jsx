@@ -615,7 +615,7 @@ const JewelleryInvoiceT1 = ({
 
                                     <div className="j-inv-grid-2 j-inv-border-b">
                                         <div className="j-inv-flex-col j-inv-border-r j-inv-p-5">
-                                            <div className="j-inv-bold">Company Details :-</div>
+                                            <div className="j-inv-bold">Company Details -</div>
                                             <div className="j-inv-bold j-inv-large">{headerData?.CompanyFullName}{" "}</div>
                                             <div>{headerData?.CompanyAddress + ", "} {headerData?.CompanyAddress2}</div>
 
@@ -645,13 +645,13 @@ const JewelleryInvoiceT1 = ({
                                         </div>
                                         <div className="j-inv-flex-col j-inv-p-5">
                                             <div><span className="j-inv-bold" style={{ marginRight: "10px" }}>Invoice No. :</span>{headerData?.InvoiceNo}</div>
-                                            <div><span className="j-inv-bold" style={{ marginRight: "10px" }}>Invoice Date :</span>{headerData?.EntryDate}</div>
+                                            <div><span className="j-inv-bold" style={{ marginRight: "10px" }}>Invoice date :</span>{headerData?.EntryDate}</div>
                                         </div>
                                     </div>
 
                                     <div style={{ display: "flex" }}>
                                         <div className="j-inv-flex-col  j-inv-p-5 j-inv-min-h-80" style={{ borderRight: "1px solid black", width: "50%" }}>
-                                            <div className="j-inv-bold">Bill To :-</div>
+                                            <div className="j-inv-bold">Bill To -</div>
                                             <div>{headerData?.CustName}</div>
                                             {headerData?.customerstreet?.length > 0 ? (
                                                 <div className="fslhJL">
@@ -685,7 +685,7 @@ const JewelleryInvoiceT1 = ({
 
 
                                         <div className="j-inv-flex-col  j-inv-p-5 j-inv-min-h-80" style={{ width: "50%" }}>
-                                            <div className="j-inv-bold">Ship To :-</div>
+                                            <div className="j-inv-bold">Ship To -</div>
                                          
                                             {headerData?.address?.map((e, i) => {
                                                 return (

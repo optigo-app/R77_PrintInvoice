@@ -627,6 +627,8 @@ const BagPrint16A = ({ queries, headers }) => {
                   return (
                     e?.additional?.chdata?.length > 0 &&
                     e?.additional?.chdata?.map((chunk, indexnmt) => {
+                      
+                    
                       return (
                         <React.Fragment key={indexnmt}>
                           <div className="containerprint16A">

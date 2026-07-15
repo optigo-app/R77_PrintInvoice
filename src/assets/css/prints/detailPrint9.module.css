@@ -4,7 +4,9 @@
   word-break: normal;
   font-family: Calibri;
 }
-
+.fontBill{
+  font-size: 14px;
+}
 .companyDetails *{
   font-size: 12px;
 }
@@ -91,6 +93,9 @@
 
   .print_sec_sum4{
     display: none !important;
+  }
+  .fontBill{
+    font-size: 12px;
   }
 
   .detailprint9 * {

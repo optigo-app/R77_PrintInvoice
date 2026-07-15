@@ -417,9 +417,8 @@ const InvoicePrint4Material = ({
                   <div className="spinst" dangerouslySetInnerHTML={{ __html: json0Data?.Declaration, }}></div>
                 </div>
               )} */}
-
-              {(json0Data?.Notes || json0Data?.Declaration) && (
-                <div className="brbxAll" style={{ borderTop: "none", padding: "5px" }}>
+                {(json0Data?.Notes || json0Data?.Declaration) && (
+                <div className="brbxAll" style={{ borderTop: "none",padding:"5px" }}>
                   <div
                     className="spinst"
                     dangerouslySetInnerHTML={{

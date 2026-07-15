@@ -5,8 +5,9 @@ import { ToWords } from "to-words";
 import { deepClone } from "@mui/x-data-grid/utils/utils";
 export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo, printName, evn) => {
 
-  
+ 
 
+ 
   const toWords = new ToWords();
   let header = cloneDeep(header2);
   let json1 = cloneDeep(json1_1);
@@ -16,7 +17,15 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
   let resultArray = [];
   let jobnodup = [];
   let maintotal = {
+    total_mountWeight: 0,
     diamonds: {
+      Wt: 0,
+      Pcs: 0,
+      Rate: 0,
+      Amount: 0,
+      SettingAmount: 0
+    },
+    solitaire:{
       Wt: 0,
       Pcs: 0,
       Rate: 0,
@@ -30,9 +39,17 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
       Amount: 0,
       SettingAmount: 0
     },
+    gemstone:{
+      Wt: 0,
+      Pcs: 0,
+      Rate: 0,
+      Amount: 0,
+      SettingAmount: 0
+    },
     metal: {
       Wt: 0,
       Pcs: 0,
+      RMwt: 0,
       Rate: 0,
       Amount: 0,
       FineWt: 0,
@@ -120,6 +137,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
     total_TotalDiaSetcost: 0,
     total_MakingAmount_Setting_Amount: 0,
     total_otherCharge_Diamond_Handling: 0,
+    total_mountWeight: 0,
   };
 
   //json1 array
@@ -160,7 +178,25 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
           FineWt: 0,
           length: 0,
         },
+        solitaire: {
+          Wt: 0,
+          Pcs: 0,
+          Rate: 0,
+          Amount: 0,
+          SettingAmount: 0,
+          FineWt: 0,
+          length: 0,
+        },
         colorstone: {
+          Wt: 0,
+          Pcs: 0,
+          Rate: 0,
+          Amount: 0,
+          SettingAmount: 0,
+          FineWt: 0,
+          length: 0,
+        },
+        gemstone: {
           Wt: 0,
           Pcs: 0,
           Rate: 0,
@@ -172,6 +208,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
         metal: {
           Wt: 0,
           Pcs: 0,
+          RMwt: 0,
           Rate: 0,
           Amount: 0,
           FineWt: 0,
@@ -261,7 +298,9 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
       maintotal.total_TotalDiaSetcost += j1?.TotalDiaSetcost;
       maintotal.total_otherCharge_Diamond_Handling += j1?.TotalDiamondHandling + j1?.OtherCharges + j1?.MiscAmount;
       
+      maintotal.total_mountWeight += j1?.MountWeight;
       
+ 
 
       //json2
       json2?.length > 0 &&
@@ -288,6 +327,21 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
               maintotal.diamonds.Amount += j2?.Amount;
               maintotal.diamonds.SettingAmount += +j2?.SettingAmount;
             }
+            if (j2?.MasterManagement_DiamondStoneTypeid === 1 && j2?.IsSolGem === 1) {
+              jobwise_totals.solitaire.Wt += j2?.Wt;
+              jobwise_totals.solitaire.Pcs += j2?.Pcs;
+              jobwise_totals.solitaire.Rate += j2?.Rate;
+              jobwise_totals.solitaire.Amount += j2?.Amount;
+              jobwise_totals.solitaire.length += 1;
+            }
+            
+            if (j2?.MasterManagement_DiamondStoneTypeid === 1 && j2?.IsSolGem === 1) {
+              maintotal.solitaire.Wt += j2?.Wt;
+              maintotal.solitaire.Pcs += j2?.Pcs;
+              maintotal.solitaire.Rate += j2?.Rate;
+              maintotal.solitaire.Amount += j2?.Amount;
+              maintotal.solitaire.length += 1;
+            }
             //for colorstone
             if (j2?.MasterManagement_DiamondStoneTypeid === 2) {
               all_m_d_c_m.push(j2)
@@ -308,6 +362,21 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
               maintotal.colorstone.Amount += j2?.Amount;
               maintotal.colorstone.SettingAmount += +j2?.SettingAmount;
             }
+            if (j2?.MasterManagement_DiamondStoneTypeid === 2 && j2?.IsSolGem === 1) {
+              jobwise_totals.gemstone.Wt += j2?.Wt;
+              jobwise_totals.gemstone.Pcs += j2?.Pcs;
+              jobwise_totals.gemstone.Rate += j2?.Rate;
+              jobwise_totals.gemstone.Amount += j2?.Amount;
+              jobwise_totals.gemstone.length += 1;
+            }
+            if(j2?.MasterManagement_DiamondStoneTypeid === 2 && j2?.IsSolGem === 1){
+              maintotal.gemstone.Wt += j2?.Wt;
+              maintotal.gemstone.Pcs += j2?.Pcs;
+              maintotal.gemstone.Rate += j2?.Rate;
+              maintotal.gemstone.Amount += j2?.Amount;
+              maintotal.gemstone.SettingAmount += +j2?.SettingAmount;
+              
+            }
             //for metal
             if (j2?.MasterManagement_DiamondStoneTypeid === 4) {
               all_m_d_c_m.push(j2)
@@ -315,11 +384,13 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
 
               jobwise_totals.metal.Wt += j2?.Wt;
               jobwise_totals.metal.Pcs += j2?.Pcs;
+              jobwise_totals.metal.RMwt += j2?.RMwt;
               jobwise_totals.metal.Rate += j2?.Rate;
               jobwise_totals.metal.Amount += j2?.Amount;
               jobwise_totals.metal.FineWt += j2?.FineWt;
               jobwise_totals.metal.length += 1;
               maintotal.metal.Wt += j2?.Wt;
+              maintotal.metal.RMwt += j2?.RMwt;
               maintotal.metal.total_FineWt += +j2?.FineWt;
               maintotal.metal.FineWt += +j2?.FineWt;
               maintotal.metal.Pcs += j2?.Pcs;
@@ -562,6 +633,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
   //alltax
   allTax?.length > 0 &&
     allTax?.forEach((e) => {
+      
       const [dollars, cents] = (((e?.amount)))?.split(".");
       const dollarsInWords = numberToWords.toWords(parseInt(dollars));
       const centsInWords = cents
@@ -590,26 +662,26 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
   
   totalAmount = (+totalAmount)?.toFixed(2);
   totalAmount = (+totalAmount) + (+header?.AddLess);
-  // totalAmount = (+totalAmount) + (+header?.AddLess) + (+header?.FreightCharges);
+ 
 
   let headerObj = { ...header };
 
   headerObj.BrokerageDetails = brArr;
 
-  // resultArray.sort((a, b) => a.designno - b.designno);
+ 
   const customSort = (a, b) => {
 
     if (isNaN(a?.designno) && isNaN(b?.designno)) {
-      // If both are non-numeric, compare as strings
+      
       return (a?.designno)?.localeCompare(b?.designno);
     } else if (isNaN(a?.designno)) {
-      // If only 'a' is non-numeric, place it at the end
+    
       return 1;
     } else if (isNaN(b?.designno)) {
-      // If only 'b' is non-numeric, place it at the end
+ 
       return -1;
     } else {
-      // If both are numeric, compare as numbers
+    
       return a?.designno - b?.designno;
     }
   };

@@ -1,39 +1,39 @@
 /* Container for handling overflow layout gracefully */
 .table-container {
-  width: 100%;
-  overflow-x: auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.custom-jewelry-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  border: 1px solid #000000;
-}
-
-.custom-jewelry-table th {
-  background-color: #f8f9fa;
-  color: #000000;
-  font-weight: 600;
-  border: 1px solid #000000;
-  padding: 8px;
-  text-align: center;
-}
-
-.custom-jewelry-table td {
-  border: 1px solid #bfbfbf;
-  padding: 6px 8px;
-  vertical-align: middle;
-  color: #212529;
-}
-
-.custom-jewelry-table tr.table-row-group-end td {
+    width: 100%;
+    overflow-x: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  .custom-jewelry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    border: 1px solid #000000;
+  }
+  
+  .custom-jewelry-table th {
+    background-color: #f8f9fa;
+    color: #000000;
+    font-weight: 600;
+    border: 1px solid #000000;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .custom-jewelry-table td {
+    border: 1px solid #bfbfbf;
+    padding: 6px 8px;
+    vertical-align: middle;
+    color: #212529;
+  }
+  
+  .custom-jewelry-table tr.table-row-group-end td {
+     
+  }
+  
+  /* Optional: Ensures outer borders of the table wrap neatly with the grouping lines */
+  .custom-jewelry-table {
    
-}
-
-/* Optional: Ensures outer borders of the table wrap neatly with the grouping lines */
-.custom-jewelry-table {
- 
-  border-collapse: collapse;
-}
+    border-collapse: collapse;
+  }

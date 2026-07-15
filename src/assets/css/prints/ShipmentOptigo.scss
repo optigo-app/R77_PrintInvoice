@@ -172,6 +172,9 @@
 //   font-weight: bold;
 //   color: #333; /* any color you like */
 // }
+.header1_lines__ElifE div {
+  line-height: 1.2 !important;
+}
 .spbrWord {
   overflow-wrap: break-word;
   word-break: keep-all;
@@ -207,12 +210,14 @@
   word-break: normal;         
   overflow-wrap: break-word; 
 }
+
 .wordwarper,
 .wordwarper * {
   white-space: normal !important;
   word-break: normal !important;         
   overflow-wrap: break-word !important; 
 }
+
 
 @media print {
   .hidedp10{

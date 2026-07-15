@@ -18,6 +18,21 @@ html {
     height: 85px;
 }
 
+.headlineJL {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;   
+    height: 35px;
+    background-color: #939292;
+    color: white;
+    font-size: 30px !important;
+    line-height: 120%;
+    font-family: calibri;
+    padding-left: 10px;
+    margin-bottom: 7px;
+}
+
 .disflx{
     display: flex;
 }

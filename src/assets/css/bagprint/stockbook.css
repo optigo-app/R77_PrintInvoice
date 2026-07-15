@@ -1,0 +1,136 @@
+.mainItemBlockWithImg {
+    width: 180px;
+    margin: 0 11px 10px 0;
+    display: inline-block;
+    vertical-align: top;
+    border: 1px solid #C4C4C4;
+  }
+  
+  .thumbnailCard {
+    
+  
+    border-radius: 14px;
+ 
+ 
+    transition: all 0.25s ease;
+  }
+  
+ 
+  
+  .customerNameDiv {
+    padding: 1px 12px;
+    border-bottom: 1px solid #C4C4C4;
+    font-size: 13px;
+    font-weight: 600;
+    color: black;
+  }
+  
+  .imageWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+ 
+  }
+  
+  .productImage {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 10px;
+  }
+  
+  .mainCaption {
+    border-top: 1px solid #C4C4C4;
+ 
+  }
+  
+  .captionContent {
+    padding: 1px 0px 12px;
+  }
+  
+  .designNoDiv {
+    /* margin-bottom: 8px; */
+  }
+  
+  .designTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .leftCell {
+    font-size: 14px;
+    font-weight: 700;
+    color: black;
+  }
+  
+  .rightCell {
+    text-align: right;
+  }
+  
+  .weightRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 12px;
+    color: black;
+   
+  }
+  
+  .weightLeft {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .weightMiddle {
+    color: black;
+  }
+  
+  .weightRight {
+    flex: 1;
+    text-align: right;
+    font-weight: 500;
+    color: black;
+  }
+  
+  .hiddenRow {
+    display: none;
+  }
+
+  .stockbook_container{
+    width: 980px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @media print{
+    .stockbook_container{
+      width: 100% !important;
+    }
+    .customerNameDiv{
+        font-size: 10px !important;
+    }
+
+    .leftCell{
+        font-size: 11px !important;
+    }
+    .weightRow{
+        font-size: 9px !important;
+    }
+    .mainItemBlockWithImg{
+      width: 108px !important;
+    }
+    .d-none-print{
+      display: none !important;
+    }
+    .productImage {
+      height: 80px !important;
+    }
+    .weightRow{
+      gap: 0px;
+    }
+
+
+  }

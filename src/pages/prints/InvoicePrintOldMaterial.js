@@ -4,6 +4,7 @@ import "../../assets/css/prints/InvoicePrintOldMaterialSale.css";
 import { useState } from "react";
 import {
   NumberWithCommas,
+  HeaderComponent,
   apiCall,
   checkMsg,
   fixedValues,
@@ -29,6 +30,7 @@ const InvoicePrintOldMaterial = ({
   const [custAddress, setCustAddress] = useState([]);
   const [taxAmont , setTaxAmount] = useState();
   const [extraTaxAmont , setExtraTaxAmount] = useState();
+    const [headerss, setHeaderss] = useState(null);
   const toWords = new ToWords();
 
   useEffect(() => {
@@ -48,7 +50,8 @@ const InvoicePrintOldMaterial = ({
             let address =
               data?.Data?.MaterialBill_Json[0]?.Printlable?.split("\r\n");
             setCustAddress(address);
-            console.log("data", data);
+              let headersss = HeaderComponent("3", data?.Data?.MaterialBill_Json[0],true);
+                                 setHeaderss(headersss);
             
             setJson0Data(data?.Data?.MaterialBill_Json[0]);
             const sortedItems = [...(data?.Data?.MaterialBill_Json1 || [])].sort(
@@ -144,14 +147,19 @@ const InvoicePrintOldMaterial = ({
           </div>
           <div className="w-full flex items-center justify-center">
             <div className="container_inv2">
+
+            {json0Data?.iseinvoice != 1 ? <>
               <div className="headlineJL w-100 p-2">
                 <b style={{ fontSize: "20px" }}>
                   {json0Data?.PrintHeadLbl}
                 </b>
               </div>
+            </> : headerss
+          }
+            
 
               {/** Bill Number & Date */}
-              <div className="disflx">
+              <div className="disflx mt-2">
                 <div className="w1_inv2 spfnthead">
                 </div>
                 <div className="w30_inv2 spfnthead brbxAll">
@@ -214,16 +222,32 @@ const InvoicePrintOldMaterial = ({
                     return (
                       <div className="disflx">
                         <div className="Sucol2_inv2 spbrWord">
-                          {e?.ItemName === "DIAMOND" ? "CUT AND POLISHED DIAMOND" 
+                          {/* {e?.ItemName === "DIAMOND" ? "CUT AND POLISHED DIAMOND" 
                             : e?.ItemName === "COLOR STONE" ? "STONE" 
-                              : e?.ItemName === "METAL" && e?.shape === "Gold" ? e?.quality ? `GOLD ${e?.quality}` : 'GOLD'   
-                                : e?.ItemName === "METAL" && e?.shape === "Silver" ? "SILVER"   
+                              : e?.ItemName == "METAL" && e?.shape === "Gold" ? e?.quality ? `GOLD ${e?.quality}` : 'GOLD'   
+                                : e?.ItemName == "METAL" && e?.shape === "Silver" ? "SILVER"   
                                   : e?.ItemName === "MISC" ? "MISC"   
                                     : e?.ItemName === "MOUNT" ? "M:"   
                                       : e?.ItemName === "FINDING" ? "F:"   
                                         : e?.ItemName === "ALLOY" ? "ALLOY"   
-                                          : ""
-                          }
+                                          :  ""
+                          } */}
+                          {
+  e?.ItemName === "DIAMOND" ?  `CUT AND POLISHED DIAMOND ${e?.IsSolGem ? ': S' : ''}` :
+  e?.ItemName === "COLOR STONE" ? `STONE ${e?.IsSolGem ? ': G' : ''}` :
+  e?.ItemName === "METAL" ? (
+      e?.shape === "Gold" 
+        ? (e?.quality ? `GOLD ${e?.quality}` : "GOLD") 
+        : e?.shape === "Silver" 
+          ? "SILVER" 
+          : "METAL" // Default if it's Metal but neither Gold nor Silver
+  ) :
+  e?.ItemName === "MISC" ? "MISC" :
+  e?.ItemName === "MOUNT" ? "M:" :
+  e?.ItemName === "FINDING" ? "F:" :
+  e?.ItemName === "ALLOY" ? "ALLOY" :
+  ""
+}
                         </div>
                         <div className={`${e?.CGSTAmount === 0 ? "comn_inv2NGSt" : "Sucol3_inv2"} spfnted`}>
                           {e?.CGSTAmount === 0 ? e?.HSN_No === "" ?  "-"  : e?.HSN_No : fixedValues(e?.Weight === "" ? "-" : e?.Weight,3)}

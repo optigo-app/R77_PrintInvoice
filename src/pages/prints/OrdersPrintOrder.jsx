@@ -12,6 +12,9 @@ import {
   isObjectEmpty,
   otherAmountDetail,
   taxGenrator,
+  mergeMetals,
+  mergeFindings,
+  mergedBySeetingRate
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import { cloneDeep } from "lodash";
@@ -1442,7 +1445,15 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
             {/* Data */}
             <div className="">
               {json2Data.length > 0 &&
-                json2Data.map((e, i) => {                
+                json2Data.map((e, i) => {    
+                  
+                  const mergedFindings = mergeFindings(e?.finding);
+                                  const mergedBySettingRate = mergedBySeetingRate(mergedFindings);
+                                  const mergedMetals = mergeMetals(e?.metals);
+                                  const totalSetAmt = mergedFindings.reduce((sum, item) => {
+                                    return sum + (Number(item?.SettingAmount) || 0);
+                                  }, 0);
+                  
                   return (
                     <div className={`d-flex border-bottom PageNotBrkPrint BrdrTop recordEstimatePrint overflow-hidden word_break_estimatePrint`}
                       key={i}
@@ -1451,6 +1462,8 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         borderRight: "1px solid black",
                       }}
                     >
+                      
+                   
                       <div className="srNoEstimatePrint border-end p_1Estimate border_color_estimates">
                         <p className="text-center">{i + 1}</p>
                       </div>
@@ -1618,8 +1631,8 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                       <div className="metalEstimatePrint border-end position-relative border_color_estimates">
                         {/* <div className='h-100 d-grid pad_bot_29_estimatePrint'> */}
                         <div className="pad_bot_29_estimatePrint">
-                          {e?.metals.length > 0 &&
-                            e?.metals.map((ele, ind) => {
+                          {mergedMetals?.length > 0 &&
+                            mergedMetals?.map((ele, ind) => {
                               return (
                                 <div className="d-flex" key={ind}>
                                   <div className="width_40_estimatePrint p_1Estimate">
@@ -1632,13 +1645,14 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                       {ind === 0
                                         ? fixedValues(e?.WtSpecial, 3)
                                         : fixedValues(ele?.Weight, 3)}
+                                         
                                     </p>
                                   </div>
                                   <div className="width_40_estimatePrint p_1Estimate">
                                     <p className="text-end ">
                                       {ind === 0
                                         ? fixedValues(e?.metalNetWt, 3)
-                                        : fixedValues(ele?.Wt, 3)}
+                                        : fixedValues(ele?.Wt, 3)} 
                                     </p>
                                   </div>
                                   <div className="width_40_estimatePrint p_1Estimate">
@@ -1654,8 +1668,8 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 </div>
                               );
                             })}
-                          {e?.finding.length > 0 &&
-                            e?.finding.map((ele, ind) => {
+                          { mergedFindings?.length > 0 &&
+                             mergedFindings?.map((ele, ind) => {
                               return (
                                 <div className="d-flex" key={ind}>
                                   <div className="width_40_estimatePrint p_1Estimate">
@@ -1961,6 +1975,11 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                       </p>
                                     );
                                   })}
+                                    {mergedBySettingRate?.map((val, ind) => (
+                                        <div key={ind}>
+                                          <div>{ val?.SettingRate ? val?.SettingRate?.toFixed(2) : ""}</div>
+                                        </div>
+                                      ))}
                                 </div>
                                 <div className="w-50 text-end p_1Estimate">
                                   {e?.labourArr?.map((ele, ind) => {
@@ -1970,6 +1989,11 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                       </p>
                                     );
                                   })}
+                                   {mergedBySettingRate?.map((val, ind) => (
+                                        <div key={ind}>
+                                          <div>{val?.SettingAmount ? val?.SettingAmount?.toFixed(2) : ""}</div>
+                                        </div>
+                                      ))}
                                 </div>
                               </>
                             )}
@@ -1980,9 +2004,9 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         >
                           <div className="">
                             <p className="text-end p_1Estimate fw-bold">
-                            {rateAmount ? 
+                            {rateAmount + totalSetAmt ? 
                               NumberWithCommas(
-                                  e?.labourArr?.reduce((acc, ele) => acc + (Number(ele?.value) || 0), 0),2 
+                                  e?.labourArr?.reduce((acc, ele) => acc + (Number(ele?.value) || 0)+totalSetAmt, 0),2 
                               ) : ""}
                             </p>
                           </div>
@@ -2255,7 +2279,7 @@ const OrdersPrintOrder = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                   <div className="p_1Estimate fw-bold">
                     <p>
                       {FinalTotalLabourAMT !== 0 &&
-                        rateAmount ? NumberWithCommas(FinalTotalLabourAMT, 2) : ""}
+                        rateAmount ? NumberWithCommas(FinalTotalLabourAMT , 2) : ""}
                     </p>
                   </div>
                 </div>

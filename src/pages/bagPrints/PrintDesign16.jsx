@@ -225,6 +225,8 @@ const PrintDesign16 = ({ queries, headers }) => {
               };
               miData.push(miDataObject);
             }
+            
+            console.log("TCL: fetchData -> finData", finData)
             let originlData = [...diamondData, ...clrData,...miData,...finData];
             let chData = [];
             let count = 0;
@@ -1402,7 +1404,7 @@ const PrintDesign16 = ({ queries, headers }) => {
                                             a?.Shapename?.slice(0, 15)
                                           )
                                           
-                                           
+                                         
                                         )}
                                       </div>
 

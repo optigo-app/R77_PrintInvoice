@@ -290,14 +290,18 @@ const PackingList3Quote = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
             {/* customer header */}
             <div className='d-flex  mt-1 brall_pcls brall_pcls '>
                 <div className='bright_pcls p-1 com_fs_pcl3' style={{width:'35%'}}>
-                    <div>{result?.header?.lblBillTo}</div>
+                    <div> Quote to</div>
                     <div className='fs_14_pcls fw-bold'>{result?.header?.customerfirmname}</div>
                     <div>{result?.header?.customerAddress2}</div>
                     <div>{result?.header?.customerAddress1}</div>
                     <div>{result?.header?.customercity1}{result?.header?.customerpincode}</div>
                     <div>{result?.header?.customeremail1}</div>
                     <div>{result?.header?.vat_cst_pan}</div>
-                    <div>{result?.header?.Cust_CST_STATE}-{result?.header?.Cust_CST_STATE_No}</div>
+
+                    {result?.header?.Cust_CST_STATE_No &&(
+                      <div>{result?.header?.Cust_CST_STATE}-{result?.header?.Cust_CST_STATE_No}</div>
+
+                    )}
                 </div>
                 <div className='bright_pcls p-1 com_fs_pcl3' style={{width:'35%'}}>
                     <div>Ship To,</div>

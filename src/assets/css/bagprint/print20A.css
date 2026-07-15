@@ -334,5 +334,8 @@
       .container7Acopy:nth-child(4n+4), .container7Acopy:nth-child(4n+3){
         position: relative;
         top: 90px;
-      }
+      }   
+      .printbtn{
+        display: none !important;
+    }
 }

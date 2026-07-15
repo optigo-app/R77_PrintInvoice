@@ -197,7 +197,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
 
                                     // Split by '-' or '_' and remove empty strings
                                     const activeColors = colorCodeString.split(/[-_]/).filter(Boolean);
-                                    const boxText = "18k";
+                                    const boxText = e?.data?.rd?.MetalType?.split(" ")[1] ;
 
                                     // Helper function to match the background color regardless of full word or shorthand letter
                                     const getBgColor = (code) => {

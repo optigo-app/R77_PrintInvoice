@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import "../../assets/css/bagprint/wipreport.css";
 
 import Loader from "../../components/Loader";
-import  GetWipData  from "../../GlobalFunctions/GetWipData";
+import { GetWipData } from "../../GlobalFunctions/GetWipData";
 import { GetUniquejob } from "../../GlobalFunctions/GetUniqueJob";
 import {
 
@@ -344,7 +344,6 @@ export default function WIPReport({ queries, headers }) {
                                                     <div
                                                     style={{
                                                         display: "flex",
-                                                        fontSize:"12px"
                                                     }}
                                                     className="line-height1"
                                                 >

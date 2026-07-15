@@ -1,0 +1,110 @@
+.sizelabel {
+    float: right;
+    font-family: Verdana;
+    width: auto;
+    display: inline-block;
+    /* page-break-after: always; */
+    height: 17mm;
+  }
+  
+  .labelContainer {
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .qrCode {
+    -webkit-print-color-adjust: exact;
+  }
+  
+  .qrImage {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .centerSection {
+    width: 80pt;
+    padding-right: 7px;
+  }
+  
+  .detailtab {
+    font-size: 10px;
+  }
+  
+  .row {
+    margin: 0;
+    padding: 0;
+    line-height: 1.1;
+  }
+  
+  .flexRow .details,
+  .nowrap .details {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .nowrap {
+    white-space: nowrap;
+  }
+  
+  .barcodelable {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  
+  .details {
+    font-size: 9px;
+    line-height: 1.1;
+    font-weight: bold;
+  }
+  
+  .Afterlable {
+    font-size: 9px;
+  }
+  
+  .DetailContainer {
+    padding-left: 6px;
+    vertical-align: top;
+  }
+  
+  .rightRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.3;
+  }
+  
+  .leftText {
+    margin-right: 5px;
+  }
+  
+  .bottomAlign {
+    align-items: flex-end;
+  }
+  
+  .sideLogoContainer {
+    padding-left: 6px;
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .bis_taglogo {
+    width: 45px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  @media print{
+     @page{
+        height: 17mm;
+     }
+     .qrImage {
+        width: 50px;
+        height: 50px;
+      }
+
+      .printbtn{
+        display: none !important;
+    }
+}

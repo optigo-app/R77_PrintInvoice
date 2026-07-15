@@ -24,6 +24,8 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
     const [msg, setMsg] = useState("");
     const [loader, setLoader] = useState(true);
     const [diamondWise, setDiamondWise] = useState([]);
+      const [logoflag, setLogoFlag] = useState(true);
+      const [referenceNo, setReferenceNo] = useState("");
 
     const evname = atob(evn);
     const [MetShpWise, setMetShpWise] = useState([]);
@@ -501,6 +503,20 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
         setResult(datas);
     }
 
+    const handleLogoFlag = () => {
+        if (logoflag) setLogoFlag(false);
+        else {
+          setLogoFlag(true);
+        }
+      };
+
+      const handleReferenceNo = (e) => {
+        if (referenceNo) setReferenceNo(false);
+        else {
+          setReferenceNo(true);
+        }
+      };
+
     const customSort = (a, b) => {
         if (a?.ShapeName === "OTHER" && b?.ShapeName !== "OTHER") {
             return 1; // "OTHER" comes after any other ShapeName
@@ -524,6 +540,7 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
         (sum, item) => sum + (Number(item?.BulkPurchaseQTY ? item?.BulkPurchaseQTY : item?.Quantity) || 0),
         0
     );
+    const isMultipleCOmpany = result?.header?.MltC_CompanyName?.length > 0 ? 1 : 0;
     return (
         <>
             {loader ? (
@@ -534,6 +551,31 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                         <>
                             <div className="beluxecontainer">
                                 <div className="printbtn" style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+
+                                    <div className="px-2">
+                                        <input
+                                            type="checkbox"
+                                            onChange={handleLogoFlag}
+                                            value={logoflag}
+                                            checked={logoflag}
+                                            id="logo"
+                                        />
+                                        <label htmlFor="logo" className="user-select-none mx-1">
+                                            Logo
+                                        </label>
+                                    </div>
+                                    <div className="px-2">
+                                        <input
+                                            type="checkbox"
+                                            onChange={handleReferenceNo}
+                                            value={referenceNo}
+                                            checked={referenceNo}
+                                            id="referenceNo"
+                                        />
+                                        <label htmlFor="referenceNo" className="user-select-none mx-1">
+                                            Reference
+                                        </label>
+                                    </div>
                                     <button
                                         className="btn_white blue mb-0 hidedp10_pcl7 m-0 p-2"
                                         onClick={(e) => handlePrint(e)}
@@ -543,10 +585,13 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                 </div>
                                 <div className="logobar"  >
                                     <div >
-                                        <img src={result?.header?.PrintLogo} alt="logo" />
+                                        {logoflag ?(
+                                            <img src={result?.header?.PrintLogo} alt="logo" />
+
+                                        ): <div style={{height: "50px"}}> </div>}
                                     </div>
                                     <div className="brandname">
-                                        <p> {result?.header?.CompanyFullName}</p>
+                                        <p>  {isMultipleCOmpany === 1 ? result?.header?.MltC_CompanyName : result?.header?.CompanyFullName}</p>
                                     </div>
                                 </div>
                                 <div className="title" style={{ backgroundColor: "#8bd2ed5c" }}  >
@@ -559,33 +604,98 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                 <div className="companyDetails" >
                                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                                         <div style={{ width: "45%", border: "1px solid #dbdbdb", borderTop: "none", borderBottom: "none" }}>
-                                            <h3 style={{ borderBottom: "1px solid #dbdbdb", padding: "5px " }}> {result?.header?.CompanyFullName}</h3>
+                                            <h3 style={{ borderBottom: "1px solid #dbdbdb", padding: "5px " }}> {isMultipleCOmpany === 1 ? result?.header?.MltC_CompanyName : result?.header?.CompanyFullName}</h3>
                                             <div className="address" style={{ padding: "5px  " }}>
+
+                                                <div>   {isMultipleCOmpany === 1 ? result?.header?.MltC_firstname : result?.header?.DefCustFirstname}{" "}{isMultipleCOmpany === 1 ? result?.header?.MltC_lastname : result?.header?.DefCustLastname}  </div>
                                                 <b>Address:</b>
                                                 <div style={{ wordBreak: "word-break" }}>
-                                                    {result?.header?.CompanyAddress}
-                                                    <br />
-                                                    {result?.header?.CompanyState || result?.header?.Company_CST_STATE_No ? (
+
+                                                    <div>
+                                                        {
+                                                            isMultipleCOmpany === 1 ?
+
+
+                                                                [
+                                                                    result?.header?.MltC_addressline1,
+                                                                    result?.header?.MltC_addressline2,
+                                                                    result?.header?.MltC_addressline3
+                                                                ].filter(Boolean).join(", ")
+
+                                                                :
+
+
+                                                                [
+                                                                    result?.header?.CompanyAddress,
+                                                                    result?.header?.CompanyAddress2,
+                                                                    result?.header?.CompanyAddress3
+                                                                ].filter(Boolean).join(", ")
+
+
+                                                        }
+                                                    </div>
+
+                                                    <div>
+                                                        {
+
+                                                            isMultipleCOmpany === 1 ?
+                                                                [
+                                                                    result?.header?.MltC_city,
+                                                                    result?.header?.MltC_pincode
+                                                                ].filter(Boolean).join("-")
+
+                                                                :
+                                                                [
+                                                                    result?.header?.CompanyCity,
+                                                                    result?.header?.CompanyPinCode
+                                                                ].filter(Boolean).join("-")
+
+
+
+
+                                                        }
+                                                    </div>
+
+                                                    <div> {result?.header?.CompanyState || result?.header?.Company_CST_STATE_No ? (
                                                         <>
-                                                            {result?.header?.CompanyState && (
-                                                                <>State Name: {result.header.CompanyState}</>
+                                                            {isMultipleCOmpany === 0 && (
+                                                                <>
+                                                                    {result?.header?.CompanyState && (
+                                                                        <span>State Name: {result.header.CompanyState}</span>
+                                                                    )}
+
+                                                                    {result?.header?.CompanyState && result?.header?.CompanyCountry && " | "}
+
+                                                                    {result?.header?.CompanyCountry && (
+                                                                        <span>Country: {result.header.CompanyCountry}</span>
+                                                                    )}
+                                                                </>
                                                             )}
 
-                                                            {result?.header?.CompanyState &&
-                                                                result?.header?.Company_CST_STATE_No && " | "}
+                                                            {isMultipleCOmpany === 1 && (
+                                                                <>
+                                                                    {result?.header?.CompanyState && (
+                                                                        <span>State Name: {result.header.MltC_state}</span>
+                                                                    )}
 
-                                                            {result?.header?.Company_CST_STATE_No && (
-                                                                <>State Code: {result.header.Company_CST_STATE_No}</>
+                                                                    {result?.header?.MltC_state && result?.header?.MltC_Country && " | "}
+
+                                                                    {result?.header?.MltC_Country && (
+                                                                        <span>Country: {result.header.MltC_Country}</span>
+                                                                    )}
+                                                                </>
                                                             )}
+
+
                                                         </>
-                                                    ) : null}
+                                                    ) : null}</div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div style={{ width: "30%", border: "1px solid #dbdbdb", borderTop: "none" }}>
                                             <div style={{ display: "flex", justifyContent: "space-between", height: "33%" }}>
-                                                <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "50%", borderRight: "1px solid #dbdbdb" }}>Invoice No.</div>
-                                                <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "50%" }}> {result?.header?.InvoiceNo}</div>
+                                                <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "50%", borderRight: "1px solid #dbdbdb" }}> {referenceNo ? "Reference No." : "Invoice No."} </div>
+                                                <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "50%" }} > {referenceNo ? result?.header?.BillReferenceNo : result?.header?.InvoiceNo  }</div>
                                             </div>
                                             <div style={{ display: "flex", justifyContent: "space-between", height: "33%" }}>
                                                 <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "50%", borderRight: "1px solid #dbdbdb" }}>DATE</div>
@@ -598,7 +708,15 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                         </div>
                                     </div>
                                     <div style={{ display: "flex" }}>
-                                        <div style={{ border: "1px solid #dbdbdb", padding: "5px", width: "45%", }}>Contact Number: {result?.header?.CompanyTellNo} </div>
+                                        <div style={{ border: "1px solid #dbdbdb", padding: "5px", width: "45%", }}> {isMultipleCOmpany === 0 ? (
+                                            result?.header?.CompanyTellNo && (
+                                                <div>Contact Number: {result.header.CompanyTellNo}</div>
+                                            )
+                                        ) : (
+                                            result?.header?.MltC_telephoneno && (
+                                                <div>Contact Number: {result.header.MltC_telephoneno}</div>
+                                            )
+                                        )} </div>
                                         <div style={{ border: "1px solid #dbdbdb", padding: "5px", width: "25%", borderRight: "1px solid #dbdbdb", borderLeft: "none" }}>  </div>
                                         <div style={{ borderBottom: "1px solid #dbdbdb", width: "30%", borderRight: "1px solid #dbdbdb" }}>
                                             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -607,7 +725,23 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                             </div> </div>
                                     </div>
                                     <div style={{ display: "flex" }}>
-                                        <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "45%", borderRight: "1px solid #dbdbdb", borderLeft: "1px solid #dbdbdb" }}>Email: {result?.header?.CompanyEmail} </div>
+                                        <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "45%", borderRight: "1px solid #dbdbdb", borderLeft: "1px solid #dbdbdb" }}> {
+
+                                            isMultipleCOmpany === 0 ?
+
+                                                [
+                                                    result?.header?.CompanyEmail && `Email: ${result.header.CompanyEmail}`,
+                                                    result?.header?.CompanyWebsite && `Website: ${result.header.CompanyWebsite}`
+                                                ].filter(Boolean).join(" | ")
+
+                                                :
+                                                [
+                                                    result?.header?.MltC_companymail && `Email: ${result.header.MltC_companymail}`,
+                                                    result?.header?.MltC_companywebsite && `Website: ${result.header.MltC_companywebsite}`
+                                                ].filter(Boolean).join(" | ")
+
+
+                                        }</div>
                                         <div style={{ borderBottom: "1px solid #dbdbdb", padding: "5px", width: "25%", borderRight: "1px solid #dbdbdb" }}>  </div>
                                         <div style={{ borderBottom: "1px solid #dbdbdb", width: "30%", borderRight: "1px solid #dbdbdb" }}>
                                             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -737,38 +871,38 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                     {/* grandtotal */}
                                     <div style={{ border: "1px solid #dbdbdb", borderTop: "none", display: "flex" }}>
                                         <div style={{ borderRight: "1px solid #dbdbdb", width: "71%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                                          
-                                          {result?.header?.Remark &&(
-                                            <div className="w-100 px-1 mt-1 mb-1 d-flex">
-                                            <p className="fw-bold">Remark:&nbsp;</p>
-                                            <div
-                                                dangerouslySetInnerHTML={{
-                                                    __html: result?.header?.Remark,
-                                                }}
-                                                className=""
-                                            />
-                                        </div>
-                                          )}
-                                            
 
-                                            {result?.header?.SalesRepPolicyTermsDescription &&(
-                                                 <div className="terms" style={{ padding: "5px", borderTop: "1px solid #dbdbdb" }}>
-                                                
-                                                 <div className="w-100 px-1 mt-1 mb-1 d-flex">
-                                                     <p className="fw-bold">TERMS INCLUDED:&nbsp;</p>
-                                                     <div
-                                                     
-                                                         dangerouslySetInnerHTML={{
-                                                             __html: result?.header?.SalesRepPolicyTermsDescription,
-                                                         }}
-                                                         className=""
-                                                     />
-                                                 </div>
-                                         
-                                         </div>
+                                            {result?.header?.Remark && (
+                                                <div className="w-100 px-1 mt-1 mb-1 d-flex">
+                                                    <p className="fw-bold">Remark:&nbsp;</p>
+                                                    <div
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: result?.header?.Remark,
+                                                        }}
+                                                        className=""
+                                                    />
+                                                </div>
                                             )}
 
-                                            
+
+                                            {result?.header?.SalesRepPolicyTermsDescription && (
+                                                <div className="terms" style={{ padding: "5px", borderTop: "1px solid #dbdbdb" }}>
+
+                                                    <div className="w-100 px-1 mt-1 mb-1 d-flex">
+                                                        <p className="fw-bold">TERMS INCLUDED:&nbsp;</p>
+                                                        <div
+
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: result?.header?.SalesRepPolicyTermsDescription,
+                                                            }}
+                                                            className=""
+                                                        />
+                                                    </div>
+
+                                                </div>
+                                            )}
+
+
                                         </div>
                                         <div style={{ width: "29%", fontWeight: "bold" }}>
                                             {result?.allTaxes?.length > 0 && (
@@ -867,10 +1001,10 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                     <div style={{ border: "1px solid #dbdbdb", borderTop: "none", display: "flex" }}>
                                         <div style={{ width: "50%", borderRight: "1px solid #dbdbdb" }}>
                                             <div style={{ padding: "5px", fontWeight: "bold", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}>Bank Details</div>
-                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Name:</b> <span> {result?.header?.bankname}</span></div>
-                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Number:</b> <span> {result?.header?.accountnumber}</span></div>
-                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Routing Number:</b> <span> {result?.header?.rtgs_neft_ifsc}</span></div>
-                                            <div style={{ padding: "5px", textAlign: "center" }}> <b>Zelle ID.:</b> <span> {result?.header?.bankaddress}</span></div>
+                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_bankname : result?.header?.bankname}</span></div>
+                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Number:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_accountno : result?.header?.accountnumber}</span></div>
+                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Routing Number:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_routingno : result?.header?.rtgs_neft_ifsc}</span></div>
+                                            <div style={{ padding: "5px", textAlign: "center" }}> <b>Zelle ID.:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_zelleid : result?.header?.bankaddress}</span></div>
 
                                         </div>
                                         <div style={{ width: "50%" }}> </div>
@@ -882,7 +1016,7 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                             <div>__________________</div>
                                         </div>
                                         <div style={{ width: "50%", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "center", padding: "5px" }}>
-                                            <b> {result?.header?.CompanyFullName} </b>
+                                            <b> {isMultipleCOmpany === 1 ? result?.header?.MltC_CompanyName : result?.header?.CompanyFullName} </b>
                                             <div>Authorised Signatory</div>
                                         </div>
                                     </div>

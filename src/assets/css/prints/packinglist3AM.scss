@@ -1,3 +1,7 @@
+html {
+  scrollbar-gutter: stable;
+}
+
 .container_pcls {
   box-sizing: border-box;
   word-break: break-all;
@@ -168,13 +172,20 @@
 
 /* table head */
 
+.tb_fs_pcls_head {
+  font-size: 12px;
+  line-height: 14px;
+}
+
 .tb_fs_pcls {
   font-size: 11px;
 }
 
 .tb_fs_pclsINS * {
-  font-size: 11px !important;
-  line-height: 12px !important;
+  font-size: 11px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .tb_fs_pcls1 {
@@ -350,10 +361,6 @@
   min-height: 131px;
 }
 
-.H_sum_pcl3 {
-  height: 131px;
-}
-
 .h14_dp10 {
   height: 14px;
 }
@@ -450,24 +457,29 @@
     line-height: 9px;
   }
 
+  .tb_fs_pcls_head {
+    font-size: 9px;
+    line-height: 11px;
+  }
+
   .tb_fs_pcls {
-    font-size: 7px;
-    line-height: 8px;
-  }
-
-  .tb_fs_pclsINS * {
-    font-size: 8px !important;
-    line-height: 9px !important;
-  }
-
-  .tb_fs_pcls1 {
     font-size: 8px;
     line-height: 9px;
   }
 
-  .instruct {
+  .tb_fs_pclsINS * {
     font-size: 9px;
     line-height: 10px;
+  }
+
+  .tb_fs_pcls1 {
+    font-size: 9px;
+    line-height: 10px;
+  }
+
+  .instruct {
+    font-size: 10px;
+    line-height: 11px;
   }
 
   .pbia_s {
@@ -525,9 +537,5 @@
 
   .minH_sum_pcl3 {
     min-height: 70px;
-  }
-
-  .H_sum_pcl3 {
-    height: 70px;
   }
 }

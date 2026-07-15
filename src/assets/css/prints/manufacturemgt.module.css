@@ -29,7 +29,9 @@
     min-width: 301px;
     width: 301px;
 }
-
+.font-12{
+    font-size: 12px !important;
+}
 
 .headline{
     align-items: center;
@@ -69,6 +71,11 @@
     width: 75px;
     object-fit: contain;
 }
+
+.font12{
+    font-size: 12px !important;
+}
+
 @media print{
     .print_sec_sum4 {
         display: none !important;

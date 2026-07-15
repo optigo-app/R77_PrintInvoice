@@ -61,6 +61,10 @@
     width: 6.5%;
     min-width: 6.5%;
 }
+.containerInvoiceStatement{
+    width:60% !important;
+    margin: 0 auto !important;
+}
 
 @media print{
     .print_sec_sum4{

@@ -1,0 +1,70 @@
+
+.containerMemo {
+    width: 830px;
+    margin: auto;
+    font-family: Calibri !important;
+  }
+
+.headingBar {
+    font-size: 20px;
+    background-color: #939292;
+    color: #fff;
+    padding: 4px 0 5px 6px;
+    font-weight: bold;
+  }
+
+  .companyTitle {
+    font-size: 16px;
+    padding-top: 5px;
+  }
+  .borderBox {
+    border: 1px solid #DCDCDC;
+  }
+  .flexRow {
+    display: flex;
+  }
+
+  .printTable {
+    border: 1px solid #C2C2C2;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  
+  .tableRow {
+    display: flex;
+    width: 100%;
+  }
+  
+  .tableCell {
+    padding: 5px;
+    border: 1px solid #C2C2C2;
+  }
+  
+  .headerType {
+    padding: 10px;
+    font-weight: bold;
+  }
+  
+  .headerRow {
+    background-color: #DFDFDF;
+    font-weight: bold;
+  }
+  
+  .rightAlign {
+    text-align: right;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
+
+  @media print {
+    .containerMemo {
+        width: 100% !important;
+    }
+    .print_btn{
+        display: none !important;
+    }
+
+  }

@@ -84,8 +84,8 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                 let findingWt = 0;
                 let otherCharge = 0;
                 let others = GovernMentDocuments(e?.OtherAmtDetail);
-                if(e?.NetWt+e?.LossWt !== 0 && others?.length >= 4){
-                    otherCharge = +others[3]?.value/(e?.NetWt+e?.LossWt);
+                if (e?.NetWt + e?.LossWt !== 0 && others?.length >= 4) {
+                    otherCharge = +others[3]?.value / (e?.NetWt + e?.LossWt);
                 }
                 totals.otherCharge += +(otherCharge?.toFixed(2));
                 let metalMaking = obj?.MetalAmount + obj?.MakingAmount;
@@ -254,58 +254,21 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                 }
             })
             let resultArr = [];
-            blankArr.forEach((e, i) => {
-                if (e?.GroupJob !== "") {
-                    let findIndex = resultArr.findIndex(ele => ele?.GroupJob === e?.GroupJob && ele?.primaryMetal[0]?.Rate === e?.primaryMetal[0]?.Rate);
-                    if (findIndex === -1) {
-                        resultArr.push(e);
-                        totals.diamondColorStoneWt += e?.diamondWt + e?.colorStoneWt;
-                    } else {
-                        // totals.diamondColorStoneWt += resultArr[findIndex]?.diamondWt + resultArr[findIndex]?.colorStoneWt;
-                        resultArr[findIndex].MakingAmount += e?.MakingAmount;
-                        resultArr[findIndex].MetalAmount += e?.MetalAmount;
-                        resultArr[findIndex].OtherCharges += e?.OtherCharges;
-                        resultArr[findIndex].TotalAmount += e?.TotalAmount;
-                        resultArr[findIndex].UnitCost += e?.UnitCost;
-                        resultArr[findIndex].grosswt += e?.grosswt;
-                        resultArr[findIndex].NetWt += e?.NetWt;
-                        resultArr[findIndex].LossWt += e?.LossWt;
-                        let arr = [resultArr[findIndex], e];
-                        let findRecord = arr.find(elem => elem?.SrJobno === e?.GroupJob);
-                        resultArr[findIndex].SubCategoryname = findRecord?.SubCategoryname;
-                        resultArr[findIndex].Collectionname = findRecord?.Collectionname;
-                        resultArr[findIndex].designno = findRecord?.designno;
-                        resultArr[findIndex].SrJobno = findRecord?.SrJobno;
-                        resultArr[findIndex].DesignImage = findRecord?.DesignImage;
-                        resultArr[findIndex].otherMetals = [...resultArr[findIndex].otherMetals, ...e?.otherMetals]?.flat();
-                        resultArr[findIndex].primaryMetal[0].Wt += e?.primaryMetal[0]?.Wt;
-                        resultArr[findIndex].primaryMetal[0].Amount += e?.primaryMetal[0]?.Amount;
-                        let miscs = [...resultArr[findIndex]?.miscs, ...e?.miscs]?.flat();
-                        let misc = [];
-                        miscs?.forEach((ele, ind) => {
-                            if (misc?.length === 0) {
-                                misc?.push(ele);
-                            } else {
-                                misc[0].Wt += ele?.Wt;
-                                misc[0].Amount += ele?.Amount;
-                            }
-                        })
-                    }
-                } else {
-                    resultArr.push(e);
-                    totals.diamondColorStoneWt += e?.diamondWt + e?.colorStoneWt;
-                }
+
+            blankArr.forEach((e) => {
+                resultArr.push(e);
+
+                totals.diamondColorStoneWt += (e?.diamondWt || 0) + (e?.colorStoneWt || 0);
             });
-            resultArr?.sort((a, b) => {
-                let nameA = a?.designno?.toUpperCase();
-                let nameB = b?.designno?.toUpperCase();
-                if (nameA > nameB) {
-                    return 1
-                } else if (nameA < nameB) {
-                    return -1
-                } else {
-                    return 0
-                }
+
+            // optional sorting (keep if needed)
+            resultArr.sort((a, b) => {
+                let nameA = a?.designno?.toUpperCase() || "";
+                let nameB = b?.designno?.toUpperCase() || "";
+
+                if (nameA > nameB) return 1;
+                if (nameA < nameB) return -1;
+                return 0;
             });
             let documentDetail = GovernMentDocuments(data?.BillPrint_Json[0]?.DocumentDetail);
             setDocument(documentDetail);
@@ -391,9 +354,9 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                             {/* {headerData?.Company_VAT_GST_No} |
                                             {headerData?.Cust_CST_STATE}-{headerData?.Company_CST_STATE_No} | {headerData?.vat_cst_pan} */}
 
-                                            {headerData?.Company_VAT_GST_No} 
+                                            {headerData?.Company_VAT_GST_No}
                                             {(headerData?.Company_CST_STATE_No !== "" && headerData?.Cust_CST_STATE !== "") && `| ${headerData?.Cust_CST_STATE}-${headerData?.Company_CST_STATE_No}`}
-                                            { headerData?.Com_pannumber !== "" && ` | PAN-${headerData?.Com_pannumber}`}
+                                            {headerData?.Com_pannumber !== "" && ` | PAN-${headerData?.Com_pannumber}`}
                                         </div>
                                     </div>
                                     <div className="col-2 d-flex align-items-center justify-content-center">
@@ -544,13 +507,19 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                 </div>
                                 {/* data */}
                                 {data.length > 0 && data.map((e, i) => {
+                                    const mergedMisc = e?.miscs?.reduce((acc, curr) => {
+                                        acc.Pcs += curr.Pcs || 0;
+                                        acc.Wt += curr.Wt || 0;
+                                        acc.Amount += curr.Amount || 0;
+                                        return acc;
+                                    }, { Pcs: 0, Wt: 0, Amount: 0 });
                                     return <div className="border-start border-end border-bottom d-flex no_break" key={i}>
                                         <div className={`${style?.srNoJewerryRetailInvoicePrint} border-end p-1 d-flex align-items-center justify-content-center`}><p className="">{i + 1}</p></div>
                                         <div className={`${style?.productDesPrint5} border-end p-1 `}>
                                             <p className="" style={{ wordBreak: "normal" }}>{e?.SubCategoryname} {e?.Categoryname}</p>
-                                            <p className="" style={{wordBreak: "normal"}}>{e?.designno} | {e?.SrJobno}</p>
-                                            {image && <img src={e?.DesignImage} alt="" onError={handleImageError} lazy='eagar' className={`w-100 my-1 mx-auto d-block ${style?.imageJewelleryC}`} style={{maxWidth: "75px", maxHeight: "75px"}} />}
-                                            {e?.HUID !== "" && <p style={{wordBreak: "normal"}} className={`text-center ${!image && 'pt-3'}`}>HUID-{e?.HUID}</p>}
+                                            <p className="" style={{ wordBreak: "normal" }}>{e?.designno} | {e?.SrJobno}</p>
+                                            {image && <img src={e?.DesignImage} alt="" onError={handleImageError} lazy='eagar' className={`w-100 my-1 mx-auto d-block ${style?.imageJewelleryC}`} style={{ maxWidth: "75px", maxHeight: "75px" }} />}
+                                            {e?.HUID !== "" && <p style={{ wordBreak: "normal" }} className={`text-center ${!image && 'pt-3'}`}>HUID-{e?.HUID}</p>}
                                         </div>
                                         <div className={`${style?.materialRetailInvoice5} border-end`}>
                                             <div className="d-grid h-100">
@@ -558,7 +527,31 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                                     e?.primaryMetal?.map((ele, ind) => {
                                                         return <div className={`d-flex border-bottom`} key={ind}>
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center`}><p className="p-1 lh-1">{ele?.ShapeName}</p></div>
-                                                            <div style={{ width: "20%" , wordBreak: "normal" }} className={`border-end d-flex align-items-center`} ><p className="p-1 lh-1" style={{ wordBreak: "normal" }}> {ele?.QualityName} {(e?.Tunch !== 0 && ` / ${NumberWithCommas(e?.Tunch, 2)}% ${e?.hallmarkingCount !== 0 ? "Hallmarking" : ""}`)}</p></div>
+                                                            <div style={{ width: "20%", wordBreak: "normal" }} className={`border-end d-flex align-items-center`} >
+
+                                                                {/* <p className="p-1 lh-1" style={{ wordBreak: "normal" }}> {ele?.QualityName} {(e?.Tunch !== 0 && ` / ${NumberWithCommas(e?.Tunch, 2)}% 
+                                                             ${(e?.HUID !== "" || e?.isWithHallMark === 1)
+                                                                ? "Hallmarking"
+                                                                : ""}`)}</p> */}
+                                                                <p className="p-1 lh-1" style={{ wordBreak: "normal" }}>
+                                                                    {ele?.QualityName}
+
+                                                                    {e?.Tunch !== 0 && (
+                                                                        <>
+                                                                            {" / "}{NumberWithCommas(e?.Tunch, 2)}%
+                                                                        </>
+                                                                    )}
+
+                                                                    {(e?.HUID !== "" || e?.isWithHallMark === 1) && (
+                                                                        <>
+                                                                            <br />
+                                                                            Hallmarking
+                                                                        </>
+                                                                    )}
+                                                                </p>
+
+
+                                                            </div>
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{fixedValues(e?.grosswt, 3)}</p></div>
                                                             <div style={{ width: "16%" }} className={`border-end p-1 d-flex align-items-center justify-content-end`}><p className=" text-end lh-1"></p></div>
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{e?.otherMetals?.length === 0 ? NumberWithCommas(e?.NetWt + e?.LossWt, 3) : NumberWithCommas(ele?.Wt, 3)}</p></div>
@@ -586,17 +579,18 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                                         <div style={{ width: "16%" }} className={`d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{NumberWithCommas(e?.colorStoneRate / headerData?.CurrencyExchRate, 2)}</p></div>
                                                     </div>
                                                 }
+
                                                 {
-                                                    e?.miscs?.map((ele, ind) => {
-                                                        return <div className={`d-flex border-bottom`} >
+                                                    mergedMisc?.Wt !== 0 && (
+                                                        <div className={`d-flex border-bottom`} >
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center`}><p className="p-1 lh-1">MISC</p></div>
                                                             <div style={{ width: "20%" }} className={`border-end d-flex align-items-center`}><p className="p-1 lh-1"></p></div>
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1"></p></div>
-                                                            <div style={{ width: "16%" }} className={`border-end p-1 d-flex align-items-center justify-content-end`}><p className=" text-end lh-1">{NumberWithCommas(ele?.Wt, 3)}</p></div>
+                                                            <div style={{ width: "16%" }} className={`border-end p-1 d-flex align-items-center justify-content-end`}><p className=" text-end lh-1">{NumberWithCommas(mergedMisc?.Wt, 3)}</p></div>
                                                             <div style={{ width: "16%" }} className={`border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1"></p></div>
-                                                            <div style={{ width: "16%" }} className={`d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{NumberWithCommas(ele?.Amount / ele?.Wt, 2)}</p></div>
+                                                            <div style={{ width: "16%" }} className={`d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{NumberWithCommas(mergedMisc?.Amount / mergedMisc?.Wt, 2)}</p></div>
                                                         </div>
-                                                    })
+                                                    )
                                                 }
                                                 {
                                                     e?.otherMetals?.length !== 0 && <div className={`d-flex border-bottom`} >
@@ -647,7 +641,7 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                             </div>
                                         </div>
                                         <div className={`${style?.metalMakingRetailinvoice5} border-end align-items-center d-flex justify-content-end`}>
-                                            <p className="text-end p-1">{NumberWithCommas(e?.MaKingCharge_Unit, 2)}</p>
+                                            <p className="text-end p-1">{e?.MakingChargeDiscount ? e?.MakingChargeDiscount.toFixed(2) + " %" : NumberWithCommas(e?.MaKingCharge_Unit, 2)}</p>
                                         </div>
                                         <div className={`${style?.othersRetailInvoice5} border-end align-items-center d-flex justify-content-end`}><p className=" text-end p-1">
                                             {/* {NumberWithCommas(e?.OtherCharges, 2)} */}
@@ -736,13 +730,13 @@ const RetailInvoiceprint5 = ({ urls, token, invoiceNo, printName, evn, ApiVer })
                                 {/* bank detail */}
                                 <div className="border-start border-end border-bottom d-flex no_break">
                                     <div className="col-4 p-2 border-end">
-                                        <p className="fw-bold" style={{wordBreak:"normal"}}>Bank Detail</p>
-                                        <p style={{wordBreak:"normal"}}>Bank name: {headerData?.bankname}</p>
-                                        <p style={{wordBreak:"normal"}}>Branch: {headerData?.bankaddress}</p>
+                                        <p className="fw-bold" style={{ wordBreak: "normal" }}>Bank Detail</p>
+                                        <p style={{ wordBreak: "normal" }}>Bank name: {headerData?.bankname}</p>
+                                        <p style={{ wordBreak: "normal" }}>Branch: {headerData?.bankaddress}</p>
                                         {/* <p style={{wordBreak:"normal"}}>{headerData?.PinCode}</p> */}
-                                        <p style={{wordBreak:"normal"}}>Account Name: {headerData?.accountname}</p>
-                                        <p style={{wordBreak:"normal"}}>Account No: {headerData?.accountnumber}</p>
-                                        <p style={{wordBreak:"normal"}}>RTGS NEFT IFSC: {headerData?.rtgs_neft_ifsc}</p>
+                                        <p style={{ wordBreak: "normal" }}>Account Name: {headerData?.accountname}</p>
+                                        <p style={{ wordBreak: "normal" }}>Account No: {headerData?.accountnumber}</p>
+                                        <p style={{ wordBreak: "normal" }}>RTGS NEFT IFSC: {headerData?.rtgs_neft_ifsc}</p>
                                     </div>
                                     <div className="col-4 p-2 border-end d-flex justify-content-between flex-column">
                                         <p>Signature</p>

@@ -140,7 +140,19 @@
 .lh_dp4_amt{
     line-height: 14px !important;
 }
+
+.SpBrders {
+    border-bottom: 1px solid #f0f0f0;
+    border-left: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+}
+.headerfontsize{
+    font-size: 15px;
+}
 @media print {
+    .headerfontsize{
+        font-size: 11px;
+    }
     .printHide_dp4{
         display: none !important;
     }
@@ -181,5 +193,9 @@
         padding-left: 10px;
         border: 1px solid #989898;
         font-size: 12px;
+    }
+
+    .PgeBrakInsid {
+        page-break-inside: avoid;
     }
 }

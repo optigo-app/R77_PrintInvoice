@@ -1102,10 +1102,10 @@ const DetailPrint11LExcel = ({
     <Loader />
   ) : msg === "" ? (
     <>
-      <div className="container max_width_container pad_60_allPrint mt-4">
+      <div className="container max_width_container pad_60_allPrint mt-4 d-none">
         <ReactHTMLTableToExcel
           id="test-table-xls-button"
-          className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5"
+          className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5 d-none"
           table="table-to-xls"
           filename={`DetailPrint11_${json0Data?.InvoiceNo}_${Date.now()}`}
           sheet="tablexls"
@@ -1553,6 +1553,8 @@ const DetailPrint11LExcel = ({
 
             {/* table data */}
             {result?.resultArray?.map((e, i) => {
+              
+              console.log("TCL: eeeeeeee",e )
               return (
                 <React.Fragment key={i}>
                   <tr>
@@ -1993,19 +1995,16 @@ const DetailPrint11LExcel = ({
                       align="right"
                     >
                       <b>
-                        {console.log(
+                        {/* {console.log(
                           "total........",
-                          parseFloat(e?.totals?.metal?.Amount) || 0,
-                          parseFloat(e?.MakingAmount) || 0,
-                          parseFloat(e?.totals?.diamonds?.Amount) || 0,
-                          parseFloat(e?.totals?.colorstone?.Amount) || 0,
-                          parseFloat(e?.OtherCharges) || 0
-                        )}
-                        {(parseFloat(e?.totals?.metal?.Amount) || 0) +
+                          e?.TotalAmount
+                        )} */}
+                         {e?.TotalAmount}
+                        {/* {(parseFloat(e?.totals?.metal?.Amount) || 0) +
                           (parseFloat(e?.MakingAmount) || 0) +
                           (parseFloat(e?.totals?.diamonds?.Amount) || 0) +
                           (parseFloat(e?.totals?.colorstone?.Amount) || 0) +
-                          (parseFloat(e?.OtherCharges) || 0)}
+                          (parseFloat(e?.OtherCharges) || 0)} */}
                       </b>
                     </td>
                   </tr>
@@ -2036,15 +2035,16 @@ const DetailPrint11LExcel = ({
                   verticalAlign: "middle",
                 }}
                 align="right"
-              >
-                <b>
-                  &nbsp;
+              > 
+             { console.log("TCL:grandTotal ", total)}
+               
+                
                   <span>
                     {result?.header?.CurrencyCode}
                     {"  "}
                   </span>
-                  {grandTotal?.toFixed(2)}
-                </b>
+                  <span>{total?.totalJewelleryAmount?.toFixed(2)}</span>
+             
               </td>
             </tr>
 
@@ -2157,9 +2157,9 @@ const DetailPrint11LExcel = ({
                 align="right"
               >
                 &nbsp;
-                <b style={{ color: "#000" }}>
+               
                   <span>{result?.header?.CurrencyCode}</span>{" "}
-                  {(
+                {/* <span>  {(
                     (grandTotal || 0) +
                     (parseFloat(totalArr[1]?.value) || 0) +
                     (parseFloat(totalArr[2]?.value) || 0) +
@@ -2167,8 +2167,10 @@ const DetailPrint11LExcel = ({
                       ? parseFloat(totalArr[3]?.value) || 0
                       : -(parseFloat(totalArr[3]?.value) || 0)) -
                     (parseFloat(totalArr[0]?.value) || 0)
-                  ).toFixed(2)}
-                </b>
+                  ).toFixed(2)}</span> */}
+
+                  <span>{total?.grandTotal?.toFixed(2)}</span>
+                
               </td>
             </tr>
 

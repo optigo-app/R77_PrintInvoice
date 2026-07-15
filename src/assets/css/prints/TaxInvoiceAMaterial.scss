@@ -1,0 +1,427 @@
+@font-face {
+  font-family: "Montserrat", sans-serif;
+  src: url("../../../assets/fonts/calibri-font-family/calibri-regular.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat", sans-serif;
+  src: url("../../../assets/fonts/calibri-font-family/calibri-bold.ttf")
+    format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat", sans-serif;
+  src: url("../../../assets/fonts/calibri-font-family/calibri-italic.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Montserrat", sans-serif;
+  src: url("../../../assets/fonts/calibri-font-family/calibri-bold-italic.ttf")
+    format("truetype");
+  font-weight: bold;
+  font-style: italic;
+}
+
+.containerDetailPrint1 {
+  /* max-width: 297mm !important; */
+  max-width: 1200px !important;
+  padding: 0 5px !important;
+  font-family: "Montserrat", sans-serif;
+}
+
+.page_break {
+  page-break-before: always;
+}
+
+.containerDetailPrint1 * {
+  font-size: 10px;
+}
+
+.jewelleryPackingList {
+  background-color: #939292;
+}
+
+.tax_inoivea_declartion h3 {
+  background-color: transparent !important;
+}
+
+.tax_inoivea_declartion h3 span{
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 11.4px !important;
+}
+
+.lhDetailPrint1 {
+  line-height: 130%;
+}
+
+.designDetalPrint1 {
+  width: 5%;
+}
+.designDetalPrint2 {
+  width: 13%;
+}
+.designDetalPrint3 {
+  width: 22%;
+}
+.designDetalPrint4 {
+  width: 6%;
+}
+.designDetalPrint5 {
+  width: 12%;
+}
+.designDetalPrint6 {
+  width: 13%;
+}
+.designDetalPrint7 {
+  width: 13%;
+}
+.designDetalPrint8 {
+  width: 16%;
+}
+
+// .designDetalPrint1
+// .designDetalPrint2
+// .designDetalPrint3
+// .designDetalPrint4
+// .designDetalPrint5
+// .designDetalPrint6
+// .designDetalPrint7
+// .designDetalPrint8 p{
+//     font-size: 12px;
+// }
+
+.diamondDetailPrint1l {
+  /* width: 181.9px;
+    min-width: 181.9px; */
+  width: 22.9%;
+  min-width: 22.9%;
+}
+
+.diamondDetailPrint1p {
+  /* width: 181.9px;
+    min-width: 181.9px; */
+  width: 21.9%;
+  min-width: 21.9%;
+}
+
+.stoneDetailsPrint1l {
+  /* width: 174.3px;
+    min-width: 174.3px; */
+  width: 23.8%;
+  min-width: 23.8%;
+}
+
+.stoneDetailsPrint1p {
+  /* width: 174.3px;
+    min-width: 174.3px; */
+  width: 21.8%;
+  min-width: 21.8%;
+}
+
+.metalDetailPrint1 {
+  width: 200px;
+  min-width: 200px;
+}
+
+.stoneDetailPrint1 {
+  width: 200px;
+  min-width: 200px;
+}
+
+.otherAmountDetailPrint1 {
+  width: 11.3%;
+  min-width: 11.3%;
+}
+
+.otherAmountDetailPrint1p {
+  width: 10.3%;
+  min-width: 10.3%;
+}
+
+.otherAmountDetailPrint1l {
+  width: 5.3%;
+  min-width: 5.3%;
+}
+
+.labourAmountDetailPrint1 {
+  width: 9%;
+  min-width: 9%;
+}
+
+.totalAmountDetailPrint1 {
+  width: 5%;
+  min-width: 5%;
+}
+
+.metalGoldDetailPrint1,
+.metalTotalDetailPrint1 {
+  width: 20%;
+  min-width: 20%;
+}
+
+.metalGoldDetailPrint1l,
+.metalTotalDetailPrint1l {
+  width: 22%;
+  min-width: 22%;
+}
+
+.metalGoldDetailPrint1p,
+.metalTotalDetailPrint1p {
+  width: 20%;
+  min-width: 20%;
+}
+
+.diamondDetailPrint1l *,
+.diamondDetailPrint1p * {
+  word-break: break-all;
+}
+
+.parentDetailPrint1 {
+  display: inline-flex;
+  justify-content: space-between;
+}
+
+.designDetalPrint1Total {
+  width: 12%;
+  min-width: 12%;
+}
+
+.cgstDetailPrint1 {
+  min-width: 95%;
+  width: 95%;
+}
+
+.cgstTotalDetailPrint1 {
+  min-width: 5%;
+  width: 5%;
+}
+
+.summaryPadBotDetailPrint1 {
+  padding-bottom: 30px;
+}
+
+.totalLineDetailPrint1 {
+  min-height: 21px;
+}
+
+.createdByDetailPrint1 {
+  min-height: 116px;
+}
+
+.paddingBottomTotalDetailPrint1 {
+  padding-bottom: 22px;
+}
+
+.totalMinHeightDetailPrint1 {
+  min-height: 18px;
+}
+
+.paddingLeftDetailPrint1 {
+  padding-left: 2px !important;
+}
+
+.paddingRightDetailPrint1 {
+  padding-right: 2px !important;
+}
+
+.paddingLeftDetailPrint1l {
+  padding-left: 4px !important;
+}
+
+.paddingRightDetailPrint1l {
+  padding-right: 4px !important;
+}
+
+.header_top_content_main_class {
+  display: flex;
+}
+.Header_top_title_name {
+  min-width: 70px;
+}
+.Header_top_title_name1 {
+  min-width: 90px;
+}
+
+.print_watermark_element {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1111111;
+  pointer-events: none;
+  user-select: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-image: url("../../img/watermark.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10%;
+    opacity: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.tax_invoice_main_allPrint {
+  margin-bottom: 100px;
+  //   -webkit-print-color-adjust: exact; /* For WebKit browsers */
+  //   background-image: url('../../../assets/img/watermark.png');
+  //   background-repeat: no-repeat;
+  //   background-position: center;
+}
+
+// Vivek
+.wordbr{
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word; 
+}
+
+.min_height{
+  min-height: 100px;
+}
+
+.main_max_height{
+  max-height: 300px;
+}
+
+.main_min_height{
+  min-height: 300px;
+}
+
+.main_bor{
+  border: 2px solid black;
+}
+
+@media screen {
+  .print-spacer {
+    display: none;
+  }
+}
+
+@media print {
+  // .spacer-9 { height: 860px; } 
+  // .spacer-0 { height: 590px; } // when jobs on last page is 9 *
+  // .spacer-1 { height: 670px; } // when jobs on last page is 8 **
+  // .spacer-2 { height: 773px; } // when jobs on last page is 7 * 
+  // .spacer-3 { height: 890px; } // when jobs on last page is 6 *
+  // .spacer-4 { height: 25px; } // when jobs on last page is 5 **
+  // .spacer-5 { height: 135px; } // when jobs on last page is 4 * 
+  // .spacer-6 { height: 214px; } // when jobs on last page is 3 * 
+  // .spacer-7 { height: 305px; } // when jobs on last page is 2 *
+  // .spacer-8 { height: 435px; } // when jobs on last page is 1 *
+  // ****** / ****** /
+  .spacer-49 { height: 0px; }
+  .spacer-50 { height: 0px; }
+  .spacer-51 { height: 45px; }
+  .spacer-52 { height: 90px; }
+  .spacer-53 { height: 135px; }
+  .spacer-54 { height: 180px; }
+  .spacer-55 { height: 225px; }
+  .spacer-56 { height: 330px; }
+
+  //   .footerForThe_print {
+  //   position: fixed;
+  //   bottom: 0;
+  //   left: 0; 
+  //   width: 100%;
+  //   background: white;
+  //   border-top: 1px solid black;
+  //   padding: 10px 0;
+  //   text-align: center;
+  //   font-weight: bold;
+  // }
+
+  .tax_invoice_main_allPrint {
+    margin-bottom: 0px !important;
+    //   -webkit-print-color-adjust: exact; /* For WebKit browsers */
+    //   background-image: url('../../../assets/img/watermark.png');
+    //   background-repeat: no-repeat;
+    //   background-position: center;
+  }
+
+  .footerForThe_print {
+    display: flex !important;
+    justify-content: center !important;
+    // border-bottom: 2px solid black !important;
+    border-top: 1px solid rgb(77, 74, 74) !important;
+  }
+
+  // table tfoot{
+  //   border-bottom: 2px solid black;
+  // }
+
+  .print_watermark_element {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .print_watermark_element::before {
+    opacity: 1;
+    background-size: 50%;
+  }
+
+  .myToalaSection {
+    page-break-inside: avoid;
+  }
+
+  .containerDetailPrint1 {
+    zoom: unset;
+    margin: 0;
+  }
+
+  .header_top_content_main_class {
+    line-height: 11px !important;
+  }
+
+  .containerDetailPrint1 * {
+    font-size: 10px !important;
+  }
+
+  .totalLineDetailPrint1 {
+    min-height: 18px;
+  }
+
+  .recordDetailPrint1 {
+    page-break-inside: avoid;
+  }
+
+  .print_sec_sum4 {
+    display: none !important;
+  }
+
+  .bottomo_section_for_print {
+    border-bottom: 0px solid !important;
+  }
+  
+  .main_bor{
+    border-bottom: none;
+  }
+
+  .wordbr{
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: break-word; 
+    }
+}

@@ -31,9 +31,9 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const [tax, setTax] = useState([]);
     const [category, setCategory] = useState([]);
     const [isImageWorking, setIsImageWorking] = useState(true);
-  const handleImageErrors = () => {
-    setIsImageWorking(false);
-  };
+    const handleImageErrors = () => {
+        setIsImageWorking(false);
+    };
     const loadData = (data) => {
         let head = HeaderComponent(data?.BillPrint_Json[0]?.HeaderNo, data?.BillPrint_Json[0]);
         let footerComp = FooterComponent(data?.BillPrint_Json[0]?.HeaderNo, data?.BillPrint_Json[0]);
@@ -167,7 +167,7 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <div className={`${style?.purity} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>PURITY</p></div>
                     <div className={`${style?.quality} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>QLTY</p></div>
                     <div className={`${style?.dia} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>DIA WT</p></div>
-                    <div className={`${style?.dia} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>DIA PCS</p></div>
+                    {/* <div className={`${style?.dia} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>DIA PCS</p></div> */}
                     <div className={`${style?.dia} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>DIA RATE</p></div>
                     <div className={`${style?.dia} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>DIA AMT</p></div>
                     <div className={`${style?.gwt} d-flex justify-content-center align-items-center fw-bolder p-1 border-end`}><p>G WT</p></div>
@@ -181,6 +181,21 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </div>
                 {/* table data */}
                 {data.length > 0 && data.map((e, i) => {
+                    const mergedDiamonds = Object.values(
+                        e?.diamonds?.reduce((acc, curr) => {
+                            const key = `${curr.QualityName}_${curr.Rate}`;
+
+                            if (!acc[key]) {
+                                acc[key] = { ...curr };
+                            } else {
+                                acc[key].Pcs += curr.Pcs || 0;
+                                acc[key].Wt += curr.Wt || 0;
+                                acc[key].Amount += curr.Amount || 0;
+                            }
+
+                            return acc;
+                        }, {})
+                    );
                     return <div className={`d-flex border-start border-end border-bottom ${style?.containerSummry11DataFont}`} key={i + "data"}>
                         <div className={`${style?.srNo} align-items-center p-1 border-end`}><p>{NumberWithCommas(i + 1, 0)}</p></div>
                         <div className={`${style?.design} align-items-center fw-bolder p-1 border-end`}>
@@ -190,30 +205,43 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             {e?.HUID !== "" && <p className="fw-normal">HUID: {e?.HUID}</p>}
                         </div>
                         <div className={`${style?.purity}  p-1 border-end`}><p>{e?.MetalTypePurity}</p></div>
-                        <div className={`${style?.quality}  p-1 border-end`}>
-                            {e?.diamonds.length > 0 && e?.diamonds.map((ele, ind) => {
-                                return <p key={ind + "quality"}>{ele?.QualityName}</p>
-                            })}
+                        {console.log("e?.diamonds", e?.diamonds)}
+                        <div className={`${style?.quality} p-1 border-end`}>
+                            {mergedDiamonds.map((ele, ind) => (
+                                <p key={ind + "quality"}>{ele?.QualityName}</p>
+                            ))}
                         </div>
-                        <div className={`${style?.dia}  p-1 border-end`}>
-                            {e?.diamonds.length > 0 && e?.diamonds.map((ele, ind) => {
-                                return <p key={ind + "wt"} className='text-end'>{NumberWithCommas(ele?.Wt, 3)}</p>
-                            })}
+
+                        <div className={`${style?.dia} p-1 border-end`}>
+                            {mergedDiamonds.map((ele, ind) => (
+                                <p key={ind + "wt"} className='text-end'>
+                                    {NumberWithCommas(ele?.Pcs, 0)+"/"+NumberWithCommas(ele?.Wt, 3)}
+                                </p>
+                            ))}
                         </div>
-                        <div className={`${style?.dia}  p-1 border-end text-end`}>
-                            {e?.diamonds.length > 0 && e?.diamonds.map((ele, ind) => {
-                                return <p key={ind + "pcs"}>{NumberWithCommas(ele?.Pcs, 0)}</p>
-                            })}
+
+                        {/* <div className={`${style?.dia} p-1 border-end text-end`}>
+                            {mergedDiamonds.map((ele, ind) => (
+                                <p key={ind + "pcs"}>
+                                    {NumberWithCommas(ele?.Pcs, 0)}
+                                </p>
+                            ))}
+                        </div> */}
+
+                        <div className={`${style?.dia} p-1 border-end text-end`}>
+                            {mergedDiamonds.map((ele, ind) => (
+                                <p key={ind + "rate"}>
+                                    {NumberWithCommas(ele?.Rate, 2)}
+                                </p>
+                            ))}
                         </div>
-                        <div className={`${style?.dia}  p-1 border-end text-end`}>
-                            {e?.diamonds.length > 0 && e?.diamonds.map((ele, ind) => {
-                                return <p key={ind + "rate"}>{NumberWithCommas(ele?.Rate, 2)}</p>
-                            })}
-                        </div>
-                        <div className={`${style?.dia}  p-1 border-end text-end`}>
-                            {e?.diamonds.length > 0 && e?.diamonds.map((ele, ind) => {
-                                return <p key={ind + "amt"}>{NumberWithCommas(ele?.Amount, 2)}</p>
-                            })}
+
+                        <div className={`${style?.dia} p-1 border-end text-end`}>
+                            {mergedDiamonds.map((ele, ind) => (
+                                <p key={ind + "amt"}>
+                                    {NumberWithCommas(ele?.Amount, 2)}
+                                </p>
+                            ))}
                         </div>
                         <div className={`${style?.gwt}  p-1 border-end text-end`}><p>{NumberWithCommas(e?.grosswt, 3)}</p></div>
                         <div className={`${style?.gwt}  p-1 border-end text-end`}><p>{NumberWithCommas(e?.NetWt, 3)}</p></div>
@@ -231,8 +259,8 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <div className={`${style?.total} fw-bolder p-1 border-end`}>
                         <p className='fw-bolder text-center'>TOTAL </p>
                     </div>
-                    <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.diaWt, 3)}</p></div>
-                    <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.diaPcs, 0)}</p></div>
+                    <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.diaPcs, 0)+"/"+NumberWithCommas(total?.diaWt, 3)}</p></div>
+                    {/* <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.diaPcs, 0)}</p></div> */}
                     <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p></p></div>
                     <div className={`${style?.dia} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.diaAmt, 3)}</p></div>
                     <div className={`${style?.gwt} fw-bolder p-1 border-end text-end`}><p>{NumberWithCommas(total?.grosswt, 3)}</p></div>
@@ -250,7 +278,7 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         {tax.length > 0 && tax.map((e, i) => {
                             return <div className="d-flex justify-content-between" key={i}>
                                 <p>{e?.name} @ {e?.per}	</p>
-                                <p>{e?.amount}</p>
+                                <p>{NumberWithCommas(e?.amount, 2)}</p>
                             </div>
                         })}
                         <div className="d-flex justify-content-between fw-bold">
@@ -284,15 +312,22 @@ const Summary11 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 {/* notes */}
                 <div className="mt-2 border p-2">
                     <p className="fw-bolder pb-1 width_max_content">NOTE :</p>
-                    <div dangerouslySetInnerHTML={{__html: header?.Declaration}}></div>
+                    <div dangerouslySetInnerHTML={{ __html: header?.Declaration }}></div>
                 </div>
                 <div className='d-flex px-2 mt-2'>
-                        <p className='pe-2 fw-bold width_max_content'>REMARK : </p>
-                        <div dangerouslySetInnerHTML={{ __html: header?.PrintRemark }}>
+                    <p className='pe-2 fw-bold width_max_content'>REMARK : </p>
+                    <div dangerouslySetInnerHTML={{ __html: header?.PrintRemark }}>
                     </div>
-                    </div>
+                </div>
                 {/* TERMS INCLUDED : */}
-                <p className="fw-bolder p-2">TERMS INCLUDED :</p>
+                <p ><span className="fw-bolder p-2">TERMS INCLUDED </span>:
+                    <span
+                        dangerouslySetInnerHTML={{
+                            __html: header?.SalesRepPolicyTermsDescription,
+                        }}
+                        className=""
+                    />
+                </p>
                 {/* signs  */}
                 <div className={footer1.footer1Info}>
                     <div className={`w-50 d-flex justify-content-center align-items-end ${footer1.borderRightF1} h-100`}>RECEIVER's SIGNATURE & SEAL</div>

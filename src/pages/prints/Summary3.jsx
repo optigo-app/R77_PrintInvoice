@@ -218,7 +218,7 @@ const Summary3 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         <div className="d-grid h-100">
                             <div className="d-flex justify-content-center border-black border-bottom">Final</div>
                             <div className="d-flex">
-                                <div className="col-6 border-black border-end wfines3">Fine</div>
+                                <div className="col-6 border-black border-end wfines3" style={{width:"35.5%"}}>Fine</div>
                                 <div className="col-6 wcashs3">Cash</div>
                             </div>
                         </div>
@@ -245,8 +245,8 @@ const Summary3 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {/* <div className={`col1s3 centers3 border-end border-black  rs3 pe-1`}> {  atob(printName) === "summary 3" ? <>{e?._totalcswt?.toFixed(3)}</> : <>{e?._totalcswt?.toFixed(3)}</> } </div> */}
                                 {/* <div className={`col1s3 centers3 border-end border-black  rs3 pe-1`}>{formatAmount(e?.totals?.metal?.Rate)}</div> */}
                                 <div className={`col9s3 centers3 border-end border-black  rs3 pe-1`}>{formatAmount(e?.metalrate)}</div>
-                                <div className={`col10s3 centers3 border-end border-black  rs3 pe-1`}>{e?.convertednetwt?.toFixed(3)}</div>
-                                <div className={`col11s3 centers3 border-end border-black  rs3 pe-1`}>{formatAmount(e?.TotalAmount)}</div>      
+                                <div className={`col10s3 centers3 border-end border-black  rs3 pe-1`} style={{width:"7%"}}>{e?.convertednetwt?.toFixed(3)}</div>
+                                <div className={`col11s3 centers3 border-end border-black  rs3 pe-1`}style={{width:"13%"}}>{formatAmount(e?.TotalAmount)}</div>      
                             </div>
                             )
                         })
@@ -264,8 +264,8 @@ const Summary3 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <div className={`col7s3 centers3 border-end border-black  rs3 pe-1`}>{result?.mainTotal?.misc?.Wt?.toFixed(3)}</div>
                                 <div className={`col8s3 centers3 border-end border-black  rs3 pe-1`}> {  atob(printName) === "summary 3" ? <>{result?.mainTotal?.colorstone?.Wt?.toFixed(3)}</> : <>{result?.mainTotal?.colorstone?.Wt?.toFixed(3)}</> } </div>
                                 <div className={`col9s3 centers3 border-end border-black  `}></div>
-                                <div className={`col10s3 centers3 border-end border-black   rs3 pe-1`}>{result?.mainTotal?.convertednetwt?.toFixed(3)}</div>
-                                <div className={`col11s3 centers3 border-end border-black  rs3 pe-1`}>{formatAmount(result?.mainTotal?.total_amount)}</div> 
+                                <div className={`col10s3 centers3 border-end border-black   rs3 pe-1`}style={{width:"7%"}}>{result?.mainTotal?.convertednetwt?.toFixed(3)}</div>
+                                <div className={`col11s3 centers3 border-end border-black  rs3 pe-1`}style={{width:"13%"}}>{formatAmount(result?.mainTotal?.total_amount)}</div> 
                             </div>
                     </div>
                     <div className="w-100 border-black border border-top-0 border-bottom-0 fw-bold bgcs3 fsgs3">
@@ -273,7 +273,7 @@ const Summary3 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             result?.allTaxes?.map((e, i) => {
                                 return(
                                     <div className="d-flex justify-content-between w-100 border-black border-bottom" key={i}>
-                                        <div className="border-black border-end taxws3 px-1">{e?.name} @ {e?.per}</div><div className="taxwamts3 border-black border-start rs3 px-1">{e?.amount * result?.header?.CurrencyExchRate}</div>
+                                        <div className="border-black border-end taxws3 px-1">{e?.name} @ {e?.per}</div><div className="taxwamts3 border-black border-start rs3 px-1" style={{width:"13%"}}>{formatAmount(e?.amount * result?.header?.CurrencyExchRate)}</div>
                                     </div>
                                 )
                             })
@@ -281,10 +281,17 @@ const Summary3 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     </div>
                     <div className="fsgs3 w-100 d-flex justify-content-between align-items-center border-black border border-top-0 border-bottom fw-bold bgcs3 ">
                       <div className="taxws3 border-end border-black px-1">ADD / LESS</div>
-                      <div className="taxwamts3 border-black border-start px-1 rs3">{result?.header?.AddLess}</div></div>
+                      <div className="taxwamts3 border-black border-start px-1 rs3"style={{width:"13%"}}>{result?.header?.AddLess}</div></div>
                     <div className="fsgs3 w-100 d-flex justify-content-between align-items-center border-black border border-top-0 border-bottom fw-bold bgcs3 ">
                       <div className="taxws3 border-end border-black px-1">GRAND TOTAL</div>
-                      <div className="taxwamts3 border-black border-start px-1 rs3">{formatAmount((result?.mainTotal?.total_amount + (result?.allTaxesTotal * result?.header?.CurrencyExchRate ) + result?.header?.AddLess))}</div></div>
+                      <div className="taxwamts3 border-black border-start px-1 rs3" style={{width:"13%"}}>{formatAmount((result?.mainTotal?.total_amount + (result?.allTaxesTotal * result?.header?.CurrencyExchRate ) + result?.header?.AddLess))}</div></div>
+                      <div className=' p-1 border-top-0 pbia note_ri'>
+                        <div> <b>TERMS INCLUDED:</b> 
+                        <span dangerouslySetInnerHTML={{__html:result?.header?.SalesRepPolicyTermsDescription}}></span>
+                        
+                        </div>
+                         
+                    </div>
               </div>
             </>
           ) : (

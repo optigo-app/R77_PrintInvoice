@@ -208,9 +208,7 @@ const MultiPart = ({ queries, headers }) => {
                 if(e?.data?.rd?.casting_split_detail === ''){
                     obj1.data.rd.metal_color_casted =    e?.data?.rd?.MetalColor; 
                 }else{
-                    // obj1.data.rd.metal_color_casted = e?.data?.rd?.casting_split_detail?.split(",")[0];
-                    // obj2.data.rd.metal_color_casted = e?.data?.rd?.casting_split_detail?.split(",")[1];
-
+                     
                     obj.data.rd.MetalColor = e?.data?.rd?.casting_split_detail?.split(",")[0];
                     obj1.data.rd.MetalColor = e?.data?.rd?.casting_split_detail?.split(",")[1];
                     obj2.data.rd.MetalColor = e?.data?.rd?.casting_split_detail?.split(",")[2];
@@ -236,7 +234,29 @@ const MultiPart = ({ queries, headers }) => {
             }, 500);
         }
     };
-    // console.log("filterData", filterData);
+    // function getTotalByTitle(data, title) {
+    //     if (!Array.isArray(data)) return 0;
+      
+    //     return data.reduce((total, item) => {
+    //       const additional = item?.additional || {};
+      
+    //       if (title === "DIAMOND") {
+    //         return total + (additional?.dia?.diaWt || 0);
+    //       }
+      
+    //       if (title === "ColorStone") {
+    //         return total + (additional?.clr?.clrWt || 0);
+    //       }
+      
+    //       if (title === "Misc") {
+    //         return total + (additional?.misc?.miscWt || 0);
+    //       }
+      
+    //       return total;
+    //     }, 0);
+    //   }
+
+  
     
   return (
     <div className='bg_color_mlt pb-5 mb-5'>
@@ -310,9 +330,11 @@ const MultiPart = ({ queries, headers }) => {
             {Array.from({ length: queries?.pageStart }, (_, index) => (
                     index > 0 && <div key={index} className="container  ml_5 mb_10"></div>
                 ))}
+                 
+                 
                 {
                   filterData?.length > 0 && filterData?.map((e, index) => {
-                    
+                     
                     return(
                         <div className='containerjbsbg' key={index}>
                             <div>
@@ -325,6 +347,18 @@ const MultiPart = ({ queries, headers }) => {
                                 { e?.data?.rd?.Size?.length > 0 && <div className='fsjbsbg'>Size: {e?.data?.rd?.Size}</div>}
                                 { e?.data?.rd?.MetalType?.length > 0 && <div className='fsjbsbg'>{e?.data?.rd?.MetalType?.split(" ")[1] + " " +e?.data?.rd?.MetalColor}</div>}
                                 { e?.data?.rd?.MetalWeight > 0 && <div className='fsjbsbg'>{(+e?.data?.rd?.MetalWeight)?.toFixed(3)}gm</div>}
+                                {title=="DIAMOND" && (
+                                 e?.additional?.dia?.diaWt > 0 && <div className='fsjbsbg'>{("DiaWeight: " + (+e?.additional?.dia?.diaWt)?.toFixed(3))}ct</div>
+                                )}
+                                 {title=="COLORSTONE" && (
+                                  e?.additional?.clr?.clrWt > 0 && <div className='fsjbsbg'>{("ColorWeight: " + (+e?.additional?.clr?.clrWt)?.toFixed(3))}ct</div>
+                                )}
+                                {title=="MISC" && (
+                                  e?.additional?.misc?.miscWt > 0 && <div className='fsjbsbg'>{("MiscWeight: "+(  +e?.additional?.misc?.miscWt)?.toFixed(3))}gm</div>
+                                )}
+                                {title=="FINDING" && (
+                                  e?.additional?.fin?.finWt > 0 && <div className='fsjbsbg'>{("FinWeight: "+(  +e?.additional?.fin?.finWt)?.toFixed(3))}gm</div>
+                                )}   {/* first changes in FetchDatas,js additional */}
                                 <div className='d-flex justify-content-start align-items-center'>
                                     <QRCodeGenerator text={e?.data?.rd.serialjobno +" "+ (e?.data?.rd?.metal_color_casted === undefined ? '' : e?.data?.rd?.metal_color_casted)} />{ diaFlag && <span className='fsjbsbg'>{e?.data?.rd?.diamondQuality?.join(",")}</span>}
                                 </div>

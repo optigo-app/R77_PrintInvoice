@@ -140,7 +140,7 @@ const Summary4Quote = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     <p>CIN-{result?.header.CINNO} | MSME-{result?.header.MSME}</p>
                                 </div>
                                 <div>
-                                    <img height={"90px"} src={result?.header.PrintLogo} alt=''></img>
+                                    <img width={"150px"} src={result?.header.PrintLogo} alt=''></img>
                                 </div>
                             </div>
                         </div>

@@ -4,6 +4,7 @@ export const GetWipData = async (queries ) => {
 
     
     console.log("TCL: GetWipData ->queries ", queries)
+    console.log("TCL: GetWipData ->queries?.wip_id ", queries?.wip_id)
 
     const header = {
       YearCode:  queries?.YearCode,
@@ -27,4 +28,4 @@ export const GetWipData = async (queries ) => {
   }
 };
 
- 
+export default GetWipData;

@@ -697,7 +697,7 @@ const InvoicePrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     </div>
                   </div>
                   <div className="notesinvp2">
-                    <div className="noteinvp2">DECLARATION :</div>
+                    <div className="noteinvp2" style={{fontWeight:"bold"}}>DECLARATION :</div>
                     <div
                       className="noteDemoinvp2 pb-4"
                       dangerouslySetInnerHTML={{

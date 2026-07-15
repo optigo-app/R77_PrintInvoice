@@ -67,7 +67,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       setDiaQlty(true);
     }
   };
-  
+
   const [misc, setMisc] = useState(true);
   const checkMisc = () => {
     setMisc(prevState => !prevState);
@@ -213,7 +213,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
           } else if (ele?.MasterManagement_DiamondStoneTypeid === 2) {
             const groupingKey = `${ele?.ShapeName}-${ele?.QualityName}-${ele?.Colorname}-${ele?.Rate}`;
             let existingGroup = colors.find(item => item.groupKey === groupingKey);
-            
+
             if (existingGroup) {
               existingGroup.Pcs += ele?.Pcs || 0;
               existingGroup.Wt += ele?.Wt || 0;
@@ -259,8 +259,8 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             }
           } else if (ele?.MasterManagement_DiamondStoneTypeid === 3) {
             if (ele?.IsHSCOE !== 0) {
-                otherChargess.push(ele);
-                // otherChargess.Amount += ele?.Amount;
+              otherChargess.push(ele);
+              // otherChargess.Amount += ele?.Amount;
             } else {
               misc.push(ele)
               rowWiseMiscTotal.Wt += ele?.Wt;
@@ -322,11 +322,11 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     // console.log("taxValue", taxValue);
     let taxess =
       taxValue?.reduce(
-        (acc, cObj) => 
-          acc + +cObj?.amount / data?.BillPrint_Json[0]?.CurrencyExchRate,0
+        (acc, cObj) =>
+          acc + +cObj?.amount / data?.BillPrint_Json[0]?.CurrencyExchRate, 0
       ) +
       data?.BillPrint_Json[0]?.AddLess /
-        data?.BillPrint_Json[0]?.CurrencyExchRate;
+      data?.BillPrint_Json[0]?.CurrencyExchRate;
 
     setTotal({
       ...total,
@@ -388,7 +388,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             diamondMap.set(key, { ...diamond });
           }
         });
-    
+
         const colorMap = new Map();
         obj.colors.forEach((color) => {
           const key = `${color.ShapeName}_${color.QualityName}_${color.Colorname}_${color.SizeName}_${color.Rate}`;
@@ -401,15 +401,15 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             colorMap.set(key, { ...color });
           }
         });
-        
-        return { 
-          ...obj, 
-          diamonds: Array.from(diamondMap.values()), 
-          colors: Array.from(colorMap.values()) 
+
+        return {
+          ...obj,
+          diamonds: Array.from(diamondMap.values()),
+          colors: Array.from(colorMap.values())
         };
       });
     };
-    
+
     const updatedData = processJewelryData(newArr);
     // console.log('Updated Data:', updatedData);
     setData(updatedData);
@@ -482,18 +482,27 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   function extractTextFromHTML(htmlString) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlString;
-    
+
     return tempDiv.textContent || tempDiv.innerText || "";
   }
-    
+
   const plainText = extractTextFromHTML(json0Data?.Declaration);
   // console.log("plainText", plainText);
 
   // console.log("FinalTotalMisc", FinalTotalMisc);
   // console.log("data", data);
   // console.log("json0Data", json0Data);
-  console.log("json0Data?.address", json0Data?.address);
-  
+
+  const discountCriteria = [
+    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond', disAmount: "DiamondDiscountAmount" },
+    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal', disAmount: "MetalDiscountAmount" },
+    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone', disAmount: "StoneDiscountAmount" },
+    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour', disAmount: "LabourDiscountAmount" },
+    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire', disAmount: "SolitaireDiscountAmount1" },
+    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc', disAmount: "MiscDiscountAmount" },
+  ];
+
+
   return (
     <>
       {loader ? (
@@ -545,52 +554,52 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             </div>
 
             {/* print head text */}
-            <div className={`${style?.headText_pcls} mb-1 d-flex align-items-center`}> 
+            <div className={`${style?.headText_pcls} mb-1 d-flex align-items-center`}>
               {json0Data?.PrintHeadLabel === "" ? "PACKING LIST" : json0Data?.PrintHeadLabel}
             </div>
 
             {/* Comapny Header */}
             <div className={`px-1 ${style?.spbrWord} ${style?.com_fs_pcl3} ${style?.mainHeadWD}`}>
-                <div className={`justify-content-start ${style?.spbrWord} ${style?.fs_14_pcls}`}>
-                  <div className={`${style?.fs_16_pcls} fw-bold py-1 ${style?.spbrWord}`}>
-                    {json0Data?.CompanyFullName}
-                  </div>
-                  <div>
-                    <span>{json0Data?.CompanyAddress !== "" && `${json0Data?.CompanyAddress}`}</span>
-                    <span>{json0Data?.CompanyAddress2 !== "" && `${json0Data?.CompanyAddress2}`}</span>{" "}
-                    {json0Data?.CompanyCity}{" "}
-                    {json0Data?.CompanyCity}
-                    {json0Data?.CompanyPinCode !== "" && `- ${json0Data?.CompanyPinCode}`}{" "}
-                    {json0Data?.CompanyState !== "" && `, ${json0Data?.CompanyState}`}(
-                    {json0Data?.CompanyCountry}){" "}
-                  </div>
-                  {/* <div>{json0Data?.CompanyAddress2}</div> */}
-                  {/* <div>{json0Data?.CompanyCity}</div> */}
-                  <div>
-                    <span>{json0Data?.CompanyTellNo !== "" && `T : ${json0Data?.CompanyTellNo}`}</span>{" "}
-                    <span>
-                      {json0Data?.CompanyEmail !== "" && `${json0Data?.CompanyEmail}`}{" "}
-                      {json0Data?.CompanyWebsite !== "" && `| ${json0Data?.CompanyWebsite}`}{" "}
-                    </span>
-                      {json0Data?.Company_VAT_GST_No !== "" && `| ${json0Data?.Company_VAT_GST_No}`}{" "}
-                      {json0Data?.Company_CST_STATE_No !== "" && `| ${json0Data?.Company_CST_STATE}`}
-                      {json0Data?.Company_CST_STATE_No !== "" && `-${json0Data?.Company_CST_STATE_No}`}
-                      {json0Data?.Pannumber !== "" && ` | PAN- ${json0Data?.Pannumber}`}
-                  </div>
+              <div className={`justify-content-start ${style?.spbrWord} ${style?.fs_14_pcls}`}>
+                <div className={`${style?.fs_16_pcls} fw-bold py-1 ${style?.spbrWord}`}>
+                  {json0Data?.CompanyFullName}
                 </div>
+                <div>
+                  <span>{json0Data?.CompanyAddress !== "" && `${json0Data?.CompanyAddress}`}</span>
+                  <span>{json0Data?.CompanyAddress2 !== "" && `${json0Data?.CompanyAddress2}`}</span>{" "}
+                  {json0Data?.CompanyCity}{" "}
+                  {json0Data?.CompanyCity}
+                  {json0Data?.CompanyPinCode !== "" && `- ${json0Data?.CompanyPinCode}`}{" "}
+                  {json0Data?.CompanyState !== "" && `, ${json0Data?.CompanyState}`}(
+                  {json0Data?.CompanyCountry}){" "}
+                </div>
+                {/* <div>{json0Data?.CompanyAddress2}</div> */}
+                {/* <div>{json0Data?.CompanyCity}</div> */}
+                <div>
+                  <span>{json0Data?.CompanyTellNo !== "" && `T : ${json0Data?.CompanyTellNo}`}</span>{" "}
+                  <span>
+                    {json0Data?.CompanyEmail !== "" && `${json0Data?.CompanyEmail}`}{" "}
+                    {json0Data?.CompanyWebsite !== "" && `| ${json0Data?.CompanyWebsite}`}{" "}
+                  </span>
+                  {json0Data?.Company_VAT_GST_No !== "" && `| ${json0Data?.Company_VAT_GST_No}`}{" "}
+                  {json0Data?.Company_CST_STATE_No !== "" && `| ${json0Data?.Company_CST_STATE}`}
+                  {json0Data?.Company_CST_STATE_No !== "" && `-${json0Data?.Company_CST_STATE_No}`}
+                  {json0Data?.Pannumber !== "" && ` | PAN- ${json0Data?.Pannumber}`}
+                </div>
+              </div>
 
-                {/* Company Logo */}
-                {json0Data?.PrintLogo !== "" && (
-                  <img
-                    src={json0Data?.PrintLogo}
-                    alt=""
-                    className={`w-100 h-auto ms-auto d-block object-fit-contain`}
-                    onError={handleImageErrors}
-                    height={120}
-                    width={150}
-                    style={{ maxWidth: "116px" }}
-                  />
-                )}
+              {/* Company Logo */}
+              {json0Data?.PrintLogo !== "" && (
+                <img
+                  src={json0Data?.PrintLogo}
+                  alt=""
+                  className={`w-100 h-auto ms-auto d-block object-fit-contain`}
+                  onError={handleImageErrors}
+                  height={120}
+                  width={150}
+                  style={{ maxWidth: "116px" }}
+                />
+              )}
             </div>
 
             {/* customer header */}
@@ -602,34 +611,34 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   style={{ whiteSpace: "normal", wordBreak: "break-word" }}
                 >
                   <b className={`${style?.fs_14_pcls}`}>{json0Data?.customerfirmname}</b>
-                    {json0Data?.customerAddress2 &&
-                      `, ${json0Data.customerAddress2}`}
-                    {json0Data?.customerAddress1 &&
-                      ` ${json0Data.customerAddress1}`}
-                    {json0Data?.customerAddress3 &&
-                      ` ${json0Data.customerAddress3}`}
-                    {json0Data?.customercity1 &&
-                      ` ${json0Data.customercity1}`}
-                    {json0Data?.PinCode && ` - ${json0Data.PinCode}`}
-                  </div>
-                  <div className="px-1">
-                    {json0Data?.customeremail1 !== "" && json0Data?.customeremail1}&nbsp;
-                    {json0Data?.vat_cst_pan !== " " && json0Data?.vat_cst_pan} 
-                    {json0Data?.Cust_CST_STATE_No !== "" && `${json0Data?.Cust_CST_STATE}`}
-                    {json0Data?.Cust_CST_STATE_No !== "" && `- ${json0Data?.Cust_CST_STATE_No}`}
-                  </div>
+                  {json0Data?.customerAddress2 &&
+                    `, ${json0Data.customerAddress2}`}
+                  {json0Data?.customerAddress1 &&
+                    ` ${json0Data.customerAddress1}`}
+                  {json0Data?.customerAddress3 &&
+                    ` ${json0Data.customerAddress3}`}
+                  {json0Data?.customercity1 &&
+                    ` ${json0Data.customercity1}`}
+                  {json0Data?.PinCode && ` - ${json0Data.PinCode}`}
+                </div>
+                <div className="px-1">
+                  {json0Data?.customeremail1 !== "" && json0Data?.customeremail1}&nbsp;
+                  {json0Data?.vat_cst_pan !== " " && json0Data?.vat_cst_pan}
+                  {json0Data?.Cust_CST_STATE_No !== "" && `${json0Data?.Cust_CST_STATE}`}
+                  {json0Data?.Cust_CST_STATE_No !== "" && `- ${json0Data?.Cust_CST_STATE_No}`}
+                </div>
               </div>
               <div className={`${style?.bright_pcls} p-1 ${style?.com_fs_pcl3}`} style={{ width: "35%" }}>
                 <div>Ship To,</div>
                 <div className={`px-1 ${style?.fsgdp10_pcl7_3}`}>
                   <b className={`${style?.fs_14_pcls}`}>{json0Data?.customerfirmname}</b>
-                    {json0Data?.address?.map((e, i) => {
-                      return (
-                        <div key={i}>
-                          {e}
-                        </div>
-                      );
-                    })}
+                  {json0Data?.address?.map((e, i) => {
+                    return (
+                      <div key={i}>
+                        {e}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               <div className={`p-1 ${style?.com_fs_pcl3}`} style={{ width: "30%" }}>
@@ -775,9 +784,25 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
               </div>
             </div>
 
+            
+           
+
             {/* Table Data */}
             {data?.length > 0 &&
+            
               data?.map((e, i) => {
+                const discountDisplay = discountCriteria
+                  .filter(({ key }) => e?.[key] > 0) // Only include non-zero discounts
+                  .map(({ key, isAmountKey, label, disAmount }) => {
+                    const num = Number(e[key]); // ensure it's a number
+                    const am = Number(e[disAmount])
+                    const decimals = e[isAmountKey] === 1 ? 3 : 2; // 0 => 3 decimals, 1 => 2 decimals
+                    const val = num.toFixed(decimals); // fixed decimals
+                    return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                  })
+                  .join(', ');
+                
+                console.log("TCL:discountDisplay ", discountDisplay)
                 return (
                   <div
                     key={i}
@@ -800,8 +825,8 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {atob(evn)?.toLowerCase() === "quote"
                                 ? e?.designno
                                 : e?.JewelCodePrefix?.slice(0, 2) +
-                                  e?.Category_Prefix?.slice(0, 2) +
-                                  e?.SrJobno?.split("/")[1]}
+                                e?.Category_Prefix?.slice(0, 2) +
+                                e?.SrJobno?.split("/")[1]}
                             </p>
                             <img
                               src={e?.DesignImage}
@@ -814,7 +839,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             )}
                           </div>
                         </div>
-                        
+
                         {/* Diamond */}
                         <div
                           className={` ${style?.diamond} border-end d-flex flex-wrap`}
@@ -837,8 +862,8 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {e?.diamonds.map((el, indd) => {
                                 return (
                                   <p key={indd} className="text-center">
-                                    {el?.CustomSize !== "" && el?.SizeName?.toLowerCase() === "custom" 
-                                      ? `C:${el?.CustomSize}` 
+                                    {el?.CustomSize !== "" && el?.SizeName?.toLowerCase() === "custom"
+                                      ? `C:${el?.CustomSize}`
                                       : el?.SizeName
                                     }
                                   </p>
@@ -894,14 +919,14 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Metal */}
                         <div
                           className={` ${style?.metal} border-end d-flex flex-wrap`}
                         >
                           <div
                             className="d-flex w-100"
-                            /* ${ e?.JobRemark !== "" && "border-bottom"} Bug Solving 13/12/25_11:12 */
+                          /* ${ e?.JobRemark !== "" && "border-bottom"} Bug Solving 13/12/25_11:12 */
                           >
                             <div
                               className={`${style?.wid_20} border-end ${style?.no_word_break}`}
@@ -950,7 +975,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                     {indd === 0 &&
                                       NumberWithCommas(
                                         el?.Amount /
-                                          json0Data?.CurrencyExchRate,
+                                        json0Data?.CurrencyExchRate,
                                         2
                                       )}
                                   </p>
@@ -963,7 +988,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               <p>Remark:</p>
                               <p className="fw-bold">{e?.JobRemark}</p>
                             </div>
-                          )} Bug Solving 13/12/25_11:12*/} 
+                          )} Bug Solving 13/12/25_11:12*/}
                         </div>
 
                         {/* Stone */}
@@ -1078,7 +1103,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               <p>
                                 {NumberWithCommas(
                                   (e?.MakingAmount + e?.SettingAmount) /
-                                    json0Data?.CurrencyExchRate,
+                                  json0Data?.CurrencyExchRate,
                                   2
                                 )}
                               </p>
@@ -1145,7 +1170,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                     >
                                       {NumberWithCommas(
                                         ele?.Amount /
-                                          json0Data?.CurrencyExchRate,
+                                        json0Data?.CurrencyExchRate,
                                         2
                                       )}
                                     </p>
@@ -1157,7 +1182,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <p className={`${style?.min_height}`}>
                                   {NumberWithCommas(
                                     e?.otherMiscAmount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   )}
                                 </p>
@@ -1254,7 +1279,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {e?.rowWiseDiamondTotal.Amount !== 0 &&
                                   NumberWithCommas(
                                     e?.rowWiseDiamondTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1299,7 +1324,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {e?.rowWiseMetalTotal.Amount !== 0 &&
                                   NumberWithCommas(
                                     e?.rowWiseMetalTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1353,11 +1378,11 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {(e?.rowWiseColorStoneTotal.Amount !== 0 || e?.rowWiseMiscTotal.Amount !== 0) &&
                                   misc ? NumberWithCommas(
                                     e?.rowWiseColorStoneTotal.Amount + e?.rowWiseMiscTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   ) : NumberWithCommas(
                                     e?.rowWiseColorStoneTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1377,7 +1402,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               <p className={`fw-bold w-100 border-top`}>
                                 {NumberWithCommas(
                                   (e?.MakingAmount + e?.SettingAmount) /
-                                    json0Data?.CurrencyExchRate,
+                                  json0Data?.CurrencyExchRate,
                                   2
                                 )}
                               </p>
@@ -1400,7 +1425,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {misc ? NumberWithCommas(
                                   e?.otherTotals / json0Data?.CurrencyExchRate,
                                   2
-                                ): NumberWithCommas(
+                                ) : NumberWithCommas(
                                   e?.otherTotals + e?.otherMiscAmount / json0Data?.CurrencyExchRate,
                                   2
                                 )}
@@ -1426,10 +1451,10 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         </div>
                       </div>
                     </div>
-                    
+
 
                     {/* Per Job Discount Row */}
-                    {e?.DiscountAmt !== 0 && (
+                    {e?.discountDisplay !== 0 && (
                       <div className={`border-start ${style?.pbia_pcl3} border-end border-grey`}>
                         <div className="d-flex border-bottom border-top">
                           <div
@@ -1537,20 +1562,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           >
                             {/* <p className={` w-100 fw-bold`}>Discount {e?.Discount}% On Amount</p> */}
                             <p className="fw-bold text-end">
-                              Discount {e?.Discount}% @
-                              {e?.IsCriteriabasedAmount === 1
-                                ? e?.discountElements?.map((ele, ind) => {
-                                    return (
-                                      <React.Fragment key={ind}>
-                                        {ele?.label}{" "}
-                                        {ind !== e?.discountElements?.length - 1
-                                          ? ","
-                                          : ""}
-                                      </React.Fragment>
-                                    );
-                                  })
-                                : "Total "}
-                              Amount{" "}
+                             Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}
                             </p>
                           </div>
                           <div
@@ -1573,7 +1585,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <p>
                                   {NumberWithCommas(
                                     e?.TotalAmount /
-                                      json0Data?.CurrencyExchRate,
+                                    json0Data?.CurrencyExchRate,
                                     2
                                   )}
                                 </p>
@@ -1628,7 +1640,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       <p className="">
                         {NumberWithCommas(
                           total?.diamondTotal?.Amount /
-                            json0Data?.CurrencyExchRate,
+                          json0Data?.CurrencyExchRate,
                           2
                         )}
                       </p>
@@ -1695,13 +1707,13 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       className={`${style?.wid_20} text-end d-flex align-items-center justify-content-end`}
                     >
                       <p>
-                        {misc ?  NumberWithCommas(
+                        {misc ? NumberWithCommas(
                           total?.colorStone?.Amount + total?.Misc?.Amount /
-                            json0Data?.CurrencyExchRate,
+                          json0Data?.CurrencyExchRate,
                           2
                         ) : NumberWithCommas(
                           total?.colorStone?.Amount /
-                            json0Data?.CurrencyExchRate,
+                          json0Data?.CurrencyExchRate,
                           2
                         )}
                       </p>
@@ -1726,7 +1738,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           (total?.MakingAmount +
                             total?.DiaSettignAmount +
                             total?.clrStoneSettignAmount) /
-                            json0Data?.CurrencyExchRate,
+                          json0Data?.CurrencyExchRate,
                           2
                         )}
                       </p>

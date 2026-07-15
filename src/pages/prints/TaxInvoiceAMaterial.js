@@ -1,6 +1,6 @@
 // http://localhost:3000/?tkn=OTA2NTQ3MTcwMDUzNTY1MQ==&invn=TVMvMzY0LzIwMjQ=&evn=TWF0ZXJpYWwgc2FsZQ==&pnm=dGF4IGludm9pY2UgYQ==&up=aHR0cDovL256ZW4vam8vYXBpLWxpYi9BcHAvTWF0ZXJpYWxCaWxsX0pzb24=&ctv=NzE=&ifid=DetailPrintR&pid=undefined
 import React, { useEffect } from "react";
-import "../../assets/css/prints/TaxInvoiceA.scss";
+import "../../assets/css/prints/TaxInvoiceAMaterial.scss";
 import { useState } from "react";
 import {
   NumberWithCommas,
@@ -136,43 +136,43 @@ const TaxInvoiceAMaterial = ({
   }, 0);
    
 
-  const styles = `
-    @media print {
-      @page {
-        size: A4;
+    const styles = `
+      @media print {
+        @page {
+          size: A4;
 
-            @bottom-right {
-          content: "Page " counter(page) " of " counter(pages);
-          font-family: Arial, sans-serif;
-          font-size: 10pt;
-          color: #666;
+              @bottom-left {
+            content: "INVOICE NO. ${json0Data?.InvoiceNo}";
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            color: #666;
+          }
+              @bottom-right {
+            content: " PAGE " counter(page) " OF " counter(pages);
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            color: #666;
+          }
         }
-      }
-      .no-print {
-        display: none !important;
-      }
+        .no-print {
+          display: none !important;
+        }
 
-      .footerForThe_print {
-        page-break-inside: avoid;
+        .footerForThe_print {
+          page-break-inside: avoid;
+        }
+        
       }
-      
-    }
-  `;
+    `;
 
   const formatTaxLabel = (taxName, taxValue) => {
     if (!taxName || taxValue == null) return "";
-  
     const normalizedValue = parseFloat(taxValue);
-  
-    // Step 1: Build the full label
     let label = taxName;
   
-    // Step 2: Append value if not already included
     if (!label.includes(normalizedValue)) {
       label += ` ${fixedValues(normalizedValue,3)}`;
     }
-  
-    // Step 3: Check if label already contains '%'
     if (!label.includes("%")) {
       label += " %";
     }
@@ -194,10 +194,34 @@ const TaxInvoiceAMaterial = ({
       .reduce((sum, item) => sum + (parseFloat(item?.DiscountAmount) || 0), 0)
   : 0;
 
-  console.log("finalDfinalDfinalD", finalD);
+  // console.log("finalD", finalD);
   // console.log("json0Data", json0Data);
   // console.log("taxAmont", taxAmont);
   // console.log("extraTaxAmont", extraTaxAmont);
+
+  const PerPageAfterFirstPage = 14;
+  const OnFirstPage = 8;
+  let totalProducts = finalD?.length;
+  // console.log("totalProducts", totalProducts);
+  // totalProducts = totalProducts > 7 ? totalProducts + 2 : totalProducts;
+  
+  const totalPages = finalD?.length > 8;
+  
+  const remainingOnLastPage = totalPages % OnFirstPage || PerPageAfterFirstPage;
+  // console.log("remainingOnLastPage", remainingOnLastPage);
+
+  const spacerClass = 
+    totalProducts === 1 ? "spacer-56" :
+    totalProducts === 2 ? "spacer-55" :
+    totalProducts === 3 ? "spacer-54" :
+    totalProducts === 4 ? "spacer-53" :
+    totalProducts === 5 ? "spacer-52" :
+    totalProducts === 6 ? "spacer-51" :
+    totalProducts === 7 ? "spacer-50" :
+    totalProducts === 8 ? "spacer-49" :
+    remainingOnLastPage <= OnFirstPage 
+      ? `spacer-${OnFirstPage - remainingOnLastPage}`  
+      : "";
 
   return (
     <>
@@ -313,6 +337,7 @@ const TaxInvoiceAMaterial = ({
                       whiteSpace: "pre-wrap",
                       wordWrap: "break-word",
                       overflowWrap: "break-word",
+                      minHeight: "25px", maxHeight: "25px", overflow: "hidden"
                     }}
                   >
                     <span>
@@ -506,7 +531,7 @@ const TaxInvoiceAMaterial = ({
               {/* data */}
               <div
                 style={{
-                  minHeight: "250px",
+                  // minHeight: "310px",
                 }}
               >
                 {finalD?.map((e, i) => {
@@ -514,6 +539,7 @@ const TaxInvoiceAMaterial = ({
                     <div
                       key={i}
                       className="recordDetailPrint1 detailPrint1L_font_11"
+                      style={{ minHeight: "45px", maxHeight: "45px", overflow: "hidden" }}
                     >
                       <div className="d-flex w-100">
                         <div className="designDetalPrint1 pt-1">
@@ -523,8 +549,8 @@ const TaxInvoiceAMaterial = ({
                         </div>
 
                         <div
-                          className="designDetalPrint3   p-1 "
-                          style={{ width: "25%" }}
+                          className="designDetalPrint3 p-1"
+                          style={{ width: "27%" }}
                         >
                           <div className="d-flex justify-content-between">
                             <p>
@@ -542,7 +568,7 @@ const TaxInvoiceAMaterial = ({
                         <div
                           className="designDetalPrint4 p-1"
                           style={{
-                            width: "10%",
+                            width: "8%",
                             display: "flex",
                             justifyContent: "flex-end",
                           }}
@@ -598,6 +624,9 @@ const TaxInvoiceAMaterial = ({
                   );
                 })}
               </div>
+
+              <div className={`spacer ${spacerClass}`}/>
+              {console.log("spacerClass", spacerClass)}
 
               <div className="myToalaSection">
                 <div

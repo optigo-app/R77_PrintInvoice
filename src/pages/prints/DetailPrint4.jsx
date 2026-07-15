@@ -116,6 +116,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           e?.StockBarcode === a?.StockBarcode &&
           e?.ShapeName === a?.ShapeName &&
           e?.QualityName === a?.QualityName &&
+          e?.isSolGem === a?.isSolGem &&
           e?.Colorname === a?.Colorname
       );
 
@@ -140,6 +141,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           e?.StockBarcode === a?.StockBarcode &&
           e?.ShapeName === a?.ShapeName &&
           e?.QualityName === a?.QualityName &&
+          e?.isSolGem === a?.isSolGem &&
           e?.Colorname === a?.Colorname
       );
 
@@ -182,6 +184,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         (a) =>
           e?.ShapeName === a?.ShapeName &&
           e?.QualityName === a?.QualityName &&
+          e?.isSolGem === a?.isSolGem &&
           e?.Colorname === a?.Colorname
       );
       if (find_record === -1) {
@@ -204,7 +207,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     datas?.resultArray?.forEach((e) => {
       let diaqc = [];
       e?.diamonds?.forEach((a) => {
-        let findrecord = diaqc?.findIndex((el) => el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname)
+        let findrecord = diaqc?.findIndex((el) => el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname && el?.isSolGem === a?.isSolGem)
         if (findrecord === -1) {
           let obj = { ...a };
           obj._pcs = a?.Pcs;
@@ -220,7 +223,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       e.diamonds = diaqc;
       let csqc = [];
       e?.colorstone?.forEach((a) => {
-        let findrecord = csqc?.findIndex((el) => el?.ShapeName === a?.ShapeName && el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname)
+        let findrecord = csqc?.findIndex((el) => el?.ShapeName === a?.ShapeName && el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname && el?.isSolGem === a?.isSolGem)
         if (findrecord === -1) {
           let obj = { ...a };
           obj._pcs = a?.Pcs;
@@ -341,7 +344,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     datas?.resultArray?.forEach((e) => {
       let dia = [];
       e?.diamonds?.forEach((el) => {
-        let findrecord = dia?.findIndex((a) => el?.ShapeName === a?.ShapeName && el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname && el?.isRateOnPcs === a?.isRateOnPcs);
+        let findrecord = dia?.findIndex((a) => el?.ShapeName === a?.ShapeName && el?.QualityName === a?.QualityName && el?.Colorname === a?.Colorname && el?.isRateOnPcs === a?.isRateOnPcs && el?.isSolGem === a?.isSolGem);
         if (findrecord === -1) {
           let obj = { ...el };
           obj.dpcs = el?._pcs;
@@ -380,7 +383,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
       let clrarr = [];
       e?.colorstone?.forEach((e) => {
-        let findrec = clrarr?.findIndex((a) => a?.ShapeName === e?.ShapeName && a?.QualityName === e?.QualityName && a?.Colorname === e?.Colorname)
+        let findrec = clrarr?.findIndex((a) => a?.ShapeName === e?.ShapeName && a?.QualityName === e?.QualityName && a?.Colorname === e?.Colorname && a?.isSolGem === e?.isSolGem)
         if (findrec === -1) {
           let obj = { ...e };
           obj.csamt = e?._amount;
@@ -773,7 +776,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               {e?.diamonds?.map((el, ind) => {
                                 return (
                                   <div className="d-flex fs_dp4" key={ind}>
-                                    <div className="dia_col_w_dp4 start_dp4" style={{ width: "35%" }} > {el?.QualityName} {el?.Colorname} </div>
+                                    <div className="dia_col_w_dp4 start_dp4" style={{ width: "35%" }} > {el?.isSolGem ? "S:" : ""}{el?.QualityName} {el?.Colorname} </div>
                                     <div className="dia_col_w_dp4 end_dp4 lh_dp4_amt" style={{ width: "10%" }} > {el?.dpcs} </div>
                                     <div className="dia_col_w_dp4 end_dp4 lh_dp4_amt" style={{ width: "15%" }} > {el?.dwt?.toFixed(3)} </div>
                                     <div className="dia_col_w_dp4 end_dp4 lh_dp4_amt">
@@ -851,7 +854,7 @@ const DetailPrint4 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 return (
                                   <div className="d-flex fs_dp4" key={ind}>
                                     <div className="dia_col_w_dp4 start_dp4 lh_dp4_amt" style={{ width: "35%" }} >
-                                      {el?.QualityName} {el?.Colorname}
+                                    {el?.isSolGem ? "G:" : ""}  {el?.QualityName} {el?.Colorname}
                                     </div>
                                     <div className="dia_col_w_dp4 end_dp4 lh_dp4_amt" style={{ width: "10%" }} >
                                       {el?.cspcs}

@@ -364,7 +364,8 @@ const TaxInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       <p className={`${style?.pad_1}`}>{e?.SrJobno}</p>
                     </div>
                     <div className="w-100 d-flex justify-content-center align-items-center">{image && <img src={e?.DesignImage} alt="" className="object-fit-contain h-100 w-100 imgWidth3 " onError={handleImageError} />}</div>
-                    {/* <p className="text-center">Tunch : <span className="fw-bold">{NumberWithCommas(e?.Tunch, 3)}</span></p> */}
+                    <p className="text-center">Tunch : <span className="fw-bold">{NumberWithCommas(e?.Tunch, 3)}</span></p>
+ 
                     <p className="text-center"><span className="fw-bold">{NumberWithCommas(e?.grosswt, 3)} gm</span> Gross</p>
                   </div>
                   <div className={`${style?.diamond} border-end border-bottom`}>
@@ -372,7 +373,7 @@ const TaxInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       <div>
                         {e?.diamonds?.map((ele, ind) => {
                           return <div className="d-flex w-100" key={ind}>
-                            <div style={{ width: "70px" }} className=""><p className={`${style?.pad_1} text-break`}>{ele?.ShapeName} {ele?.QualityName}	</p></div>
+                            <div style={{ width: "70px" }} className=""><p className={`${style?.pad_1} text-break`}>{ele?.ShapeName} {ele?.QualityName} {ele?.Colorname}	</p></div>
                             <div style={{ width: "62px" }} className=""><p className={`${style?.pad_1} text-break` }>{ele?.SizeName}	</p></div>
                             <div style={{ width: "30px" }} className=""><p className={`${style?.pad_1} text-end`}>{NumberWithCommas(ele?.Pcs, 0)}</p></div>
                             <div style={{ width: "47px" }} className=""><p className={`${style?.pad_1} text-end`}>{NumberWithCommas(ele?.Wt, 3)}	</p></div>
@@ -390,7 +391,7 @@ const TaxInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           return ele?.IsPrimaryMetal === 1 && <div className="d-flex w-100 border-bottom" key={ind}>
                             <div style={{ width: "56px" }} className="text-break"><p className={`${style?.pad_1} text-break w-100`}>{ele?.ShapeName} {ele?.QualityName}</p></div>
                             <div style={{ width: "49px" }} className=""><p className={`${style?.pad_1}  text-end`}>{NumberWithCommas(e?.NetWt, 3)}</p></div>
-                            <div style={{ width: "46px" }} className=""><p className={`${style?.pad_1} text-end`}>{NumberWithCommas(ele?.Rate, 0)}</p></div>
+                            <div style={{ width: "46px" }} className=""><p className={`${style?.pad_1} text-end`}>{NumberWithCommas(ele?.Rate, 2)}</p></div>
                             <div style={{ width: "68px" }} className=""><p className={`${style?.pad_1} text-end fw-bold`}>{NumberWithCommas(ele?.Amount, 2)}</p></div>
                           </div>
                         })}
@@ -656,15 +657,29 @@ const TaxInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   </div>
                 })}
               </div>
-              <div className="col-2 border-bottom border-end border-start border-top h-100">
-                <p className={`fw-bold ${style?.pad_1} text-center border-bottom p-1 lightGrey`}>Remark </p>
-                <p className="px-1 text-break" dangerouslySetInnerHTML={{__html:json0Data?.PrintRemark}}></p>
-              </div>
+              {json0Data?.PrintRemark &&(
+                  <div className="col-2 border-bottom border-end border-start border-top h-100">
+                  <p className={`fw-bold ${style?.pad_1} text-center border-bottom p-1 lightGrey`}>Remark </p>
+                  <p className="px-1 text-break" dangerouslySetInnerHTML={{__html:json0Data?.PrintRemark}}></p>
+                </div>
+              )}
+              
             </div>
             {/* note */}
             <div className={`border my-1 no_break ${style?.rowWisePad} ${style?.wordBreak}`}>
               <p className="fw-bold pt-2 px-2" style={{ fontSize: "13px" }}> NOTE :</p>
               <div className={`px-2 pb-2 ${style?.declaration}`} dangerouslySetInnerHTML={{ __html: json0Data?.Declaration }}></div>
+            </div>
+            <div style={{margin:"10px 0"}}>
+                <p className="fw-bold pb-1 font_14_sum4">
+                                TERMS INCLUDED : &nbsp;
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: json0Data?.SalesRepPolicyTermsDescription,
+                                  }}
+                                  style={{ fontWeight: "400" }}
+                                />
+                              </p>
             </div>
             {/* signature */}
             <div className={`border my-1 no_break d-flex ${style?.rowWisePad} ${style?.wordBreak}`}>

@@ -12,6 +12,8 @@ import {
   handlePrint,
   isObjectEmpty,
   taxGenrator,
+   mergeMetals,
+    mergeFindings
 } from "../../GlobalFunctions";
 import { ToWords } from "to-words";
 import BarcodePrintGenerator from "../../components/barcodes/BarcodePrintGenerator";
@@ -160,7 +162,7 @@ const InvoicePrint8 = ({
       let count = 0;
       let secondMetalWt = 0;
       let netWtFinal = e?.NetWt + e?.LossWt - findingsWt;
- 
+
       diamondHandling += e?.TotalDiamondHandling;
       e?.metal?.forEach((ele, ind) => {
         count += 1;
@@ -174,8 +176,8 @@ const InvoicePrint8 = ({
           secondMetalWt += ele?.Wt;
         }
       });
-      let latestAmount = (((e?.MetalDiaWt - findingsWt) * primaryMetalRAte) + secondaryMetalAmount );
-              total2.total += latestAmount;
+      let latestAmount = (((e?.MetalDiaWt - findingsWt) * primaryMetalRAte) + secondaryMetalAmount);
+      total2.total += latestAmount;
       let finalMetalAmount = (e?.MetalDiaWt - (e?.totals?.finding?.Wt * e?.LossPer) / 100 + e?.totals?.finding?.Wt) * primaryMetalRAte + secondaryMetalAmount;
 
       // labour.primaryWt += primaryWt;
@@ -196,8 +198,8 @@ const InvoicePrint8 = ({
       if (obj?.primaryMetal) {
         // total2.total +=
         //   obj?.metalAmountFinal / data?.BillPrint_Json[0]?.CurrencyExchRate;
-        let findRecord = resultArr?.findIndex( (ele, ind) => ele?.primaryMetal?.ShapeName === obj?.primaryMetal?.ShapeName && 
-        ele?.primaryMetal?.QualityName === obj?.primaryMetal?.QualityName && ele?.primaryMetal?.Rate === obj?.primaryMetal?.Rate
+        let findRecord = resultArr?.findIndex((ele, ind) => ele?.primaryMetal?.ShapeName === obj?.primaryMetal?.ShapeName &&
+          ele?.primaryMetal?.QualityName === obj?.primaryMetal?.QualityName && ele?.primaryMetal?.Rate === obj?.primaryMetal?.Rate
         );
         if (findRecord === -1) {
           resultArr?.push(obj);
@@ -425,8 +427,8 @@ const InvoicePrint8 = ({
           setLoader(false);
           // setMsg(data?.Message);
           const err = checkMsg(data?.Message);
-                    console.log(data?.Message);
-                    setMsg(err);
+          console.log(data?.Message);
+          setMsg(err);
         }
       } catch (error) {
         console.error(error);
@@ -434,11 +436,47 @@ const InvoicePrint8 = ({
     };
     sendData();
   }, []);
+
+
+  const mergeStoneData = (data = []) => {
+    return data.reduce(
+      (acc, item) => {
+        acc.Pcs += item.Pcs || 0;
+        acc.Wt += item.Wt || 0;
+        acc.Amount += item.Amount || 0;
+
+        // keep rate type
+        if (acc.isRateOnPcs === null) {
+          acc.isRateOnPcs = item.isRateOnPcs;
+        }
+
+        // keep material name if exists
+        if (!acc.MaterialTypeName && item.MaterialTypeName) {
+          acc.MaterialTypeName = item.MaterialTypeName;
+        }
+
+        return acc;
+      },
+      {
+        Pcs: 0,
+        Wt: 0,
+        Amount: 0,
+        isRateOnPcs: null,
+        MaterialTypeName: "",
+      }
+    );
+  };
+
+  const mergedDiamond = mergeStoneData(mainData?.diamonds);
+  const mergedColorStone = mergeStoneData(mainData?.colorStones);
+  const mergedMisc = mergeStoneData(mainData?.misc2);
+
   return loader ? (
     <Loader />
   ) : msg === "" ? (
     <div
       className={`container container-fluid max_width_container mt-1 ${style?.InvoicePrint_10_11} pad_60_allPrint px-1`}
+      style={{ width: "900px" }}
     >
       {/* buttons */}
       <div className={`d-flex justify-content-end align-items-center ${style?.print_sec_sum4} mb-4`} >
@@ -447,53 +485,53 @@ const InvoicePrint8 = ({
         </div>
       </div>
       {/* header */}
-    { headerData?.IsEinvoice !== 1 ? <><div className={`${style2.headline} headerTitle`}>
+      {headerData?.IsEinvoice !== 1 ? <><div className={`${style2.headline} headerTitle`}>
         {headerData?.PrintHeadLabel}
       </div>
-      <div className={`${style?.font_12} ${style2.companyDetails}`}>
-        <div className={`${style2.companyhead} p-2`}>
-          <div className={`${style2.lines} ${style?.font_16}`} style={{ fontWeight: "bold" }} >
-            {headerData?.CompanyFullName}
+        <div className={`${style?.font_12} ${style2.companyDetails}`}>
+          <div className={`${style2.companyhead} p-2`}>
+            <div className={`${style2.lines} ${style?.font_16}`} style={{ fontWeight: "bold" }} >
+              {headerData?.CompanyFullName}
+            </div>
+            <div className={style2.lines}>{headerData?.CompanyAddress}</div>
+            <div className={style2.lines}>{headerData?.CompanyAddress2}</div>
+            <div className={style2.lines}>
+              {headerData?.CompanyCity}-{headerData?.CompanyPinCode},
+              {headerData?.CompanyState}({headerData?.CompanyCountry})
+            </div>
+            {/* <div className={style2.lines}>Tell No: {headerData?.CompanyTellNo}</div> */}
+            <div className={style2.lines}>
+              T: {headerData?.CompanyTellNo} | TOLL FREE{" "}
+              {headerData?.CompanyTollFreeNo} | TOLL FREE{" "}
+              {headerData?.CompanyTollFreeNo}
+            </div>
+            <div className={style2.lines}>
+              {headerData?.CompanyEmail} | {headerData?.CompanyWebsite}
+            </div>
+            <div className={style2.lines}>
+              {/* {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-{headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber} */}
+              {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-
+              {headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber}
+            </div>
           </div>
-          <div className={style2.lines}>{headerData?.CompanyAddress}</div>
-          <div className={style2.lines}>{headerData?.CompanyAddress2}</div>
-          <div className={style2.lines}>
-            {headerData?.CompanyCity}-{headerData?.CompanyPinCode},
-            {headerData?.CompanyState}({headerData?.CompanyCountry})
+          <div
+            style={{ width: "30%" }}
+            className="d-flex justify-content-end align-item-center h-100"
+          >
+            {isImageWorking && headerData?.PrintLogo !== "" && (
+              <img
+                src={headerData?.PrintLogo}
+                alt=""
+                className="w-100 h-auto ms-auto d-block object-fit-contain"
+                style={{ maxWidth: "116px" }}
+                onError={handleImageErrors}
+                height={120}
+                width={150}
+              />
+            )}
+            {/* <img src={headerData?.PrintLogo} alt="" className={style2.headerImg} /> */}
           </div>
-          {/* <div className={style2.lines}>Tell No: {headerData?.CompanyTellNo}</div> */}
-          <div className={style2.lines}>
-            T: {headerData?.CompanyTellNo} | TOLL FREE{" "}
-            {headerData?.CompanyTollFreeNo} | TOLL FREE{" "}
-            {headerData?.CompanyTollFreeNo}
-          </div>
-          <div className={style2.lines}>
-            {headerData?.CompanyEmail} | {headerData?.CompanyWebsite}
-          </div>
-          <div className={style2.lines}>
-            {/* {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-{headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber} */}
-            {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-
-            {headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber}
-          </div>
-        </div>
-        <div
-          style={{ width: "30%" }}
-          className="d-flex justify-content-end align-item-center h-100"
-        >
-          {isImageWorking && headerData?.PrintLogo !== "" && (
-            <img
-              src={headerData?.PrintLogo}
-              alt=""
-              className="w-100 h-auto ms-auto d-block object-fit-contain"
-              style={{ maxWidth: "116px" }}
-              onError={handleImageErrors}
-              height={120}
-              width={150}
-            />
-          )}
-          {/* <img src={headerData?.PrintLogo} alt="" className={style2.headerImg} /> */}
-        </div>
-      </div></> : headerss}
+        </div></> : headerss}
 
       <div className={`border d-flex ${style?.font_12}`}>
         <div className="col-4 px-2 border-end">
@@ -611,62 +649,65 @@ const InvoicePrint8 = ({
             </p>
           </div>
           <div className={`col-9 ${style?.font_13}`}>
+            
+           { console.log("TCL:mainData?.resultArr ", mainData?.resultArr)}
             {mainData?.resultArr?.map((e, i) => {
-              return (
-                <div className="d-flex" key={i}>
-                  <div
-                    style={{ minWidth: "17%", width: "17%" }}
-                    className=" px-1 text-uppercase"
-                  >
-                    <p>
-                      {e?.primaryMetal?.ShapeName}{" "}
-                      {e?.primaryMetal?.QualityName}
-                    </p>
+
+               const mergedMetals = mergeMetals(e?.metal);
+            
+
+              
+        
+              return  mergedMetals?.map((m, i) => (
+                  <div className="d-flex" key={i}>
+                    <div style={{ minWidth: "17%", width: "17%" }} className="px-1 text-uppercase">
+                      <p>
+                        {m?.ShapeName} {m?.QualityName}
+                      </p>
+                    </div>
+                
+                    <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                      <p>  {
+                                                            m?.IsPrimaryMetal == 1
+                                                              ? (
+                                                                i === 0
+                                                                  ? NumberWithCommas(
+                                                                    e?.NetWt + (e?.totals?.diamonds?.Wt / 5),
+                                                                    3
+                                                                  )+" Gms"
+                                                                  : NumberWithCommas(m?.Wt, 3)
+                                                              )
+                                                              : ""
+                                                          } </p>
+                    </div>
+                
+                    <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                      {/* <p>{NumberWithCommas(m?.netWtFinal, 3)} Gms</p> */}
+                      <p>  {NumberWithCommas(m?.Wt - e?.totals?.finding?.Wt, 3)} Gms</p>
+                      
+                    </div>
+                
+                    <div style={{ minWidth: "9%", width: "9%" }} className="px-1">
+                      <p></p>
+                    </div>
+                
+                    <div style={{ minWidth: "15%", width: "15%" }} className="px-1">
+                      <p></p>
+                    </div>
+                
+                    <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                      {/* <p>{NumberWithCommas(m?.finalRate, 2)}</p> */}
+                      <p>   {m?.Rate?.toFixed(2)}</p>
+                    </div>
+                
+                    <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                      {/* <p>{NumberWithCommas(m?.latestAmount, 2)}</p> */}
+                      <p>{m?.Amount?.toFixed(2)}</p>
+                    </div>
                   </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.grosswt, 3)} Gms</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.netWtFinal, 3)} Gms</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "9%", width: "9%" }}
-                    className=" px-1"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1 text-end"
-                  >
-          
-                    <p>{NumberWithCommas(e?.finalRate, 2)}</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>
-                      {NumberWithCommas(
-                        e?.latestAmount,
-                        2
-                      )}
-                    </p>
-                  </div>
-                </div>
-              );
+                ))
+                
+              
             })}
             {mainData?.findings?.map((e, i) => {
               return (
@@ -715,161 +756,144 @@ const InvoicePrint8 = ({
                 </div>
               );
             })}
-            {mainData?.diamonds?.map((e, i) => {
-              return (
-                <div className="d-flex" key={i}>
-                  <div
-                    style={{ minWidth: "17%", width: "17%" }}
-                    className="px-1 text-uppercase"
-                  >
-                    <p>{e?.MasterManagement_DiamondStoneTypeName}</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className="px-1 text-end"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className="px-1 text-end"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "9%", width: "9%" }}
-                    className="px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.Pcs, 0)}</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className="px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.Wt, 3)} Ctw</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className="px-1 text-end"
-                  >
-                    <p>
-                      {e?.isRateOnPcs === 0
-                        ? e?.Wt !== 0 && (
-                          <>
-                            {NumberWithCommas(
-                              e?.Amount /
-                              e?.Wt /
-                              headerData?.CurrencyExchRate,
-                              2
-                            )}{" "}
-                            / Wt
-                          </>
-                        )
-                        : e?.Pcs !== 0 && (
-                          <>
-                            {NumberWithCommas(
-                              e?.Amount /
-                              e?.Pcs /
-                              headerData?.CurrencyExchRate,
-                              2
-                            )}{" "}
-                            / Pcs
-                          </>
-                        )}
-                    </p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className="px-1 text-end"
-                  >
-                    <p>
-                      {NumberWithCommas(
-                        e?.Amount / headerData?.CurrencyExchRate,
-                        2
-                      )}
-                    </p>
-                  </div>
+
+            {(mainData?.diamonds?.length > 0) && (
+              <div className="d-flex">
+
+                <div
+                  style={{ minWidth: "17%", width: "17%" }}
+                  className="px-1 text-uppercase"
+                >
+                  <p>DIAMOND</p>
                 </div>
-              );
-            })}
-            {mainData?.colorStones?.map((e, i) => {
-              return (
-                <div className="d-flex" key={i}>
-                  <div
-                    style={{ minWidth: "17%", width: "17%" }}
-                    className="px-1 text-uppercase"
-                  >
-                    <p>{e?.MasterManagement_DiamondStoneTypeName}</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "14.5%", width: "14.5%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p></p>
-                  </div>
-                  <div
-                    style={{ minWidth: "9%", width: "9%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.Pcs, 0)}</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>{NumberWithCommas(e?.Wt, 3)} Ctw</p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>
-                      {e?.isRateOnPcs === 0
-                        ? e?.Wt !== 0 && (
-                          <>
-                            {NumberWithCommas(
-                              e?.Amount /
-                              e?.Wt /
-                              headerData?.CurrencyExchRate,
-                              2
-                            )}{" "}
-                            / Wt
-                          </>
-                        )
-                        : e?.Pcs !== 0 && (
-                          <>
-                            {NumberWithCommas(
-                              e?.Amount /
-                              e?.Pcs /
-                              headerData?.CurrencyExchRate,
-                              2
-                            )}{" "}
-                            / Pcs
-                          </>
-                        )}
-                    </p>
-                  </div>
-                  <div
-                    style={{ minWidth: "15%", width: "15%" }}
-                    className=" px-1 text-end"
-                  >
-                    <p>
-                      {NumberWithCommas(
-                        e?.Amount / headerData?.CurrencyExchRate,
-                        2
-                      )}
-                    </p>
-                  </div>
+
+                <div
+                  style={{ minWidth: "14.5%", width: "14.5%" }}
+                  className="px-1 text-end"
+                >
+                  <p></p>
                 </div>
-              );
-            })}
-            {mainData?.misc2?.map((e, i) => {
+
+                <div
+                  style={{ minWidth: "14.5%", width: "14.5%" }}
+                  className="px-1 text-end"
+                >
+                  <p></p>
+                </div>
+
+                <div
+                  style={{ minWidth: "9%", width: "9%" }}
+                  className="px-1 text-end"
+                >
+                  <p>{NumberWithCommas(mergedDiamond?.Pcs, 0)}</p>
+                </div>
+
+                <div
+                  style={{ minWidth: "15%", width: "15%" }}
+                  className="px-1 text-end"
+                >
+                  <p>{NumberWithCommas(mergedDiamond?.Wt, 3)} Ctw</p>
+                </div>
+
+                <div
+                  style={{ minWidth: "15%", width: "15%" }}
+                  className="px-1 text-end"
+                >
+                  <p>
+                    {mergedDiamond?.isRateOnPcs === 0
+                      ? mergedDiamond?.Wt !== 0 &&
+                      `${NumberWithCommas(
+                        mergedDiamond?.Amount /
+                        mergedDiamond?.Wt /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Wt`
+                      : mergedDiamond?.Pcs !== 0 &&
+                      `${NumberWithCommas(
+                        mergedDiamond?.Amount /
+                        mergedDiamond?.Pcs /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Pcs`}
+                  </p>
+                </div>
+
+                <div
+                  style={{ minWidth: "15%", width: "15%" }}
+                  className="px-1 text-end"
+                >
+                  <p>
+                    {NumberWithCommas(
+                      mergedDiamond?.Amount / headerData?.CurrencyExchRate,
+                      2
+                    )}
+                  </p>
+                </div>
+
+              </div>
+            )}
+
+            {(mainData?.colorStones?.length > 0) && (
+              <div className="d-flex">
+
+                <div
+                  style={{ minWidth: "17%", width: "17%" }}
+                  className="px-1 text-uppercase"
+                >
+                  <p>Color Stone</p>
+                </div>
+
+                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                  <p></p>
+                </div>
+
+                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                  <p></p>
+                </div>
+
+                <div style={{ minWidth: "9%", width: "9%" }} className="px-1 text-end">
+                  <p>{NumberWithCommas(mergedColorStone?.Pcs, 0)}</p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>
+                    {NumberWithCommas(mergedColorStone?.Wt, 3)}{" "}
+                    {atob(printName) === "invoice print 8A" ? "Gms" : "Ctw"}
+                  </p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>
+                    {mergedColorStone?.isRateOnPcs === 0
+                      ? mergedColorStone?.Wt !== 0 &&
+                      `${NumberWithCommas(
+                        mergedColorStone?.Amount /
+                        mergedColorStone?.Wt /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Wt`
+                      : mergedColorStone?.Pcs !== 0 &&
+                      `${NumberWithCommas(
+                        mergedColorStone?.Amount /
+                        mergedColorStone?.Pcs /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Pcs`}
+                  </p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>
+                    {NumberWithCommas(
+                      mergedColorStone?.Amount / headerData?.CurrencyExchRate,
+                      2
+                    )}
+                  </p>
+                </div>
+
+              </div>
+            )}
+            {/* {mainData?.misc2?.map((e, i) => {
               return (
                 <div className="d-flex" key={i}>
                   <div
@@ -945,7 +969,66 @@ const InvoicePrint8 = ({
                   </div>
                 </div>
               );
-            })}
+            })} */}
+
+            {(mainData?.misc2?.length > 0) && (
+              <div className="d-flex">
+
+                <div
+                  style={{ minWidth: "17%", width: "17%" }}
+                  className="px-1 text-uppercase"
+                >
+                  <p>OTHER MATERIAL</p>
+                </div>
+
+                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                  <p></p>
+                </div>
+
+                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                  <p></p>
+                </div>
+
+                <div style={{ minWidth: "9%", width: "9%" }} className="px-1 text-end">
+                  <p>{NumberWithCommas(mergedMisc?.Pcs, 0)}</p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>{NumberWithCommas(mergedMisc?.Wt, 3)} Gms</p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>
+                    {mergedMisc?.isRateOnPcs === 0
+                      ? mergedMisc?.Wt !== 0 &&
+                      `${NumberWithCommas(
+                        mergedMisc?.Amount /
+                        mergedMisc?.Wt /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Wt`
+                      : mergedMisc?.Pcs !== 0 &&
+                      `${NumberWithCommas(
+                        mergedMisc?.Amount /
+                        mergedMisc?.Pcs /
+                        headerData?.CurrencyExchRate,
+                        2
+                      )} / Pcs`}
+                  </p>
+                </div>
+
+                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                  <p>
+                    {NumberWithCommas(
+                      mergedMisc?.Amount / headerData?.CurrencyExchRate,
+                      2
+                    )}
+                  </p>
+                </div>
+
+              </div>
+            )}
+
             <div className="d-flex">
               <div
                 style={{ minWidth: "17%", width: "17%" }}
@@ -1004,6 +1087,8 @@ const InvoicePrint8 = ({
                 </p>
               </div>
             </div>
+
+
 
             {mainData?.otherCharges?.map((e, i) => {
               return (
@@ -1103,7 +1188,7 @@ const InvoicePrint8 = ({
               <p className="fw-bold"> Total Amount </p>
               <p className="fw-bold">
                 {" "}
-                {NumberWithCommas( (mainDatas?.mainTotal?.total_amount  / headerData?.CurrencyExchRate)- headerData?.FreightCharges, 2 )}
+                {NumberWithCommas((mainDatas?.mainTotal?.total_amount / headerData?.CurrencyExchRate) - headerData?.FreightCharges, 2)}
               </p>
               {/* <p className="fw-bold"> {NumberWithCommas(totalss?.total-totalss?.discount, 2)}</p> */}
             </div>
@@ -1183,7 +1268,7 @@ const InvoicePrint8 = ({
           dangerouslySetInnerHTML={{ __html: headerData?.Declaration }}
         ></div>
         <p className="p-1 no_break">
-          <span className="fw-bold"> REMARKS :</span> <span dangerouslySetInnerHTML={{ __html: headerData?.PrintRemark }}></span> 
+          <span className="fw-bold"> REMARKS :</span> <span dangerouslySetInnerHTML={{ __html: headerData?.PrintRemark }}></span>
         </p>
         {/* {footer} */}
         <div

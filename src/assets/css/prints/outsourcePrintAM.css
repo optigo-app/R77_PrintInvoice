@@ -1,3 +1,7 @@
+html {
+  scrollbar-gutter: stable;
+}
+
 .containerEstimate {
   max-width: 297mm !important;
   font-family: Calibri;

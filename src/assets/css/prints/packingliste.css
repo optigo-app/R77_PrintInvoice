@@ -393,3 +393,52 @@
     
     
 }
+
+
+
+/* export invoice excel */
+.inv-top-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    border: 2px solid #000000;
+  }
+  
+  .inv-top-cell {
+    border: 1px solid #000000;
+    padding: 6px;
+    vertical-align: top;
+  }
+  
+  .inv-top-label {
+    font-size: 11px;
+    color: #000000;
+    margin-bottom: 3px;
+    display: block;
+  }
+  
+  .inv-top-bold-header {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+  }
+  
+  .inv-top-ship-header {
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 8px 0 4px 0;
+  }
+  
+  .inv-top-spaced-row {
+    min-height: 40px;
+  }
+  
+  .inv-top-text-center {
+    text-align: center;
+  }
+  
+  .inv-top-inline-flex {
+    display: flex;
+    justify-content: space-between;
+  }

@@ -237,9 +237,9 @@ const DetailPrintMaterial = ({token, invoiceNo, printName, urls, evn, ApiVer,}) 
                     <div className="col1_inv2 spbrRht spfntCen" style={{ width: "4.10%"}}>{i + 1}</div>
                     <div className="Sucol2_inv2 spbrRht">
                     {e?.ItemName === "DIAMOND" 
-                      ? `DIAMOND:${e?.LotNo}${e?.LotNo ? '/' : ''}${e?.shape}${e?.shape ? '/' : ''}${e?.quality}${e?.quality ? '/' : ''}${e?.color}${e?.color ? '/' : ''}${e?.size}`
+                      ? `DIAMOND ${e?.IsSolGem ? ' S:' : ''}${e?.LotNo}${e?.LotNo ? '/' : ''}${e?.shape}${e?.shape ? '/' : ''}${e?.quality}${e?.quality ? '/' : ''}${e?.color}${e?.color ? '/' : ''}${e?.size}`
                       : e?.ItemName === "COLOR STONE" 
-                        ? `CS:${e?.shape}${e?.shape ? '/' : ''}${e?.quality}${e?.quality ? '/' : ''}${e?.color}${e?.color ? '/' : ''}${e?.size}` 
+                        ? `CS ${e?.IsSolGem ? ' G:' : ''}${e?.shape}${e?.shape ? '/' : ''}${e?.quality}${e?.quality ? '/' : ''}${e?.color}${e?.color ? '/' : ''}${e?.size}` 
                         : e?.ItemName === "METAL" 
                           ? `METAL:${e?.shape}${e?.shape ? '/' : ''}${e?.quality}${e?.quality ? '/' : ''}${e?.color}${e?.color ? '/' : ''}${formatAmount(e?.Tunch,3)}`
                           : e?.ItemName === "MISC" 

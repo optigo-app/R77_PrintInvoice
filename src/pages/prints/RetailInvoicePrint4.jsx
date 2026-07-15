@@ -27,7 +27,6 @@ const RetailInvoiceprint4 = ({
 }) => {
   const [headerData, setHeaderData] = useState({});
   const [data, setdata] = useState([]);
-  console.log("TCL: data", data)
   const [msg, setMsg] = useState("");
   const [loader, setLoader] = useState(true);
   const toWords = new ToWords();
@@ -55,6 +54,9 @@ const RetailInvoiceprint4 = ({
   const [taxes, setTaxes] = useState([]);
   const [bank, setBank] = useState([]);
   const [document, setDocument] = useState([]);
+
+
+  
   function loadData(data) {
     // console.log("datadatadata", data);
 
@@ -269,6 +271,9 @@ const RetailInvoiceprint4 = ({
             e.hallmarkingCount = findRecord?.hallmarkingCount;
             e.findingWt = findRecord?.findingWt;
             e.otherCharge = findRecord?.otherCharge;
+
+
+
           }
         } else {
           // totals.diamondColorStoneWt += e?.diamondWt + e?.colorStoneWt;
@@ -397,6 +402,45 @@ const RetailInvoiceprint4 = ({
     bank?.reduce((acc, cObj) => acc + +cObj?.amount, 0);
 
   const difference = Math.round((totalConverted - totalPayments) * 100) / 100;
+
+
+
+
+
+
+
+
+  const matches = headerData?.oldgoldDetails?.match(/\[(.*?)\]/g) || [];
+
+const grouped = {};
+
+matches.forEach((item) => {
+  const metalType = item.match(/MetalType\s*:\s*([^,]+)/)?.[1]?.trim();
+  const purity = item.match(/purity\s*:\s*([^,]+)/)?.[1]?.trim();
+  const netWt = parseFloat(item.match(/NetWt\s*:\s*([\d.]+)/)?.[1] || 0);
+  const totalAmount = parseFloat(item.match(/TotalAmount\s*:\s*([\d.]+)/)?.[1] || 0);
+
+  const key = `${metalType}_${purity}`;
+
+  if (!grouped[key]) {
+    grouped[key] = {
+      MetalType: metalType,
+      Purity: purity,
+      NetWt: 0,
+      TotalAmount: 0,
+    };
+  }
+
+  grouped[key].NetWt += netWt;
+  grouped[key].TotalAmount += totalAmount;
+});
+
+const OldGolddetails = Object.values(grouped);
+
+
+console.log("TCL: OldGolddetails", OldGolddetails)
+
+ 
 
   return (
     <>
@@ -721,8 +765,7 @@ const RetailInvoiceprint4 = ({
                             )}
                           </div>
                           <div
-                            className={`${style?.materialJewerryRetailInvoicePrint} border-end`}
-                          >
+                            className={`${style?.materialJewerryRetailInvoicePrint} border-end`} >
                             <div className="d-grid h-100">
                               {e?.primaryMetal?.map((ele, ind) => {
                                 return (
@@ -747,26 +790,16 @@ const RetailInvoiceprint4 = ({
                                       >
                                         {/* {e?.Tunch !== 0 && NumberWithCommas(e?.Tunch, 3)}  */}
                                         {ele?.QualityName}{" "}
-                                        {e?.Tunch !== 0 && ` / ${NumberWithCommas(e?.Tunch, 2)}%`}
-
-                                        {/* {(e?.hallmarkingCount !== 0 || e?.HUID !== "" || e?.isWithHallMark === 1) && */}
-                                         {(  e?.HUID !== "" || e?.isWithHallMark === 1) &&
-                                          " Hallmarking"
-                                        }
-                                        {/* {e?.Tunch !== 0 &&
+                                        {e?.Tunch !== 0 &&
                                           ` / ${NumberWithCommas(
                                             e?.Tunch,
                                             2
-                                          )}%
-                                          
-                                          ${e?.hallmarkingCount !== 0
+                                          )}% ${
+                                          // e?.hallmarkingCount !== 0
+                                          (e?.HUID !== "" || e?.isWithHallMark === 1)
                                             ? "Hallmarking"
                                             : ""
-                                          }`
-                                          }
-                                        {e?.HUID != "" && "Hallmarking"}
-                                        {e?.isWithHallMark == 1 && "Hallmarking"} */}
-
+                                          }`}
                                       </p>
                                     </div>
                                     <div
@@ -1038,24 +1071,7 @@ const RetailInvoiceprint4 = ({
                                     </div>
                                   </div>
                                 )}
-                              {/* 
-                        {e?.materials.length > 0 ? e?.materials.map((ele, ind) => {
-                          return <div className={`d-flex ${ind !== e?.materials.length - 1 && 'border-bottom'}`} key={ind}>
-                            <div className={`col-2 border-end d-flex align-items-center`}><p className="p-1 lh-1">{ele?.MasterManagement_DiamondStoneTypeid === 4 ? ele?.ShapeName : ele?.MasterManagement_DiamondStoneTypeName}</p></div>
-                            <div className={`col-2 border-end d-flex align-items-center`}><p className="p-1 lh-1">{ele?.MasterManagement_DiamondStoneTypeid === 4 && ele?.QualityName}{((ind === 0 && e?.Tunch !== 0) && ` / ${NumberWithCommas(e?.Tunch, 2)}%`)}</p></div>
-                            <div className={`col-2 border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{ele?.MasterManagement_DiamondStoneTypeid === 4 && fixedValues(e?.grosswt, 3)}</p></div>
-                            <div className={`col-2 border-end p-1 d-flex align-items-center justify-content-end`}><p className=" text-end lh-1">{ele?.MasterManagement_DiamondStoneTypeid !== 4 && fixedValues(ele?.Wt, 3)}</p></div>
-                            <div className={`col-2 border-end d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{ele?.MasterManagement_DiamondStoneTypeid === 4 && fixedValues(e?.MetalDiaWt, 3)}</p></div>
-                            <div className={`col-2 d-flex align-items-center justify-content-end`}><p className=" p-1 text-end lh-1">{ele?.MasterManagement_DiamondStoneTypeid === 4 ? NumberWithCommas(ele?.Rate, 2) : NumberWithCommas(ele?.Amount / ele?.Wt, 2)}</p></div>
-                          </div>
-                        }) : <div className="d-flex">
-                          <div className={` border-end`}><p className="p-1 lh-1"></p></div>
-                          <div className={` border-end`}><p className="p-1 lh-1"></p></div>
-                          <div className={` border-end`}><p className="p-1 text-end lh-1"></p></div>
-                          <div className={` border-end p-1 `}><p className="text-end lh-1"></p></div>
-                          <div className={`border-end `}><p className="p-1 text-end lh-1"></p></div>
-                          <div className={` `}><p className="p-1 text-end lh-1"></p></div>
-                        </div>} */}
+
                             </div>
                           </div>
                           <div
@@ -1204,7 +1220,7 @@ const RetailInvoiceprint4 = ({
                         className={`${style?.RemarkJewelleryInvoicePrintC} p-2`}
                       >
                         <div className="d-flex ">
-                          Old Gold Purchase Description :{" "}
+                          Old Metal Purchase Description :{" "}
                           <div
                             dangerouslySetInnerHTML={{
                               __html: headerData?.Remark,
@@ -1240,7 +1256,17 @@ const RetailInvoiceprint4 = ({
                         <p className="pb-1 px-1 text-end">
                           Total Amt after Tax
                         </p>
-                        <p className="pb-1 px-1 text-end">Old Gold</p>
+                        {/* <p className="pb-1 px-1 text-end">Old Gold</p> */}
+
+                        {
+                           OldGolddetails?.map((e, i) => {
+                            return (
+                              <p className="pb-1 px-1 text-end" key={i}>
+                                {e?.MetalType} - {NumberWithCommas(e?.NetWt, 3) +" gm" } 
+                              </p>
+                            )
+                          })
+                        }
                         <p className="pb-1 px-1 text-end">Recv. in Cash</p>
                         {bank.length > 0 &&
                           bank.map((e, i) => {
@@ -1295,9 +1321,19 @@ const RetailInvoiceprint4 = ({
                             2
                           )} {/** After Tax */}
                         </p>
-                        <p className="pb-1 px-1 text-end">
-                          {NumberWithCommas(headerData?.OldGoldAmount, 2)} {/** Old Gold */}
-                        </p>
+                        {/* <p className="pb-1 px-1 text-end">
+                          {NumberWithCommas(headerData?.OldGoldAmount, 2)}  
+                        </p> */}
+
+                        {
+                           OldGolddetails?.map((e, i) => {
+                            return (
+                              <p className="pb-1 px-1 text-end" key={i}>
+                                 {NumberWithCommas(e?.TotalAmount, 2)}
+                              </p>
+                            )
+                          })
+                        }
                         <p className="pb-1 px-1 text-end">
                           {NumberWithCommas(headerData?.CashReceived, 2)} {/** Amount That Receive In Cash */}
                         </p>

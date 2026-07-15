@@ -100,7 +100,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       let diamonds = [];
       obj?.diamonds?.forEach((ele, ind) => {
         let findDiamond = diamonds?.findIndex(
-          (elem, index) => elem?.QualityName === ele?.QualityName
+          (elem, index) => elem?.QualityName === ele?.QualityName && elem?.IsSolGem === ele?.IsSolGem
         );
         if (findDiamond === -1) {
           diamonds?.push(ele);
@@ -113,7 +113,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       let colorstone = [];
       obj?.colorstone?.forEach((ele, ind) => {
         let findColorStone = colorstone?.findIndex(
-          (elem, index) => elem?.QualityName === ele?.QualityName
+          (elem, index) => elem?.QualityName === ele?.QualityName && elem?.IsSolGem === ele?.IsSolGem
         );
         if (findColorStone === -1) {
           colorstone?.push(ele);
@@ -234,7 +234,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         let blankDiamonds = [];
         allDiamonds?.forEach((ele, ind) => {
           let findDiamonds = blankDiamonds?.findIndex(
-            (elem, index) => elem?.QualityName === ele?.QualityName
+            (elem, index) => elem?.QualityName === ele?.QualityName  && elem?.IsSolGem === ele?.IsSolGem
           );
           if (findDiamonds === -1) {
             blankDiamonds?.push(ele);
@@ -252,7 +252,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         let blankcolorStones = [];
         allColorStone?.forEach((ele, ind) => {
           let findColorStoness = blankcolorStones?.findIndex(
-            (elem, index) => elem?.ShapeName === ele?.ShapeName
+            (elem, index) => elem?.ShapeName === ele?.ShapeName && elem?.IsSolGem === ele?.IsSolGem
           );
           if (findColorStoness === -1) {
             blankcolorStones?.push(ele);
@@ -354,6 +354,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     let gmwt = 0;
     let ctwwt = 0;
     datas?.resultArray?.forEach((e) => {
+      console.log('datas: ', datas);
         e?.misc?.forEach((el) => {
             totmiscwt += el?.Wt;
             gmwt += el?.Wt;
@@ -376,24 +377,28 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     setMisctotPcs(totmiscwt)
 
     let tot_pcs2 = 0;
-    let tot_wt2 = 0;
-    datas?.resultArray?.forEach((e) => {
-            e?.diamonds?.forEach((el) => {
-                tot_pcs2 += el?.dpcs;
-                tot_wt2 += el?.dwt;
-            })
-           
-    })
-    datas?.resultArray?.forEach((e) => {
-            e?.colorstone?.forEach((el) => {
-                tot_pcs2 += el?.cspcs;
-                tot_wt2 += el?.cswt;
-            })
-           
-    })
-    setTotPcs(tot_pcs2)
-    setTotWt(tot_wt2)
+let tot_wt2 = 0;
+
+datas?.resultArray?.forEach((e) => {
+  e?.diamonds?.forEach((el) => {
+    tot_pcs2 += Number(el?.Pcs || 0);
+    tot_wt2 += Number(el?.Wt || 0);
+  });
+
+  e?.colorstone?.forEach((el) => {
+    tot_pcs2 += Number(el?.Pcs || 0);
+    tot_wt2 += Number(el?.Wt || 0);
+  });
+});
+
+console.log("TCL: datas?.resultArray", datas?.resultArray)
+
+setTotPcs(tot_pcs2);
+setTotWt(tot_wt2);
   };
+
+  
+ 
 
   const handleChange = (e) => {
     rate ? setRate(false) : setRate(true);
@@ -448,6 +453,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   console.log("finalD", finalD);
   // console.log("taxes", taxes);
 
+   
   return (
     <>
       {loader ? (
@@ -542,28 +548,32 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 {jsonData1?.customerAddress2}
               </p>
               <p className="line_height_110 ft_12_retailPrint">
-                {jsonData1?.customercity}
+                {jsonData1?.customercity1}
                 {jsonData1?.customerpincode}
               </p>
               <p className="line_height_110 ft_12_retailPrint">
                 {jsonData1?.customeremail1}
               </p>
               <p className="line_height_110 ft_12_retailPrint">
-                {jsonData1?.vat_cst_pan}
+               
+                 GSTIN-{jsonData1?.Cust_VAT_GST_No} | {jsonData1?.vat_cst_pan}
+              </p>
+              <p className="line_height_110 ft_12_retailPrint">
+                Aadhaar-{jsonData1?.aadharno}
               </p>
               <p className="line_height_110 ft_12_retailPrint">
                 {jsonData1?.Cust_CST_STATE}-{jsonData1?.Cust_CST_STATE_No}
               </p>
+              
             </div>
             <div className="col-4 p-1 border-end">
               <p className="line_height_110 ft_12_retailPrint">Ship To, </p>
               <p className="fw-bold">{jsonData1?.customerfirmname}</p>
-              <p className="line_height_110 ft_12_retailPrint">
+              {/* <p className="line_height_110 ft_12_retailPrint">
                 {jsonData1?.CustName}
-              </p>
-
-              {/* <p className=''>{jsonData1?.customerAddress2}</p> */}
-              <p className="line_height_110 ft_12_retailPrint">
+              </p> */}
+ 
+              {/* <p className="line_height_110 ft_12_retailPrint">
                 {jsonData1?.customercity}, {jsonData1?.State}
               </p>
               <p className="line_height_110 ft_12_retailPrint">
@@ -572,7 +582,11 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
               </p>
               <p className="line_height_110 ft_12_retailPrint">
                 Mobile No. : {jsonData1?.customermobileno1}
-              </p>
+              </p> */}
+              
+              <div style={{ whiteSpace: "pre-line",lineHeight:"110%" }}>
+              {jsonData1?.Printlable}
+</div>
             </div>
             <div
               className="col-4 p-1 position-relative"
@@ -664,6 +678,8 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
           {/* data */}
           {dataFill.map((e, i) => {
+            
+            console.log("TCL: e", e)
             return (
               <>
                 {" "}
@@ -772,6 +788,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             >
                               <p>
                                 {ele?.MasterManagement_DiamondStoneTypeName}
+                                {ele?.IsSolGem==1? ": S":""}
                               </p>
                             </div>
                             <div
@@ -835,7 +852,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               className={`${styles.Material} border-end p-1 d-flex align-items-center`}
                             >
                               <p>
-                                {ele?.MasterManagement_DiamondStoneTypeName}
+                                {ele?.MasterManagement_DiamondStoneTypeName}{ele?.IsSolGem==1? ": G":""}
                               </p>
                             </div>
                             <div
@@ -1029,7 +1046,7 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 <div
                   className={`${styles.Wt} lossWtRetailPrintNoRate border-end p-1 d-flex align-items-end justify-content-around flex-column min_height_44_retail_print_1 ft_12_retailPrint`}
                 ><p className="fw-bold text-end">
-                    {gmwt !== 0 && `${gmwt?.toFixed(3)} gms`} <br /> {totWt !== 0 && `${totWt?.toFixed(3)} ctw`} 
+                    {gmwt !== 0 && `${gmwt?.toFixed(3)} gms`} <br /> { Number(totWt) !== 0 && `${Number(totWt)?.toFixed(3)} ctw`} 
                 </p>
                   {/* <p className="fw-bold lh-1 text-end fs_maintotal_wt_rp">
                     D + C : {fixedValues(total?.materialWeight, 3)} Ctw
@@ -1101,7 +1118,13 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
           {/* grand total */}
           <div className="d-flex border-start border-end border-bottom no_break">
             {/* <div className="totalInWordsRetailPrint p-1 d-flex flex-column align-items-start justify-content-end p-1 border-end"> */}
-            <div className="col-8 p-1 d-flex flex-column align-items-start justify-content-end p-1 border-end">
+
+            
+            <div className="col-8 p-1 d-flex flex-column align-items-start justify-content-between p-1 border-end">
+              <div>
+                <p>Fine Wt: <span className="fw-bold">{NumberWithCommas(finalD?.mainTotal?.convertednetwt, 3)+" gm"}</span></p>
+              </div>
+              <div>
               <p className="ft_12_retailPrint">
                 In Words {jsonData1?.Currencyname}
               </p>
@@ -1124,8 +1147,9 @@ const RetailPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       jsonData1?.AddLess / jsonData1?.CurrencyExchRate,
                     2
                   )
-                )}{" "}
+                )}{" Only"}
               </p>
+              </div>
             </div>
             {/* <div className="cgstRetailPrint p-1 text-end p-1 border-end"> */}
             <div className="col-2 py-1 text-end border-end ft_12_retailPrint">

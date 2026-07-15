@@ -129,8 +129,9 @@
 }
 /* tax */
 .boxwtaxs2{
-    width: 16.2%;
+    width: 22.20%;
 }
+
 @media print{
     .hidebtns2{
         display: none !important;
@@ -142,7 +143,7 @@
         line-height: 8px;
     }
     .boxwtaxs2{
-        width: 20%;
+        width: 22.20%;
     }
     .printlogos2{
         max-height: 100px;

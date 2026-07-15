@@ -118,6 +118,7 @@ const SaleOrder = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           name: "Labour",
           amount: e?.MakingAmount,
         });
+        
       } else {
         summaryArr[findLabour].amount += e?.MakingAmount;
       }

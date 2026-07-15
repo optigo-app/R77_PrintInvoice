@@ -110,6 +110,15 @@ const PackingList4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const discountCriteria = [
+        { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond', disAmount: "DiamondDiscountAmount" },
+        { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal', disAmount: "MetalDiscountAmount" },
+        { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone', disAmount: "StoneDiscountAmount" },
+        { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour', disAmount: "LabourDiscountAmount" },
+        { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire', disAmount: "SolitaireDiscountAmount1" },
+        { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc', disAmount: "MiscDiscountAmount" },
+      ];
+
     return (
         <>
             {loader ? (
@@ -128,7 +137,7 @@ const PackingList4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                     </div>
                                 </div>
                                 {/* company details */}
-                                <div className={`text-center ${style?.font_12}`}>
+                                <div className={`text-center ${style?.font_12}`} style={{display:"flex",flexDirection:"column", alignItems: "center"}}>
                                     {/* <img src={headerData?.PrintLogo} alt="" className='imgWidth' style={{ maxWidth: "115px" }} /> */}
                                     {isImageWorking && (headerData?.PrintLogo !== "" &&
                                         <img src={headerData?.PrintLogo} alt=""
@@ -216,6 +225,16 @@ const PackingList4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                     <tbody>
                                         {/* table data */}
                                         {data?.resultArray?.map((e, i) => {
+                                             const discountDisplay = discountCriteria
+                                             .filter(({ key }) => e?.[key] > 0)
+                                             .map(({ key, isAmountKey, label, disAmount }) => {
+                                               const num = Number(e[key]);
+                                               const am = Number(e[disAmount])
+                                               const decimals = e[isAmountKey] === 1 ? 3 : 2;
+                                               const val = num.toFixed(decimals);
+                                               return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                                             })
+                                             .join(', ');
                                             return <tr key={i}>
                                                 <td className=''>
                                                     <div className='border-top'>
@@ -315,7 +334,7 @@ const PackingList4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                                                 <div>
                                                                                     {
                                                                                         e?.metal?.map((ele, ind) => {
-                                                                                            return <p key={ind} className='text-end'>{NumberWithCommas(ele?.Rate, 2)} </p>
+                                                                                            return <p key={ind} className='text-end'>{ele.IsPrimaryMetal==1?  NumberWithCommas(ele?.Rate, 2):""} </p>
                                                                                         })
                                                                                     }
                                                                                 </div>
@@ -639,11 +658,7 @@ const PackingList4 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
                                                                 </div>
                                                                 <div className={`lightGrey border-end border-top ${style?.discountAmt}`}>
-                                                                    <p className="fw-bold text-end">Discount {e?.Discount}% @{e?.IsCriteriabasedAmount === 1 ?
-                                                                    e?.discountElements?.map((ele, ind) => {
-                                                                        return <React.Fragment key={ind}>{ele?.label} {ind !== (e?.discountElements?.length - 1) ? "," : ""}</React.Fragment>
-                                                                    }) : "Total "}
-                                                                        Amount	</p>
+                                                                    <p className="fw-bold text-end">    Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}	</p>
                                                                 </div>
                                                                 <div className={`lightGrey border-end border-top ${style?.discountAmtnumber}`}><p className='fw-bold text-end'>{NumberWithCommas(e?.DiscountAmt / headerData?.CurrencyExchRate, 2)}</p></div>
                                                                 <div className={`lightGrey border-top ${style?.amount}`}>

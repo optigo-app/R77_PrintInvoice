@@ -32,11 +32,12 @@ const JewelleryTaxInvoiceSale = ({
   const [tax, settax] = useState([]);
   const [summary, setSummary] = useState([]);
   const [imgFlag, setImgFlag] = useState(false);
+  const [pandingflag, setPandingflag] = useState(false);
   const [showBoxNo, setShowBoxNo] = useState(false);
   const [isImageWorking, setIsImageWorking] = useState(true);
   const handleImageErrors = () => {
     setIsImageWorking(false);
-  };   
+  };
   const [totalAmount, settotalAmount] = useState({
     before: 0,
     after: 0,
@@ -75,6 +76,8 @@ const JewelleryTaxInvoiceSale = ({
     let metalArr = [];
     let diamondWt = 0;
     let labGrownWt = 0;
+    let solitaireWt = 0;
+    let gemstoneWt = 0;
     let colorStoneWt = 0;
     let miscWt = 0;
     let grossWt = 0;
@@ -94,16 +97,20 @@ const JewelleryTaxInvoiceSale = ({
       grossWt += e?.grosswt * e?.Quantity;
       let diamondWts = 0;
       let labGrownWts = 0;
+      let solitaireWts = 0;
+      let gemstoneWts = 0;
       let colorStoneWts = 0;
       let miscWts = 0;
       let obj = { ...e };
       let miscWt = 0;
       let materials = [];
+      let metal = [];
       totalAmountBefore +=
         e?.TotalAmount / data?.BillPrint_Json[0].CurrencyExchRate;
       let metalColorCode = "";
       data?.BillPrint_Json2.forEach((ele) => {
         if (obj?.SrJobno === ele?.StockBarcode) {
+          metal.push(ele);
 
           if (ele?.IsCenterStone === 1) {
             materials.push(ele);
@@ -134,13 +141,14 @@ const JewelleryTaxInvoiceSale = ({
                 elem?.Colorname === ele?.Colorname &&
                 elem?.QualityName === ele?.QualityName &&
                 elem?.Rate === ele?.Rate &&
+                elem?.IsSolGem === ele?.IsSolGem &&
                 elem?.IsCenterStone !== 1;
-          
+
               if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
                 return (
                   isSameBasic &&
                   getMaterialType(elem?.MaterialTypeName) ===
-                    getMaterialType(ele?.MaterialTypeName)
+                  getMaterialType(ele?.MaterialTypeName)
                 );
               }
               return isSameBasic;
@@ -154,17 +162,28 @@ const JewelleryTaxInvoiceSale = ({
 
             }
             if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
-              if(ele?.MaterialTypeName === "LabGrown"){
+              
+              if (ele?.MaterialTypeName === "LabGrown") {
                 labGrownWt += ele?.Wt * obj?.Quantity;
                 labGrownWts += ele?.Wt;
-              }else{
+              } else {
+                if (ele?.IsSolGem === 1) {
+                  solitaireWt += ele?.Wt * obj?.Quantity;
+                  solitaireWts += ele?.Wt;
+                }else{
                 diamondWt += ele?.Wt * obj?.Quantity;
                 diamondWts += ele?.Wt;
+                }
               }
             }
             if (ele?.MasterManagement_DiamondStoneTypeid === 2) {
+              if (ele?.IsSolGem === 1) {
+                gemstoneWt += ele?.Wt * obj?.Quantity;
+                gemstoneWts += ele?.Wt;
+              }else{
               colorStoneWt += ele?.Wt * obj?.Quantity;
               colorStoneWts += ele?.Wt;
+              }
             }
             if (ele?.MasterManagement_DiamondStoneTypeid === 3) {
               miscWt += ele?.Wt;
@@ -184,17 +203,22 @@ const JewelleryTaxInvoiceSale = ({
         obj.TotalAmount / data?.BillPrint_Json[0].CurrencyExchRate;
       obj.diamondWts = diamondWts;
       obj.labGrownWts = labGrownWts;
+      obj.solitaireWts = solitaireWts;
+      obj.gemstoneWts = gemstoneWts;
       obj.colorStoneWts = colorStoneWts;
       obj.miscWts = miscWts;
       obj.materials = materials;
+      obj.metal = metal;
       obj.metalColorCode = metalColorCode;
 
       obj.miscWt = miscWt * obj?.Quantity;
       resultArr.push(obj);
     });
     metalArr.push({ label: "Diamond Wt", value: diamondWt, gm: false });
+    metalArr.push({ label: "Solitaire Wt", value: solitaireWt, gm: false });
     metalArr.push({ label: "Lab Grown Dia. Wt", value: labGrownWt, gm: false });
     metalArr.push({ label: "Stone Wt", value: colorStoneWt, gm: false });
+    metalArr.push({ label: "Gemstone Wt", value: gemstoneWt, gm: false });
     metalArr.push({ label: "Gross Wt", value: grossWt, gm: true });
     let miscQunWt = 0;
     resultArr?.forEach((a) => {
@@ -323,6 +347,13 @@ const JewelleryTaxInvoiceSale = ({
     }
   };
 
+  const handlePandingflag = (e) => {
+    if (pandingflag) setPandingflag(false);
+    else {
+      setPandingflag(true);
+    }
+  };
+
   const handleShowBoxNo = (e) => {
     if (showBoxNo) setShowBoxNo(false);
     else {
@@ -363,6 +394,13 @@ const JewelleryTaxInvoiceSale = ({
 
   // console.log("data", data);
 
+  const filteredData =
+    atob(evn) === "memo"
+      ? pandingflag
+        ? data?.filter((item) => item?.IsEdit == 1)
+        : data
+      : data;
+
   return loader ? (
     <Loader />
   ) : msg === "" ? (
@@ -402,6 +440,25 @@ const JewelleryTaxInvoiceSale = ({
                 Header
               </label>
             </div>
+
+
+            {atob(evn) === "memo" && (
+
+              <div className="px-2">
+                <input
+                  type="checkbox"
+                  onChange={handlePandingflag}
+                  value={pandingflag}
+                  checked={pandingflag}
+                  id="pandingflag"
+                />
+                <label htmlFor="pandingflag" className="user-select-none mx-1">
+                  pending
+                </label>
+              </div>
+            )}
+
+
 
             <div className="form-check ps-3 ">
               <input
@@ -740,8 +797,8 @@ const JewelleryTaxInvoiceSale = ({
           </div>
 
           {/* table data */}
-          {data?.length > 0 &&
-            data?.map((e, i) => {
+          {filteredData?.length > 0 &&
+            filteredData?.map((e, i) => {
               // {console.log("data", data)}
 
               console.log("TCL: e?.materials", e)
@@ -766,6 +823,8 @@ const JewelleryTaxInvoiceSale = ({
               //   return acc;
               // }, {});
               // {console.log("data", data)}
+
+
               const groupedMaterials = (e?.materials || []).reduce((acc, ele) => {
                 if (ele?.IsCenterStone === 1) {
                   acc[`center-stone-${ele?.StockBarcode}`] = { ...ele };
@@ -776,8 +835,8 @@ const JewelleryTaxInvoiceSale = ({
                 const isDiamond = ele?.MasterManagement_DiamondStoneTypeid === 1;
 
                 const key = isDiamond
-                  ? `${materialType}-${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}`
-                  : `${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}`;
+                  ? `${materialType}-${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`
+                  : `${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`;
 
                 if (acc[key]) {
                   acc[key].Pcs += ele?.Pcs || 0;
@@ -793,6 +852,7 @@ const JewelleryTaxInvoiceSale = ({
                 return acc;
               }, {});
               const mergedMaterials = Object.values(groupedMaterials);
+
 
               return (
                 <div
@@ -870,7 +930,7 @@ const JewelleryTaxInvoiceSale = ({
                         <>
                           {" "}
                           | {atob(evn) === "memo" && "DIA :"}{" "}
-                          {NumberWithCommas((e?.diamondWts +e?.labGrownWts), 3)} Cts
+                          {NumberWithCommas((e?.diamondWts + e?.labGrownWts), 3)} Cts
                         </>
                       )}
                       {e?.colorStoneWts !== 0 && (
@@ -892,16 +952,21 @@ const JewelleryTaxInvoiceSale = ({
                       {mergedMaterials?.map((ele, ind) => (
                         <p key={ind} className="text-break text_break_value_sub">
                           <span className="text-break">
-                            {ele?.MasterManagement_DiamondStoneTypeid === 1 &&
-                              (ele?.IsCenterStone === 1
-                                ? "CenterStone"
-                                : ele?.MaterialTypeName === "LabGrown"
-                                  ? "Lab Grown Diamond"
-                                  : "Diamond")}
-                            {ele?.MasterManagement_DiamondStoneTypeid === 2 &&
-                              "Colorstone"}
-                            {ele?.MasterManagement_DiamondStoneTypeid === 3 &&
-                              "Misc"}
+                            {ele?.MasterManagement_DiamondStoneTypeid === 1
+                              ? ele?.IsSolGem === 1
+                                ? "Diamond: S"
+                                : ele?.IsCenterStone === 1
+                                  ? "CenterStone"
+                                  : ele?.MaterialTypeName === "LabGrown"
+                                    ? "Lab Grown Diamond"
+                                    : "Diamond"
+                              : ele?.MasterManagement_DiamondStoneTypeid === 2
+                                ? ele?.IsSolGem === 1
+                                  ? "Colorstone: G"
+                                  : "Colorstone"
+                                : ele?.MasterManagement_DiamondStoneTypeid === 3
+                                  ? "Misc"
+                                  : ""}
                           </span>
                           :
                           <span style={{ fontSize: "10.5px" }}>
@@ -1030,7 +1095,7 @@ const JewelleryTaxInvoiceSale = ({
                       ) : (
                         <div
                           className="d-flex"
-                          style={{ width: "80%" ,justifyContent:"space-between"}}
+                          style={{ width: "80%", justifyContent: "space-between" }}
                           key={i}
                         >
                           <p key={i} className="remark_fs fs_jti_Sale" style={{ minWidth: '60%' }}>

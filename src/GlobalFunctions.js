@@ -5,7 +5,7 @@ import Footer1 from "./components/footers/Footer1";
 import Header1 from "./components/headers/Header1";
 import Header2 from "./components/headers/Header2";
 import Header3 from "./components/headers/Header3";
-// import Header5 from "./components/headers/Header5";
+import Header5 from "./components/headers/Header5";
 import Subhead1 from "./components/subheaders/subhead1/Subhead1";
 import Subhead2 from "./components/subheaders/subhead2/Subhead2";
 import { exportToExcel } from "react-json-to-excel";
@@ -30,20 +30,91 @@ export const handleGlobalImgError = (e, img) => {
     e.target.src = img;
   }
 };
+//sentence words first char capital function
+export const CapitalizeWords = (text) => {
+  const capitalizeFirstLetter = (word) => {
+    return word?.charAt(0)?.toUpperCase() + word?.slice(1);
+  };
+  const wordsArray = text.split(" ");
+  const capitalizedWordsArray = wordsArray.map((word) => {
+    return word?.split("-")?.map(capitalizeFirstLetter)?.join("-");
+  });
+  const capitalizedText = capitalizedWordsArray?.join(" ");
+  // eslint-disable-next-line no-useless-concat
+  // return capitalizedText + " " + "Only";
+  return capitalizedText + " ";
+};
+
+//global function of api calling
+export const apiCall = async (token, invoiceNo, printName, urls, evn, ApiVer) => {
+  const body = {
+    token: token,
+    invoiceno: invoiceNo,
+    printname: printName,
+    Eventname: evn,
+    ApiVer: ApiVer
+  };
+  try {
+    const response = await axios.post(urls, body);
+    return response?.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+};
 
 export  function mergeFindings(data) {
+    const map = new Map();
+
+    data.forEach((item) => {
+      const key = [
+        item.Supplier,
+        item.Rate,
+        item.ShapeName,
+        item.Colorname,
+        item.QualityName,
+        item.FindingAccessories,
+        item.FindingTypename,
+      ].join("|");
+
+      if (map.has(key)) {
+        const existing = map.get(key);
+
+        existing.Pcs += Number(item.Pcs || 0);
+        existing.Wt += Number(item.Wt || 0);
+        existing.FineWt += Number(item.FineWt || 0);
+        existing.Amount += Number(item.Amount || 0);
+      } else {
+        map.set(key, {
+          ...item,
+          Pcs: Number(item.Pcs || 0),
+          Wt: Number(item.Wt || 0),
+          FineWt: Number(item.FineWt || 0),
+          Amount: Number(item.Amount || 0),
+        });
+      }
+    });
+
+    return [...map.values()];
+  }
+
+export function mergeMetals(data) {
+  const normalize = (v) =>
+    String(v ?? "").trim().toLowerCase();
+
   const map = new Map();
 
   data.forEach((item) => {
     const key = [
-      item.Supplier,
-      item.Rate,
-      item.ShapeName,
-      item.Colorname,
-      item.QualityName,
-      item.FindingAccessories,
-      item.FindingTypename,
+      normalize(item.ShapeName),
+      normalize(item.QualityName),
+      normalize(item.Colorname),
+      normalize(item.Supplier),
+      Number(item.Rate || 0),
+      Number(item.IsPrimaryMetal || 0),
     ].join("|");
+    
+ 
 
     if (map.has(key)) {
       const existing = map.get(key);
@@ -63,100 +134,31 @@ export  function mergeFindings(data) {
     }
   });
 
-  return [...map.values()];
+  return [...map.values()].sort(
+    (a, b) => Number(b.IsPrimaryMetal) - Number(a.IsPrimaryMetal)
+  );
 }
 
-export function mergeMetals(data) {
-const normalize = (v) =>
-  String(v ?? "").trim().toLowerCase();
+export const mergedBySeetingRate = (data) => Object.values(
+  data.reduce((acc, item) => {
+    const rateKey = item.SettingRate;
 
-const map = new Map();
+    if (!acc[rateKey]) {
+      // If this SettingRate doesn't exist yet, create a shallow copy
+      acc[rateKey] = { ...item };
+    } else {
+      // If it exists, add the SettingAmount (and other aggregate fields if needed)
+      acc[rateKey].SettingAmount += item.SettingAmount;
+      
+      // OPTIONAL: If you want to sum up other values for matching rates:
+      acc[rateKey].Pcs += item.Pcs;
+      acc[rateKey].Wt += item.Wt;
+      acc[rateKey].Amount += item.Amount;
+    }
 
-data.forEach((item) => {
-  const key = [
-    normalize(item.ShapeName),
-    normalize(item.QualityName),
-    normalize(item.Colorname),
-    normalize(item.Supplier),
-    Number(item.Rate || 0),
-    Number(item.IsPrimaryMetal || 0),
-  ].join("|");
-  
-
-
-  if (map.has(key)) {
-    const existing = map.get(key);
-
-    existing.Pcs += Number(item.Pcs || 0);
-    existing.Wt += Number(item.Wt || 0);
-    existing.FineWt += Number(item.FineWt || 0);
-    existing.Amount += Number(item.Amount || 0);
-  } else {
-    map.set(key, {
-      ...item,
-      Pcs: Number(item.Pcs || 0),
-      Wt: Number(item.Wt || 0),
-      FineWt: Number(item.FineWt || 0),
-      Amount: Number(item.Amount || 0),
-    });
-  }
-});
-
-return [...map.values()].sort(
-  (a, b) => Number(b.IsPrimaryMetal) - Number(a.IsPrimaryMetal)
+    return acc;
+  }, {})
 );
-}
-//sentence words first char capital function
-export const CapitalizeWords = (text) => {
-  const capitalizeFirstLetter = (word) => {
-    return word?.charAt(0)?.toUpperCase() + word?.slice(1);
-  };
-  const wordsArray = text.split(" ");
-  const capitalizedWordsArray = wordsArray.map((word) => {
-    return word?.split("-")?.map(capitalizeFirstLetter)?.join("-");
-  });
-  const capitalizedText = capitalizedWordsArray?.join(" ");
-  // eslint-disable-next-line no-useless-concat
-  // return capitalizedText + " " + "Only";
-  return capitalizedText + " ";
-};
-
-//global function of api calling
-export const apiCall = async (token, invoiceNo, printName, urls, evn, ApiVer) => {
-
-  const body = {
-    token: token,
-    invoiceno: invoiceNo,
-    printname: printName,
-    Eventname: evn,
-    ApiVer: ApiVer
-  };
-
-  // const header = {
-  //   "Authorization": "Bearer 40815062023094801060"
-  // }
-  // const bodies = {
-  //   "con": "{\"id\":\"\",\"mode\":\"store_init\"}",
-  //   "p": "",
-  //   "f": "formname (init)"
-  // }
-
-  // const headers = {
-  //   "Authorization": "Bearer optigo_json_api",
-  //   "domain": "zen",
-  //   // "Content-Type": "application/json",
-  //   "version": "v4",
-  //   "YearCode": "",
-  // };
-  try {
-    // const responses = await axios.post("http://zen/api/", bodies, {headers: headers});
-    const response = await axios.post(urls, body);
-    return response?.data;
-  } catch (error) {
-    console.error(error);
-  }
-
-};
 
  
 
@@ -425,9 +427,9 @@ export const HeaderComponent = (headNo, headerData,isMaterial) => {
       headerComponent = <EInvoiceHeader data={headerData} />;
       break;
 
-      // case "6":
-      //   headerComponent = <Header5 data={headerData} />;
-      //   break;
+      case "6":
+        headerComponent = <Header5 data={headerData} />;
+        break;
 
     default:
       headerComponent = <Header1 data={headerData} />;

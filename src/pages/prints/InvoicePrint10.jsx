@@ -74,7 +74,7 @@ const InvoicePrint_10_11 = ({
     totalAmount: 0,
     totalAmountithouttax: 0,
   });
-  
+
   console.log('totalss: ', totalss);
   const loadData = (data) => {
     let head = HeaderComponent("1", data?.BillPrint_Json[0]);
@@ -239,10 +239,10 @@ const InvoicePrint_10_11 = ({
         const pcs = ele?.Pcs || 0;
         const wt = ele?.Wt || 0;
         const rate = ele?.Rate || 0;
-      
+
         // 1. Update overall total only once
         diamondTotal += amount;
-      
+
         // 2. Group by MaterialTypeName
         const existingMaterial = diamondGroupedArray.find(item => item.MaterialTypeName === ele.MaterialTypeName);
         if (existingMaterial) {
@@ -258,7 +258,7 @@ const InvoicePrint_10_11 = ({
             Rate: rate,
           });
         }
-      
+
         // 3. Group by isRateOnPcs
         const existingRateGroupIndex = diamonds?.findIndex(item => item?.isRateOnPcs === ele?.isRateOnPcs);
         if (existingRateGroupIndex === -1) {
@@ -269,7 +269,7 @@ const InvoicePrint_10_11 = ({
           diamonds[existingRateGroupIndex].Amount += amount;
         }
       });
-      
+
 
       e?.colorstone?.forEach((ele, ind) => {
         // total2.total += (ele?.Amount );
@@ -344,7 +344,7 @@ const InvoicePrint_10_11 = ({
         (e?.totals?.finding?.Wt * e?.LossPer) / 100 +
         e?.totals?.finding?.Wt +
         e?.secondMetalWt;
-        // let finalRate = e?.latestAmount / e?.netWtFinal;
+      // let finalRate = e?.latestAmount / e?.netWtFinal;
       let finalRate = e?.metalAmountFinal / e?.netWtFinal;
       let obj = cloneDeep(e);
       obj.finalMetalWt = finalMetalWt;
@@ -362,7 +362,7 @@ const InvoicePrint_10_11 = ({
       labour?.totalAmount / data?.BillPrint_Json[0]?.CurrencyExchRate +
       diamondHandling / data?.BillPrint_Json[0]?.CurrencyExchRate;
 
-      total2.totalAmountithouttax +=
+    total2.totalAmountithouttax +=
       diamondTotal / data?.BillPrint_Json[0]?.CurrencyExchRate +
       colorStone1Total1 / data?.BillPrint_Json[0]?.CurrencyExchRate +
       colorStone2Total2 / data?.BillPrint_Json[0]?.CurrencyExchRate +
@@ -513,7 +513,8 @@ const InvoicePrint_10_11 = ({
         </div>
       </div>
       {/* header */}
-      {headerData?.IsEinvoice !== 1 ? <><div className={`${style2.headline} headerTitle`}>
+      {headerData?.IsEinvoice !== 1 ? 
+      <><div className={`${style2.headline} headerTitle`}>
         {headerData?.PrintHeadLabel}
       </div>
         <div className={`${style?.font_12} ${style2.companyDetails} ${style?.head_line_invp1011}`}>
@@ -1305,11 +1306,11 @@ const InvoicePrint_10_11 = ({
           >
             <div className={`${style?.fsremark_10} fw-normal`}>Signature</div>
             <img
-                        src={headerData?.DigitalSignature}
-                        style={{
-                          width: '390px'
-                        }}   
-                      />
+              src={headerData?.DigitalSignature}
+              style={{
+                width: '390px'
+              }}
+            />
             <div >
               {headerData?.CompanyFullName}
             </div>

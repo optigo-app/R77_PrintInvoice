@@ -634,7 +634,7 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                 elee?.QualityName === elem?.QualityName &&
                 elee?.Rate === elem?.Rate &&
                 elee?.MasterManagement_DiamondStoneTypeid ===
-                  elem?.MasterManagement_DiamondStoneTypeid &&
+                elem?.MasterManagement_DiamondStoneTypeid &&
                 elee?.SizeName === elem?.SizeName
             );
             if (findMiscs === -1) {
@@ -685,7 +685,7 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                 elee?.QualityName === elem?.QualityName &&
                 elee?.Rate === elem?.Rate &&
                 elee?.MasterManagement_DiamondStoneTypeid ===
-                  elem?.MasterManagement_DiamondStoneTypeid &&
+                elem?.MasterManagement_DiamondStoneTypeid &&
                 elee?.SizeName === elem?.SizeName
             );
             if (findFinding === -1) {
@@ -719,7 +719,7 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                 elee?.QualityName === elem?.QualityName &&
                 elee?.Rate === elem?.Rate &&
                 elee?.MasterManagement_DiamondStoneTypeid ===
-                  elem?.MasterManagement_DiamondStoneTypeid &&
+                elem?.MasterManagement_DiamondStoneTypeid &&
                 elee?.SizeName === elem?.SizeName
             );
             if (findFinding === -1) {
@@ -1092,31 +1092,31 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
   const handleImageLoad = () => {
     setImageLoading(false);
   };
-  
+
   // const maxRowsPerSide = 12;
   // const totalMaxRows = 24;
   // const combinedByJob = json2Data.map(e => {
   //   const diamonds = Array.isArray(e?.diamonds) ? e.diamonds : [];
   //   const mics = Array.isArray(e?.mics) ? e.mics : [];
   //   const colorStones = Array.isArray(e?.colorStones) ? e.colorStones : [];
-  
+
   //   const count =
   //     (diamonds.length > 0 ? 1 : 0) +
   //     (mics.length > 0 ? 1 : 0) +
   //     (colorStones.length > 0 ? 1 : 0);
-  
+
   //   return {
   //     SrJobno: e.SrJobno,
   //     combinedItems: [...diamonds, ...colorStones, ...mics],
   //     typeCount: count 
   //   };
   // });
-  
+
   // const maxTypesUsed = Math.max(...combinedByJob.map(job => job.typeCount));
-  
+
   // console.log("Combined per job:", combinedByJob);
   // console.log("Max types used in a single job:", maxTypesUsed);
-  
+
   // const finalTotalMaxRows = totalMaxRows - maxTypesUsed;
   // console.log("finalTotalMaxRows",finalTotalMaxRows);
 
@@ -1126,19 +1126,19 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
     const maxRows = 20;
 
     const addRowsWithTotal = (items, type, filterFn = null) => {
-        if (!Array.isArray(items) || items.length === 0) return [];
+      if (!Array.isArray(items) || items.length === 0) return [];
 
-        // Apply filter if provided
-        const filteredItems = filterFn ? items.filter(filterFn) : items;
+      // Apply filter if provided
+      const filteredItems = filterFn ? items.filter(filterFn) : items;
 
-        if (filteredItems.length === 0) return [];
+      if (filteredItems.length === 0) return [];
 
-        const rows = filteredItems.map((item) => ({ type, data: item }));
+      const rows = filteredItems.map((item) => ({ type, data: item }));
 
-        const totalPcs = filteredItems.reduce((sum, curr) => sum + (Number(curr?.Pcs) || 0), 0);
-        const totalWt = filteredItems.reduce((sum, curr) => sum + (Number(curr?.Wt) || 0), 0);
+      const totalPcs = filteredItems.reduce((sum, curr) => sum + (Number(curr?.Pcs) || 0), 0);
+      const totalWt = filteredItems.reduce((sum, curr) => sum + (Number(curr?.Wt) || 0), 0);
 
-        return [...rows, { type: `${type}-total`, totalPcs, totalWt }];
+      return [...rows, { type: `${type}-total`, totalPcs, totalWt }];
     };
 
     const diamondRows = addRowsWithTotal(e?.diamonds, "diamond");
@@ -1146,25 +1146,25 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
 
     // Apply filter for mics: only include if ismiscwtaddingrossweight === 1
     const micsRows = addRowsWithTotal(
-        e?.mics,
-        "mics",
-        (item) => Number(item?.ismiscwtaddingrossweight) === 1
+      e?.mics,
+      "mics",
+      (item) => Number(item?.ismiscwtaddingrossweight) === 1
     );
 
     let finalRows = [...diamondRows, ...colorStoneRows, ...micsRows];
 
     // Ensure 20 rows
     if (finalRows.length > maxRows) {
-        finalRows = finalRows.slice(0, maxRows);
+      finalRows = finalRows.slice(0, maxRows);
     }
     while (finalRows.length < maxRows) {
-        finalRows.push({ type: "empty" });
+      finalRows.push({ type: "empty" });
     }
 
     return finalRows;
   };
 
-  
+
   // const renderRow = (row) => {
   //   if (row.type === 'empty') {
   //     return (
@@ -1176,13 +1176,13 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
   //       </>
   //     );
   //   }
-  
+
   //   if (row.type.endsWith('-total')) {
   //     const label =
   //       row.type.startsWith('diamond') ? 'D TOTAL' :
   //       row.type.startsWith('colorStone') ? 'C TOTAL' :
   //       'TOTAL';
-  
+
   //     return (
   //       <>
   //         <div className="dtlWdth1 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend spBold">{label}</div>
@@ -1194,9 +1194,9 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
   //       </>
   //     );
   //   }
-  
+
   //   const item = row.data;
-  
+
   //   return (
   //     <>
   //       <div className="dtlWdth1 spbrdRght spbrWord spbrdrBtom estimatePrintFont_141 Sesptxtend">
@@ -1219,7 +1219,7 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
   //   );
   // };
 
-  
+
   // console.log("json2Data", json2Data);
   // console.log("json1Data", json1Data);
 
@@ -1240,204 +1240,206 @@ const OutsourceJobPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
               />
             </div>
           </div>
-          <div className="spdispFlx1">
+          <div className="spdispFlx1" >
+            {/* <div className="spdispFlx1" style={{flexDirection: "column",}}> */}
             {json2Data?.map((e, index) => {
               const finalRows = buildMaterialRows(e);
               return (
-              <>
-              <div key={index} className="mainWdthHeit spBtomspc">
+                <>
+                  <div key={index} className="mainWdthHeit spBtomspc" >
+                    {/* <div key={index} className="mainWdthHeit spBtomspc" style={{pageBreakBefore: "always"}}> */}
 
-                <div className="w-100">
-                  {/** Upper Section */}
-                  <div className="spdispFlxClum w-100 spdtl1">
-                    <div className="spMrgdt1">
+                    <div className="w-100">
+                      {/** Upper Section */}
+                      <div className="spdispFlxClum w-100 spdtl1">
+                        <div className="spMrgdt1">
 
-                      <div className="spdispFlx spbrdrLft brdrRdusTop spbrdRght spbrdrTop">
-                        <div className="Suspdtl1">
-                          <div className="spBold sptxtend spbrdRght spbrdrBtom estimatePrintFont_9 spdispFlx justify-content-between align-items-center">
-                            <div>{e?.J_JobNo}</div>
-                            <div>{e?.designno}</div>
-                            <div className="" style={{ paddingRight: "2px" }}>
-                              {e?.metals?.filter(el => el?.IsPrimaryMetal == 1)?.map((el) => (`${el?.ShapeName} ${el?.QualityName} ${el?.Colorname}`) )}
-                            </div>
-                          </div>
-                          <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Cust.</div>
-                            <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{json1Data?.Customercode}</div>
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>Sales Rep.</div>
-                            <div className="spspdtl1 spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{json1Data?.SalesRepName}</div>
-                          </div>
-                          <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Size</div>
-                            <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.Size}</div>
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>PO</div>
-                            <div className="spspdtl1 spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.PO}</div>
-                          </div>
-                          <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Order</div>
-                            <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.EntryDate}</div>
-                            <div className="SUspspdtl1 spbrdRght spdispFlx justify-content-center align-items-center">Metal</div>
-                            <div className="spspdtl1 spdispFlx">
-                              <div className="spspdtl2 spbrdRght spdispFlx justify-content-center align-items-center">Dia.</div>
-                              <div className="spspdtl2 spdispFlx justify-content-center align-items-center">CST</div>
-                            </div>
-                          </div>
-                          <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
-                            <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Delivery</div>
-                            <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.PromiseDate}</div>
-                            <div className="SUspspdtl1 spbrdRght spdispFlx justify-content-center align-items-center">{fixedValues(e?.metalsTotal?.weight,3)}</div>
-                            <div className="spspdtl1 spdispFlx">
-                              <div className="spspdtl2 spbrdRght spdispFlx justify-content-center align-items-center margnBtom">
-                                {(e?.diamondTotal?.pcs > 0 || e?.diamondTotal?.weight > 0) && (
-                                  <>
-                                    {e?.diamondTotal?.pcs > 0 && (
+                          <div className="spdispFlx spbrdrLft brdrRdusTop spbrdRght spbrdrTop">
+                            <div className="Suspdtl1">
+                              <div className="spBold sptxtend spbrdRght spbrdrBtom estimatePrintFont_9 spdispFlx justify-content-between align-items-center">
+                                <div>{e?.J_JobNo}</div>
+                                <div>{e?.designno}</div>
+                                <div className="" style={{ paddingRight: "2px" }}>
+                                  {e?.metals?.filter(el => el?.IsPrimaryMetal == 1)?.map((el) => (`${el?.ShapeName} ${el?.QualityName} ${el?.Colorname}`))}
+                                </div>
+                              </div>
+                              <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Cust.</div>
+                                <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{json1Data?.Customercode}</div>
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>Sales Rep.</div>
+                                <div className="spspdtl1 spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{json1Data?.SalesRepName}</div>
+                              </div>
+                              <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Size</div>
+                                <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.Size}</div>
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>PO</div>
+                                <div className="spspdtl1 spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.PO}</div>
+                              </div>
+                              <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Order</div>
+                                <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.EntryDate}</div>
+                                <div className="SUspspdtl1 spbrdRght spdispFlx justify-content-center align-items-center">Metal</div>
+                                <div className="spspdtl1 spdispFlx">
+                                  <div className="spspdtl2 spbrdRght spdispFlx justify-content-center align-items-center">Dia.</div>
+                                  <div className="spspdtl2 spdispFlx justify-content-center align-items-center">CST</div>
+                                </div>
+                              </div>
+                              <div className="spBold spbrdRght sptxtend spbrdrBtom estimatePrintFont_9 spdispFlx">
+                                <div className="SUspspdtl1 spbrdRght spdispFlx align-items-center">Delivery</div>
+                                <div className="spspdtl1 spbrdRght spdispFlx align-items-center" style={{ paddingLeft: "2px" }}>{e?.PromiseDate}</div>
+                                <div className="SUspspdtl1 spbrdRght spdispFlx justify-content-center align-items-center">{fixedValues(e?.metalsTotal?.weight, 3)}</div>
+                                <div className="spspdtl1 spdispFlx">
+                                  <div className="spspdtl2 spbrdRght spdispFlx justify-content-center align-items-center margnBtom">
+                                    {(e?.diamondTotal?.pcs > 0 || e?.diamondTotal?.weight > 0) && (
                                       <>
-                                        {e.diamondTotal.pcs}
-                                        {e?.diamondTotal?.weight > 0 && " /"}
+                                        {e?.diamondTotal?.pcs > 0 && (
+                                          <>
+                                            {e.diamondTotal.pcs}
+                                            {e?.diamondTotal?.weight > 0 && " /"}
+                                          </>
+                                        )}
+                                        {e?.diamondTotal?.pcs > 0 && e?.diamondTotal?.weight > 0 && <br />}
+                                        {e?.diamondTotal?.weight > 0 && fixedValues(e?.diamondTotal?.weight, 3)}
                                       </>
                                     )}
-                                    {e?.diamondTotal?.pcs > 0 && e?.diamondTotal?.weight > 0 && <br />}
-                                    {e?.diamondTotal?.weight > 0 && fixedValues(e?.diamondTotal?.weight, 3)}
-                                  </>
-                                )}
-                              </div>
-                              <div className="spspdtl2 spdispFlx justify-content-center align-items-center margnBtom">
-                                {(e?.colorStonesTotal?.pcs > 0 || e?.colorStonesTotal?.weight > 0) && (
-                                  <>
-                                    {e?.colorStonesTotal?.pcs > 0 && (
+                                  </div>
+                                  <div className="spspdtl2 spdispFlx justify-content-center align-items-center margnBtom">
+                                    {(e?.colorStonesTotal?.pcs > 0 || e?.colorStonesTotal?.weight > 0) && (
                                       <>
-                                        {e.colorStonesTotal.pcs}
-                                        {e?.colorStonesTotal?.weight > 0 && " /"}
+                                        {e?.colorStonesTotal?.pcs > 0 && (
+                                          <>
+                                            {e.colorStonesTotal.pcs}
+                                            {e?.colorStonesTotal?.weight > 0 && " /"}
+                                          </>
+                                        )}
+                                        {e?.colorStonesTotal?.pcs > 0 && e?.colorStonesTotal?.weight > 0 && <br />}
+                                        {e?.colorStonesTotal?.weight > 0 && fixedValues(e?.colorStonesTotal?.weight, 3)}
                                       </>
                                     )}
-                                    {e?.colorStonesTotal?.pcs > 0 && e?.colorStonesTotal?.weight > 0 && <br />}
-                                    {e?.colorStonesTotal?.weight > 0 && fixedValues(e?.colorStonesTotal?.weight, 3)}
-                                  </>
-                                )}
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>  
+
+                            <div className="Suspdtl3 spbrdrBtom">
+                              <img
+                                src={e?.DesignImage}
+                                alt=""
+                                className="estimate_img spdispFlx"
+                                onError={handleImageError}
+                                onLoad={handleImageLoad}
+                              />
+                            </div>
+                          </div>
+
+                          <div
+                            className="spBold sptxtend spbrdrLft spbrdRght spbrdrBtom spdispFlx align-items-center spnfntIns estimatePrintFont_9 spMrgBFive spMrgTFive"
+                            style={{ height: "20px", color: "red" }}
+                          >
+                            Instruction: {e?.JobRemark}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/** Bottom Section */}
+                      <div className="spdispFlx spMrgdt10">
+                        <div className="spdtl2 spbrdRght spbrdrLft">
+                          <div className="spdispFlx">
+                            <div className="dtlWdth1 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">RM CODE</div>
+                            <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">RM SIZE</div>
+                            <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">ACTUAL</div>
+                            <div className="dtlWdth4 spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">ISSUE</div>
+                          </div>
+
+                          <div>
+                            {finalRows.map((row, i) => {
+                              // define renderRow function inside map callback, so it has access to row
+                              const renderRow = (row) => {
+                                if (row.type === 'empty') {
+                                  return (
+                                    <>
+                                      <div className="dtlWdth1 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend"></div>
+                                      <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend"></div>
+                                      <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row" }}>
+                                        <div className="spbrdRght" style={{ width: "40%" }}></div>
+                                        <div style={{ width: "60%" }}></div>
+                                      </div>
+                                      <div className="dtlWdth4 spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row" }}>
+                                        <div className="spbrdRght" style={{ width: "40%" }}></div>
+                                        <div style={{ width: "60%" }}></div>
+                                      </div>
+                                    </>
+                                  );
+                                }
+
+                                if (row.type.endsWith('-total')) {
+                                  const label =
+                                    row.type.startsWith('diamond') ? 'D TOTAL' :
+                                      row.type.startsWith('colorStone') ? 'C TOTAL' :
+                                        row.type.startsWith('mics') ? 'M TOTAL' :
+                                          'TOTAL';
+
+                                  return (
+                                    <>
+                                      <div className="dtlWdth1 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend spBold">{label}</div>
+                                      <div className="dtlWdth2 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend"></div>
+                                      <div className="dtlWdth3 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend spBold" style={{ flexDirection: "row" }}>
+                                        <div className="spbrdRght d-flex align-items-center" style={{ width: "40%" }}>{row.totalPcs || 0}</div>
+                                        <div className="d-flex align-items-center" style={{ width: "60%", paddingLeft: "2px" }}>{row.totalWt != null ? fixedValues(row.totalWt, 3) : ""}</div>
+                                      </div>
+                                      <div className="dtlWdth4 estimatePrintFont_9 spbrdrBtom Sesptxtend spBold" style={{ flexDirection: "row" }}>
+                                        <div className="spbrdRght" style={{ width: "40%" }}></div>
+                                        <div style={{ width: "60%" }}></div>
+                                      </div>
+                                    </>
+                                  );
+                                }
+
+                                const item = row.data;
+
+                                return (
+                                  <>
+                                    <div className="dtlWdth1 spbrdRght spbrWord spbrdrBtom estimatePrintFont_141 Sesptxtend">
+                                      <p className="spbrWord">
+                                        {[item?.Shape_Code, item?.Quality_Code, item?.Color_Code]
+                                          .filter(val => val && val !== "-")
+                                          .join("/")}
+                                      </p>
+                                    </div>
+                                    <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend">
+                                      {item?.SizeName || ""}
+                                    </div>
+                                    <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row" }}>
+                                      <div className="spbrdRght d-flex align-items-center" style={{ width: "40%" }}>{item?.Pcs || ""}</div>
+                                      <div className="d-flex align-items-center" style={{ width: "60%", paddingLeft: "3px" }}>{item?.Wt != null ? fixedValues(item?.Wt, 3) : ""}</div>
+                                    </div>
+                                    <div className="dtlWdth4 spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row" }}>
+                                      <div className="spbrdRght" style={{ width: "40%" }}></div>
+                                      <div style={{ width: "60%" }}></div>
+                                    </div>
+                                  </>
+                                );
+                              };
+
+                              return (
+                                <div key={i} className="spdispFlx">
+                                  {renderRow(row)}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
 
-                          <div className="Suspdtl3 spbrdrBtom">
-                            <img
-                              src={e?.DesignImage}
-                              alt=""
-                              className="estimate_img spdispFlx"
-                              onError={handleImageError}
-                              onLoad={handleImageLoad}
-                            />
-                          </div>
+                        <div className="spbrdRght spbrdrBtom barcode_second" style={{ width: "10%", alignContent: "center" }}>
+                          <BarcodeGenerator
+                            data={e?.J_JobNo}
+                          />
+                        </div>
                       </div>
-
-                    <div 
-                      className="spBold sptxtend spbrdrLft spbrdRght spbrdrBtom spdispFlx align-items-center spnfntIns estimatePrintFont_9 spMrgBFive spMrgTFive"
-                      style={{ height: "20px", color: "red" }}
-                    >
-                      Instruction: {e?.JobRemark}
                     </div>
+                    <div className="spMrgdt1 sptxtend spbrdrLft spbrdRght spbrdrBtom brdrRdusBtom" style={{ height: "20px", }}></div>
                   </div>
-                </div>
-
-                  {/** Bottom Section */}
-                  <div className="spdispFlx spMrgdt10">
-                    <div className="spdtl2 spbrdRght spbrdrLft">
-                      <div className="spdispFlx">
-                        <div className="dtlWdth1 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">RM CODE</div>
-                        <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">RM SIZE</div>
-                        <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">ACTUAL</div>
-                        <div className="dtlWdth4 spbrdrBtom estimatePrintFont_9 sptxtCn spBold sptxtend">ISSUE</div>
-                      </div>
-
-                      <div>
-                        {finalRows.map((row, i) => {
-                          // define renderRow function inside map callback, so it has access to row
-                          const renderRow = (row) => {
-                            if (row.type === 'empty') {
-                              return (
-                                <>
-                                  <div className="dtlWdth1 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend"></div>
-                                  <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend"></div>
-                                  <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row"}}>
-                                    <div className="spbrdRght" style={{ width: "40%" }}></div>
-                                    <div style={{ width: "60%" }}></div>
-                                  </div>
-                                  <div className="dtlWdth4 spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row"}}>
-                                    <div className="spbrdRght" style={{ width: "40%" }}></div>
-                                    <div style={{ width: "60%" }}></div>
-                                  </div>
-                                </>
-                              );
-                            }
-
-                            if (row.type.endsWith('-total')) {
-                              const label =
-                                row.type.startsWith('diamond') ? 'D TOTAL' :
-                                row.type.startsWith('colorStone') ? 'C TOTAL' :
-                                row.type.startsWith('mics') ? 'M TOTAL' :
-                                'TOTAL';
-
-                              return (
-                                <>
-                                  <div className="dtlWdth1 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend spBold">{label}</div>
-                                  <div className="dtlWdth2 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend"></div>
-                                  <div className="dtlWdth3 estimatePrintFont_9 spbrdRght spbrdrBtom Sesptxtend spBold" style={{ flexDirection: "row"}}>
-                                    <div className="spbrdRght d-flex align-items-center" style={{ width: "40%" }}>{row.totalPcs || 0}</div>
-                                    <div className="d-flex align-items-center" style={{ width: "60%", paddingLeft: "2px" }}>{row.totalWt != null ? fixedValues(row.totalWt, 3) : ""}</div>
-                                  </div>
-                                  <div className="dtlWdth4 estimatePrintFont_9 spbrdrBtom Sesptxtend spBold" style={{ flexDirection: "row"}}>
-                                    <div className="spbrdRght" style={{ width: "40%" }}></div>
-                                    <div style={{ width: "60%" }}></div>
-                                  </div>
-                                </>
-                              );
-                            }
-
-                            const item = row.data;
-
-                            return (
-                              <>
-                                <div className="dtlWdth1 spbrdRght spbrWord spbrdrBtom estimatePrintFont_141 Sesptxtend">
-                                  <p className="spbrWord">
-                                    {[item?.Shape_Code, item?.Quality_Code, item?.Color_Code]
-                                      .filter(val => val && val !== "-")
-                                      .join("/")}
-                                  </p>
-                                </div>
-                                <div className="dtlWdth2 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend">
-                                  {item?.SizeName || ""}
-                                </div>
-                                <div className="dtlWdth3 spbrdRght spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row"}}>
-                                  <div className="spbrdRght d-flex align-items-center" style={{ width: "40%" }}>{item?.Pcs || ""}</div>
-                                  <div className="d-flex align-items-center" style={{ width: "60%", paddingLeft: "3px" }}>{item?.Wt != null ? fixedValues(item?.Wt, 3) : ""}</div>
-                                </div>
-                                <div className="dtlWdth4 spbrdrBtom estimatePrintFont_14 Sesptxtend" style={{ flexDirection: "row"}}>
-                                  <div className="spbrdRght" style={{ width: "40%" }}></div>
-                                  <div style={{ width: "60%" }}></div>
-                                </div>
-                              </>
-                            );
-                          };
-
-                          return (
-                            <div key={i} className="spdispFlx">
-                              {renderRow(row)}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="spbrdRght spbrdrBtom barcode_second" style={{ width: "10%", alignContent: "center" }}>
-                      <BarcodeGenerator
-                        data={e?.J_JobNo}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="spMrgdt1 sptxtend spbrdrLft spbrdRght spbrdrBtom brdrRdusBtom" style={{ height: "20px", }}></div>
-              </div>
-              </>
+                </>
               )
             })}
           </div>

@@ -1,0 +1,391 @@
+.printContainer{
+    width: 892px;
+    margin: 0 auto;
+    font-family: Calibri;
+}
+
+.invoice-grid {
+    width: 100%;
+    font-weight: bold;
+    font-size: 12px;
+    border: 1px solid #dddddd;
+    margin-top: -1px;
+  }
+  
+  .invoice-row {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    height: 34px;
+  }
+  
+  .col {
+    border-right: 1px solid #dddddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .col:last-child {
+    border-right: none;
+  }
+  
+  /* Column widths */
+  .sr { width: 2.78%; }
+  
+  .design {
+    width: 10.87%;
+    justify-content: flex-start;
+    padding-left: 4px;
+  }
+  
+  .misc-wt { width: 11.47%; }
+  
+  .misc-chrgs { width: 13.89%; }
+  
+  .gwt { width: 6.04%; }
+  
+  .nwt { width: 6.04%; }
+  
+  .purity { width: 6.04%; }
+  
+  .wastage { width: 7.25%; }
+  
+  .rate { width: 6.04%; }
+  
+  .pure-wt { width: 6.04%; }
+  
+  .total-misc { width: 8.45%; }
+  
+  .metal-amt { width: 6.04%; }
+  
+  .total-amt { width: 9.06%; }
+
+  .total{ font-weight: bold; width: 39.01% !important; }
+
+  .row-data {
+    height: auto;  
+    font-weight: normal;
+    font-size: 11px;
+  }
+  
+  /* alignment helpers */
+  .text-right {
+    justify-content: flex-end;
+    padding-right: 4px;
+  }
+  
+  .design-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .design-text {
+    font-weight: bold;
+    font-size: 13px;
+    text-align: left;
+    overflow: hidden;
+  }
+  
+  .design-img {
+    width: 60px;
+    height: 60px;
+    margin-top: 4px;
+  }
+
+  .total-section {
+    background-color: #f2f2f2;
+  }
+  
+ 
+  
+
+
+  .tax-container {
+    width: 100%;
+    display: flex;
+    page-break-inside: avoid;
+  }
+  
+  /* left blank area (same as 76.7%) */
+  .tax-left {
+    width: 76.7%;
+  }
+  
+  /* right box */
+  .tax-box {
+    width: 23.3%;
+    outline: 1px solid #dddddd;
+  }
+  
+  /* rows inside box */
+  .tax-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 5px;
+  }
+  
+  .tax-label {
+    text-align: left;
+    padding-left: 10px;
+  }
+  
+  .tax-value {
+    text-align: right;
+    padding-right: 5px;
+  }
+  
+  /* bold row */
+  .bold {
+    font-weight: bold;
+  }
+
+
+
+
+
+  .grand-total-container {
+    width: 100%;
+    font-size: 14px;
+    border: 1px solid #dddddd;
+    margin-top: 10px;
+    background-color: #f2f2f2;
+  }
+  
+  .grand-total-row {
+    display: flex;
+    align-items: center;
+    height: 34px;
+  }
+  
+  /* left side (70%) */
+  .grand-left {
+    width: 70%;
+    text-align: left;
+    padding-left: 5px;
+  }
+  
+  /* right side (30%) */
+  .grand-right {
+    width: 30%;
+    text-align: right;
+    font-weight: bold;
+    padding-right: 8px;
+  }
+
+
+  .amount-words-container {
+    width: 100%;
+    font-size: 14px;
+    border: 1px solid #dddddd;
+    margin-top: 10px;
+    background-color: #f2f2f2;
+  }
+  
+  .amount-words-row {
+    display: flex;
+    align-items: center;
+    height: 34px;
+  }
+  
+  /* left side (70%) */
+  .amount-left {
+    width: 70%;
+    text-align: left;
+    font-weight: bold;
+    padding-left: 5px;
+  }
+  
+  /* right side (30%) */
+  .amount-right {
+    width: 30%;
+    text-align: right;
+    font-weight: bold;
+    padding-right: 8px;
+  }
+
+
+  .summary-container {
+    height: 109px;
+    font-size: 15px;
+    border: 1px solid #d2d2d2;
+    margin-top: 5px;
+  }
+  
+  /* header */
+  .summary-header {
+    background-color: #f2f2f2;
+    text-align: left;
+    padding: 2px 0 2px 11px;
+    font-size: 15px;
+  }
+  
+  /* body */
+  .summary-body {
+    padding: 3px;
+    font-size: 12.5px;
+  }
+  
+  /* each row */
+  .summary-item {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+  }
+  
+  /* label */
+  .summary-label {
+    width: 80px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  /* value */
+  .summary-value {
+    width: 30px;
+    text-align: right;
+  }
+
+
+  .note-container {
+    width: 100%;
+    outline: 1px solid #d2d2d2;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    min-height: 100px;
+    page-break-inside: avoid;
+  }
+  
+  .note-title {
+    font-weight: bold;
+    padding: 5px 8px;
+  }
+  
+  /* body */
+  .note-body {
+    padding: 5px 8px;
+  }
+  
+  /* declaration */
+  .declaration-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .declaration-content {
+    font-size: 13px;
+    line-height: 18px;
+    font-family: Calibri, sans-serif;
+  }
+  
+  /* each point */
+  .declaration-item {
+    display: flex;
+    align-items: flex-start;
+  }
+  
+  .declaration-index {
+    margin-right: 5px;
+  }
+  
+  .declaration-text {
+    font-weight: bold;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .jewelry-table-container {
+    width: 892px;
+    border: 1px solid #DDDDDD;
+    font-family: sans-serif;
+    font-size: 12px;
+  }
+  
+  .jewelry-row {
+    display: flex;
+    width: 100%;
+  }
+  
+  .jewelry-header {
+    background-color: #f9f9f9;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .jewelry-data-row {
+    border-top: 1px solid #DDDDDD;
+  }
+  
+  .cell {
+    padding: 8px 4px;
+    border-right: 1px solid #DDDDDD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: normal !important;
+    box-sizing: border-box;
+  }
+  
+  /* Remove border from last cell in every row */
+  .cell:last-child {
+    border-right: none;
+  }
+  
+/* Column Widths in Percentage */
+.col-sr { width: 3%;}
+.col-design { width: 12%; flex-direction: column;  }
+.col-misc-wt { width: 8%; }
+.col-misc-chg { width: 8%; }
+.col-gwt { width: 7%; }
+.col-nwt { width: 7%; }
+.col-purity { width: 7%; }
+.col-wastage { width: 7%; }
+.col-rate { width: 7%; }
+.col-purewt { width: 7%; }
+.col-tot-misc { width: 8%; }
+.col-metal-amt { width: 10%; }
+.col-total { width: 9%; }
+.col-totalall { width: 31%; }
+  
+  .design-img {
+    width: 55px;
+    height: 55px;
+    margin-top: 5px;
+    object-fit: contain;
+  }
+  .justify-start {
+    justify-content: flex-start;
+  }
+  .justify-end {
+    justify-content: flex-end;
+  }
+  .align-start {
+    align-items: flex-start;
+  }

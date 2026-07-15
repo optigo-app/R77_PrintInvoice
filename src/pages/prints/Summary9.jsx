@@ -298,7 +298,7 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             {/* {checkBox?.header && header} */}
             {checkBox?.header && <>  {headerData?.PrintHeadLabel !== "" && <div className={`${style1.headline} headerTitle target_header`}>{headerData?.PrintHeadLabel}</div>}
                 <div className={`${style1.companyDetails} target_header ${style?.font_13_5}`}>
-                    <div className={`${style1.companyhead} p-2`}>
+                    <div className={`${style1.companyhead} p-2`} style={{lineHeight:"1"}}>
                         <div className={`${style1.lines} ${style?.font_20}`} style={{ fontWeight: "bold" }}>
                             {headerData?.CompanyFullName}
                         </div>
@@ -330,6 +330,7 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <p className={`fw-bold ${style?.font_14}`}>{headerData?.customerfirmname}</p>
                     <p>{headerData?.customerAddress1}</p>
                     <p>{headerData?.customerAddress2}</p>
+                    <p>{headerData?.customerAddress3}</p>
                     <p>{headerData?.customercity}{headerData?.customerpincode}</p>
                     <p>{headerData?.customeremail1}</p>
                     <p>{headerData?.Cust_CST_STATE_No_}</p>
@@ -373,7 +374,7 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <div className={`${style?.DESIGN} fw-bold  border-end p-1`}>
                         <p>{e?.SrJobno} - {e?.Categoryname}</p>
                         {checkBox?.image && <img src={e?.DesignImage} alt="" className='w-100 imgWidth' onError={handleImageError} />}
-                        <p> {e?.MetalTypePurity}</p>
+                        <p style={{textAlign:"center"}}> {e?.MetalTypePurity}</p>
                         {e?.HUID !== "" && <p>HUID-{e?.HUID}</p>}
                     </div>
                     {/* <div className={`${style?.STONE}   border-end d-flex`}>
@@ -563,7 +564,8 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className="col-6 px-1 border-end pb-4 position-relative">
                                 <div className="d-flex justify-content-between">
                                     <p className="fw-bold">GOLD IN 24KT</p>
-                                    <p>{NumberWithCommas((data?.mainTotal?.total_purenetwt - notGoldMetalWtTotal), 3)} gm</p>
+                                    <p>{NumberWithCommas((data?.mainTotal?.total_purenetwt ), 3)} gm</p>
+                                    {/* <p>{NumberWithCommas((data?.mainTotal?.total_purenetwt - notGoldMetalWtTotal), 3)} gm</p> */}
                                 </div>
                                 {
                                     MetShpWise?.map((e, i) => {
@@ -587,7 +589,7 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 </div>
                                 <div className="d-flex justify-content-between">
                                     <p className="fw-bold">STONE WT</p>
-                                    <p>{NumberWithCommas(data?.mainTotal?.colorstone?.Pcs, 3)} / {NumberWithCommas(data?.mainTotal?.colorstone?.Wt, 3)} ctw	</p>
+                                    <p>{NumberWithCommas(data?.mainTotal?.colorstone?.Pcs)} / {NumberWithCommas(data?.mainTotal?.colorstone?.Wt, 3)} ctw	</p>
                                 </div>
                                 <div className={`d-flex justify-content-between lightGrey position-absolute start-0 bottom-0 w-100 px-1 py-1 ${style?.heightPad}`}>
 
@@ -596,7 +598,8 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className="col-6 px-1  position-relative" style={{ paddingBottom: "32px" }}>
                                 <div className="d-flex justify-content-between">
                                     <p className="fw-bold">GOLD</p>
-                                    <p>{NumberWithCommas((data?.mainTotal?.MetalAmount - notGoldMetalTotal), 2)} </p>
+                                    <p>{NumberWithCommas((data?.mainTotal?.MetalAmount), 2)} </p>
+                                    {/* <p>{NumberWithCommas((data?.mainTotal?.MetalAmount - notGoldMetalTotal), 2)} </p> */}
                                 </div>
                                 {
                                     MetShpWise?.map((e, i) => {
@@ -669,7 +672,15 @@ const Summary9 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             </div>
             {/* TERMS INCLUDED : */}
             <div className='pb-2 no_break'>
-                <p className="fw-bold">TERMS INCLUDED :</p>
+            <p className="fw-bold pb-1 font_14_sum4">
+                  TERMS INCLUDED : &nbsp;
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: headerData?.SalesRepPolicyTermsDescription,
+                    }}
+                    style={{ fontWeight: "400" }}
+                  />
+                </p>
                 <div className="d-flex border">
                     <div className='text-center pt-5 border-end col-6'>
                         <p className='fw-bold'>RECEIVER'S SIGNATURE & SEAL</p>

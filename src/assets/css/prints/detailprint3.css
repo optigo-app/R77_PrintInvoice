@@ -1,3 +1,7 @@
+html {
+    scrollbar-gutter: stable;
+}
+
 .containerdp3 *{
     box-sizing: border-box;
     word-break: break-all;
@@ -128,7 +132,26 @@
 .w_27_dp3{
     width: 27% !important;
 }
+
+.spbrWord {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.lneHigt {
+    line-height: 13px;
+}
+.headerfontsize{
+    font-size: 15px;
+}
+
+
+
 @media print {
+    .headerfontsize{
+        font-size: 11px;
+    }
     .containerdp3 {
         max-width: 1200px;
         margin: 0 auto;

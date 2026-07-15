@@ -6,9 +6,6 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import Icon from '../@core/components/icon'
 import CustomAvatar from '../@core/components/mui/avatar'
-
-// ** Util Import
-import { hexToRGBA } from '../@core/utils/hex-to-rgba'
 import { useEffect } from 'react';
 import { fetchDashboardData, formatAmount, formatAmountKWise } from '../GlobalFunctions';
 import { useState } from 'react';

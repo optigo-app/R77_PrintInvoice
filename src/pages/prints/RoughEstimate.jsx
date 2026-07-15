@@ -335,7 +335,7 @@ const RoughEstimate = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       let finalArr = [];
       datas?.resultArray?.forEach((e) => {
           let obj = cloneDeep(e);
-          let findrec = finalArr?.findIndex((el) => el?.Tunch === e?.Tunch && el?.Collectionname === e?.Collectionname && el?.Categoryname === e?.Categoryname);
+          let findrec = finalArr?.findIndex((el) => el?.Tunch === e?.Tunch && el?.Collectionname === e?.Collectionname && el?.Categoryname === e?.Categoryname && el?.MakingChargeDiscount === e?.MakingChargeDiscount);
           if(findrec === -1){
               finalArr.push(obj);
           }else{
@@ -491,6 +491,11 @@ const RoughEstimate = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             ""
                           ) : (
                             <p className="fs-3">W: {e?.Wastage?.toFixed(3)}</p>
+                          )}
+                          {e?.MakingChargeDiscount === 0 ? (
+                            ""
+                          ) : (
+                            <p className="fs-3">M: {e?.MakingChargeDiscount?.toFixed(2)}</p>
                           )}
                           <p className="fs-3 text-break">{e?.Collectionname}</p>
                           <p className="fs-3 fw-bold text-break">{e?.Categoryname}</p>

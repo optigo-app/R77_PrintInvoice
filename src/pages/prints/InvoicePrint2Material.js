@@ -31,6 +31,7 @@ const InvoicePrint2Material = ({
   const [extraTaxAmont, setExtraTaxAmount] = useState();
   const toWords = new ToWords();
   const [headerFlag, setHeaderFlag] = useState(true);
+  const [termsFlag, setTermsFlag] = useState(true);
   const [isImageWorking, setIsImageWorking] = useState(true);
   const handleImageErrors = () => {
     setIsImageWorking(false);
@@ -145,6 +146,13 @@ const InvoicePrint2Material = ({
     }
   };
 
+  const handleTermsShow = (e) => {
+    if (termsFlag) setTermsFlag(false);
+    else {
+      setTermsFlag(true);
+    }
+  };
+
   // console.log("taxAmont", taxAmont);
   // console.log("extraTaxAmont", extraTaxAmont);
   // console.log("finalD", finalD);
@@ -175,6 +183,19 @@ const InvoicePrint2Material = ({
 
               <div className="px-2">
                 <input
+                  type="checkbox"
+                  onChange={handleTermsShow}
+                  value={termsFlag}
+                  checked={termsFlag}
+                  id="termsshow"
+                />
+                <label htmlFor="termsshow" className="user-select-none mx-1">
+                  Terms
+                </label>
+              </div>
+
+              <div className="px-2">
+                <input
                   type="button"
                   className="btn_white blue mt-0"
                   value="Print"
@@ -187,6 +208,15 @@ const InvoicePrint2Material = ({
           <div className="w-full flex items-center justify-center">
             <div className="container_inv2">
               {/* Header */}
+              {json0Data?.PrintHeadLbl
+                && (
+                  <div className="headlineJL w-100 p-2">
+                    <b style={{ fontSize: "20px" }}>
+                      {json0Data?.PrintHeadLbl}
+                    </b>
+                  </div>
+                )
+              }
               {headerFlag && (
                 <div className="disflx justify-content-between" style={{ marginBottom: "10px" }}>
                   <div className="spfnthead" style={{ paddingLeft: "5px" }}>
@@ -274,8 +304,8 @@ const InvoicePrint2Material = ({
                   <div key={i} className="disflx spbrlFt brBtom spfntbH">
                     <div className="col1_inv2 spbrRht spfntCen">{i + 1}</div>
                     <div className="Sucol2_inv2 spbrRht">
-                      {e?.ItemName === "DIAMOND" ? "CUT AND POLISHED DIAMOND" :
-                        e?.ItemName === "COLOR STONE" ? "STONE" :
+                      {e?.ItemName === "DIAMOND" ? `CUT AND POLISHED DIAMOND ${e?.IsSolGem ? ': S' : ''}`:
+                        e?.ItemName === "COLOR STONE" ? `STONE ${e?.IsSolGem ? ': G' : ''}`:
                           e?.ItemName === "METAL" && e?.shape === "GOLD" ? "GOLD" :
                             e?.ItemName === "METAL" && e?.shape === "gold" ? "GOLD" :
                               e?.ItemName === "METAL" && e?.shape === "Gold" ? "GOLD" :
@@ -453,25 +483,26 @@ const InvoicePrint2Material = ({
               )}
 
               {/** Instuction */}
-              {/* {json0Data?.Declaration && ( 
-                <div className="brbxAll" style={{ borderTop: json0Data?.Remark === "" ? "1px solid #DDDDDD" : "none"  }}>
-                  <div className="spinst" dangerouslySetInnerHTML={{ __html: json0Data?.Declaration,}}></div>
-                </div>
-              )} */}
+              {termsFlag && (
 
-              {(json0Data?.Notes || json0Data?.Declaration) && (
-                <div className="brbxAll" style={{ borderTop: "none", padding: "5px" }}>
-                  <div
-                    className="spinst"
-                    dangerouslySetInnerHTML={{
-                      __html: json0Data?.Notes ? json0Data.Notes : json0Data?.Declaration,
-                    }}
-                  ></div>
-                </div>
+                // json0Data?.Declaration && (
+                //   <div className="brbxAll" style={{ borderTop: json0Data?.Remark === "" ? "1px solid #DDDDDD" : "none" }}>
+                //     <div className="spinst" dangerouslySetInnerHTML={{ __html: json0Data?.Declaration, }}></div>
+                //   </div>
+                // )
+                (json0Data?.Notes || json0Data?.Declaration) && (
+                  <div className="brbxAll" style={{ borderTop: "none",padding:"5px" }}>
+                    <div
+                      className="spinst"
+                      dangerouslySetInnerHTML={{
+                        __html: json0Data?.Notes ? json0Data.Notes : json0Data?.Declaration,
+                      }}
+                    ></div>
+                  </div>
+                )
+
               )}
-
-
-              <div className="disflx brbxAll spfntbH" style={{ borderTop: "none" }}>
+              <div className="disflx brbxAll spfntbH" style={{ borderTop: termsFlag ? "none" : "1px solid #DDDDDD" }}>
                 <div className="spbnkdtl spbrRht">
                   <div className="spfntBld">Bank Detail</div>
                   <div>Bank Name:<span>{json0Data?.bankname}</span></div>

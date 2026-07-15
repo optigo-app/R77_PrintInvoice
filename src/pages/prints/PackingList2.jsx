@@ -111,6 +111,17 @@ const PackingList2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         sendData();
     }, []);
 
+
+    const discountCriteria = [
+        { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond' ,disAmount:"DiamondDiscountAmount" },
+        { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal' ,disAmount:"MetalDiscountAmount" },
+        { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone' ,disAmount:"StoneDiscountAmount" },
+        { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour' ,disAmount:"LabourDiscountAmount" },
+        { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire' ,disAmount:"SolitaireDiscountAmount1" },
+        { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc' ,disAmount:"MiscDiscountAmount" },
+      ];
+      
+
     return loader ? (
         <Loader />
     ) : msg === "" ? (
@@ -278,6 +289,16 @@ const PackingList2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     {/* table data */}
                     {
                         data?.resultArray?.map((e, i) => {
+                            const discountDisplay = discountCriteria
+                .filter(({ key }) => e?.[key] > 0)
+                .map(({ key, isAmountKey, label,disAmount }) => {
+                  const num = Number(e[key]);  
+                  const am= Number(e[disAmount])
+                  const decimals = e[isAmountKey] === 1 ? 3 : 2;  
+                  const val = num.toFixed(decimals);  
+                  return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                })
+                .join(', ');
                             return <tr key={i}>
                                 <td className=''>
                                     <div className={`${i === 0 && "border-black border-top"}`}>
@@ -302,8 +323,9 @@ const PackingList2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                                 })}
                                                             </div>
                                                             <div className={`${style?.w_20} border-end`} >
+                                                                {console.log("e?.diamonds",e?.diamonds)}
                                                                 {e?.diamonds?.map((ele, ind) => {
-                                                                    return <p className=" text-center" key={ind}>{ele?.SizeName}</p>
+                                                                    return <p className=" text-center" key={ind}>{  ele?.SizeName =="Custom"? "C:"+ele?.CustomSize:  ele?.SizeName}</p>
                                                                 })}
                                                             </div>
                                                             <div className={`${style?.w_20} border-end`}>
@@ -329,7 +351,7 @@ const PackingList2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                         <div className="d-flex" >
                                                             <div style={{ width: "18%" }} className={` border-end`}>
                                                                 {e?.metal.map((ele, ind) => {
-                                                                    return ele?.IsPrimaryMetal === 1 && <p className="" key={ind} style={{ wordBreak: "normal" }}>{ele?.ShapeName} {ele?.QualityName}</p>
+                                                                    return ele?.IsPrimaryMetal === 1 && <p className="" key={ind} style={{ wordBreak: "break-word" }}>{ele?.ShapeName} {ele?.QualityName}</p>
                                                                 })}
                                                             </div>
                                                             <div style={{ width: "20%" }} className={` border-end`}>
@@ -600,11 +622,7 @@ const PackingList2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                             {/* <p className="text-end">
                                                                 Discount {e?.isdiscountinamount === 1 ? `${NumberWithCommas(e?.DiscountAmt / headerData?.CurrencyExchRate, 2)} On` : ` ${NumberWithCommas(e?.Discount, 2)}% @Total`} Amount
                                                             </p> */}
-                                                            <p className="fw-bold text-end">Discount {e?.Discount}% @{e?.IsCriteriabasedAmount === 1 ?
-                                                                e?.discountElements?.map((ele, ind) => {
-                                                                    return <React.Fragment key={ind}>{ele?.label} {ind !== (e?.discountElements?.length - 1) ? "," : ""}</React.Fragment>
-                                                                }) : "Total "}
-                                                                Amount	</p>
+                                                            <p className="fw-bold text-end">    Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}	</p>
                                                         </div>
                                                         <div className={`${style?.discount_amount}`}>
                                                             <p className="text-end">

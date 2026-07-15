@@ -747,7 +747,7 @@ const DetailPrint7 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     {result?.header?.HSN_No && (
                       <div className="fsgdp7 lhdp7 d-flex justify-content-between">
                         <span className="w-50 fw-bold">
-                          HSN
+                         HSN
                         </span>
                         <span className="w-50 d-flex justify-content-start">
                           {result?.header?.HSN_No}

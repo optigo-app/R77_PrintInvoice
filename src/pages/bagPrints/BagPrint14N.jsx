@@ -235,7 +235,7 @@ function BagPrint14N({ queries, headers }) {
                                     <div className='footer_one'>
                                       <div className='firstpart_one_1'>
                                         <div className='firstpart_one_chunk _color' style={{ fontWeight: "bold", justifyContent: "center", color: "black" }}>Order Process</div>
-                                        <div className='firstpart_one_chunk_val _color' style={{ width: "365px", justifyContent: "center", fontWeight: "bold", color: "black" }}>Prepared By</div>
+                                        <div className='firstpart_one_chunk_val _color' style={{ width: "365px", justifyContent: "center", fontWeight: "bold", color: "black" }}>Prepade By</div>
                                         <div className='firstpart_one_chunk_val _color' style={{ width: "124px", justifyContent: "center", fontWeight: "bold", color: "black",borderTop:"1.5px solid #9B9B9B" }}>Confirmed By</div>
                                         <div className='firstpart_one_chunk_val _color' style={{ width: "99px", justifyContent: "center", borderRight: "none", fontWeight: "bold", color: "black",borderTop:"1.5px solid #9B9B9B" }}></div>
                                       </div>

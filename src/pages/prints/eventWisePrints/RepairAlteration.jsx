@@ -234,7 +234,7 @@ const RepairAlteration = ({ data }) => {
               {e?.diamonds.map((ele, ind) => {
                 return (
                   <div key={ind} >
-                    {ele?.MasterManagement_DiamondStoneTypeName}:{" "}
+                    {ele?.MasterManagement_DiamondStoneTypeName}{ele?.IsSolGem==1?"S ":""}:{" "} 
                     {ele?.Pcs !== 0 && <>{ele?.Pcs} PCs |</>}{" "}
                     {ele?.Wt !== 0 && <>{ele?.Wt} Cts |</>}{" "}
                     {ele?.ShapeName} {ele?.QualityName} {ele?.Colorname}{" "}
@@ -246,7 +246,7 @@ const RepairAlteration = ({ data }) => {
                 return (
                   <div key={ind} >
                     {" "}
-                    {ele?.MasterManagement_DiamondStoneTypeName}:{" "}
+                    {ele?.MasterManagement_DiamondStoneTypeName}{ele?.IsSolGem==1?"G ":""}:{" "} 
                     {ele?.Pcs !== 0 && <>{ele?.Pcs} PCs</>}{" "}
                     {ele?.Wt !== 0 && <> | {ele?.Wt} Cts</>}{" "}
                     | {ele?.ShapeName} {ele?.QualityName} {ele?.Colorname}{" "}

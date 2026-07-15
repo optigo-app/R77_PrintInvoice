@@ -760,7 +760,7 @@ const DetailPrint11Excel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
               <td width={90} style={{ borderRight: "1px solid #000", padding: "1px", borderBottom: `1px solid`, borderTop: `1px solid`, verticalAlign: 'middle' }} align='right'><b>&nbsp;{fixedValues(total?.totalGold, 2)}</b></td>
               <td width={90} style={{ borderRight: "1px solid #000", padding: "1px", borderBottom: `1px solid`, borderTop: `1px solid`, verticalAlign: 'middle' }} align='center'><b>Total Labour</b></td>
               <td width={90} style={{ borderRight: "1px solid #000", padding: "1px", borderBottom: `1px solid`, borderTop: `1px solid`, verticalAlign: 'middle' }} align='right'><b>&nbsp;{NumberWithCommas(total?.totalLabour, 2)}</b></td>
-              <td width={90} style={{ borderRight: "1px solid #000", padding: "1px", borderBottom: `1px solid`, borderTop: `1px solid`, verticalAlign: 'middle' }} align='right'><b>&nbsp;<span dangerouslySetInnerHTML={{ __html: json0Data?.Currencysymbol }}></span>{NumberWithCommas(total?.totalJewelleryAmount, 2)}</b></td>
+              <td width={90} style={{ borderRight: "1px solid #000", padding: "1px", borderBottom: `1px solid`, borderTop: `1px solid`, verticalAlign: 'middle' }} align='right'><span dangerouslySetInnerHTML={{ __html: json0Data?.Currencysymbol }}></span> <span>{NumberWithCommas(total?.totalJewelleryAmount, 2)}</span></td>
             </tr>
             {len > 0 && Array.from({ length: len }).map((e, i) => {
               return <tr key={i}>
@@ -782,7 +782,7 @@ const DetailPrint11Excel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             <tr>
               <td></td>
               <td colSpan={14} style={{ borderLeft: "1px solid", borderRight: "1px solid", borderBottom: "1px solid", verticalAlign: 'middle' }} align='right'><b>Grand Total</b> </td>
-              <td colSpan={2} style={{ borderRight: "1px solid", borderBottom: "1px solid", verticalAlign: 'middle' }} align='right'>&nbsp;<b style={{ color: "#000" }}><span dangerouslySetInnerHTML={{ __html: json0Data?.Currencysymbol }}></span>{fixedValues(total?.grandTotal, 2)}</b></td>
+              <td colSpan={2} style={{ borderRight: "1px solid", borderBottom: "1px solid", verticalAlign: 'middle' }} align='right'>&nbsp;<b style={{ color: "#000" }}><span dangerouslySetInnerHTML={{ __html: json0Data?.Currencysymbol }}></span><span>{fixedValues(total?.grandTotal, 2)}</span></b></td>
             </tr>
             {bankDetail.length > 0 && bankDetail.map((e, i) => {
               return <tr key={i}>

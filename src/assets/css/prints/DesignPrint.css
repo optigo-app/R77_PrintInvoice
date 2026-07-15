@@ -1,0 +1,31 @@
+
+
+.design-print{
+    width: 70%;
+    margin: auto;
+    font-family: Arial, sans-serif;                   
+}
+.RequestPrint{
+    width: 85%;
+    margin: auto;
+    font-family: Arial, sans-serif;
+}
+
+
+@media print{
+    .print-btn{
+        display: none !important;
+    }
+    .design-print,.RequestPrint{
+
+        width: 100% !important;                      
+    }
+
+    .print-dis-none{
+        display: none !important;
+    }
+
+    #gradient-style{
+        margin-top: 10px;
+    }
+}

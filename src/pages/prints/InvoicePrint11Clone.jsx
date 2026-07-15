@@ -62,8 +62,8 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     diamondHandling: 0,
     secondaryMetal: [],
     fullnfinaltotal: 0,
-    totalGrossWt:0,
-    totalNetWt:0,
+    totalGrossWt: 0,
+    totalNetWt: 0,
   });
 
   const [totalss, setTotalss] = useState({
@@ -72,7 +72,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     totalPcs: 0,
     SettingAmount: 0,
   });
-  
+
 
 
   const loadData = (data) => {
@@ -117,7 +117,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     let pcsCounts = []
     datas?.resultArray?.map((e, i) => {
       total_grosswt += e?.grosswt;
-      total_netwt += e?.NetWt ;
+      total_netwt += e?.NetWt;
       let findGroups = pcsCounts?.findIndex((ele, ind) => ele?.GroupJob === e?.GroupJob);
       if (findGroups === -1) {
         pcsCounts?.push({ GroupJob: e?.GroupJob, count: 1 });
@@ -249,7 +249,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
       jobWiseMinusFindigWt += (e?.MetalDiaWt - findingWt);
 
       e?.diamonds?.forEach((ele, ind) => {
-        let findDiamond = diamonds?.findIndex((elem, index) =>  elem?.MaterialTypeName === ele?.MaterialTypeName && elem?.isRateOnPcs === ele?.isRateOnPcs);
+        let findDiamond = diamonds?.findIndex((elem, index) => elem?.MaterialTypeName === ele?.MaterialTypeName && elem?.isRateOnPcs === ele?.isRateOnPcs);
         diamondTotal += (ele?.Amount);
         if (findDiamond === -1) {
           diamonds?.push(ele);
@@ -326,19 +326,19 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
       a?.finding?.forEach((el) => {
         takeFindingOnly?.push(el);
       })
-     
+
     });
 
-     let findingLabourArr = [];
-     takeFindingOnly?.forEach((a) => {
+    let findingLabourArr = [];
+    takeFindingOnly?.forEach((a) => {
       let obj = cloneDeep(a);
-        let findrecord = findingLabourArr?.findIndex((al) => al?.SettingRate === obj?.SettingRate);
-        if(findrecord === -1){
-          findingLabourArr?.push(obj);
-        }else{
-          findingLabourArr[findrecord].SettingAmount += obj?.SettingAmount;
-        }
-      })
+      let findrecord = findingLabourArr?.findIndex((al) => al?.SettingRate === obj?.SettingRate);
+      if (findrecord === -1) {
+        findingLabourArr?.push(obj);
+      } else {
+        findingLabourArr[findrecord].SettingAmount += obj?.SettingAmount;
+      }
+    })
 
     setTotalPcsss(pcsCounts?.reduce((acc, cObj) => acc + cObj?.count, 0))
     findings?.forEach((ele, ind) => {
@@ -364,7 +364,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
       fullnfinaltotal += ele?.Amount;
     });
     fullnfinaltotal += diamondHandling + SettingAmount;
-    
+
     otherCharges?.forEach((ele, ind) => {
       fullnfinaltotal += +ele?.value;
     });
@@ -396,7 +396,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     setTotalss({ ...totalss, total: total2?.total, discount: total2?.discount, totalPcs: totalPcs, SettingAmount: SettingAmount, });
     setMainData({
       ...mainData, resultArr: resultArr, findings: findings, diamonds: diamonds, colorStones: colorStones,
-      miscs: miscs, otherCharges: otherCharges, misc2: misc2, labour: labour, diamondHandling: diamondHandling, secondaryMetal: secondaryMetal, labours: labours, fullnfinaltotal: fullnfinaltotal, totalGrossWt:total_grosswt, totalNetWt:total_netwt, findingLabourArr : findingLabourArr
+      miscs: miscs, otherCharges: otherCharges, misc2: misc2, labour: labour, diamondHandling: diamondHandling, secondaryMetal: secondaryMetal, labours: labours, fullnfinaltotal: fullnfinaltotal, totalGrossWt: total_grosswt, totalNetWt: total_netwt, findingLabourArr: findingLabourArr
     });
   };
 
@@ -417,8 +417,8 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
           setLoader(false);
           // setMsg(data?.Message);
           const err = checkMsg(data?.Message);
-                    console.log(data?.Message);
-                    setMsg(err);
+          console.log(data?.Message);
+          setMsg(err);
         }
       } catch (error) {
         console.error(error);
@@ -448,10 +448,10 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
       </div>
       {/* header */}
       {headerData?.IsEinvoice !== 1 ?
-        <><div className={` ${style?.headerTitle} `}>{headerData?.PrintHeadLabel}</div>
+        <><div className={` ${style?.headerTitle} `} style={{ textTransform: 'uppercase' }}>{headerData?.E_InvoiceType}</div>
           <div className={`${style2.companyDetails}  head_line_h_invp1011 fsremark_10_invp1011 fslineh_10_invp1011`}>
             <div className={`${style2.companyhead} p-2 `}>
-              <div style={{ fontWeight: "bold",paddingBottom:'2px' }} className={style?.companyFUllnameInvp11}>
+              <div style={{ fontWeight: "bold", paddingBottom: '2px' }} className={style?.companyFUllnameInvp11}>
                 {headerData?.CompanyFullName}
               </div>
               <div className="fslineh_10_invp1011">{headerData?.CompanyAddress}</div>
@@ -466,7 +466,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                 {/* {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-{headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber} */}
                 {headerData?.Company_VAT_GST_No} | {headerData?.Company_CST_STATE}-{headerData?.Company_CST_STATE_No} | PAN-{headerData?.Pannumber}
               </div>
-              <div className="fslineh_10_invp1011">{headerData?.MSME === '' ? '' : 'MSME - ' } {headerData?.MSME} </div>
+              <div className="fslineh_10_invp1011">{headerData?.MSME === '' ? '' : 'MSME - '} {headerData?.MSME} </div>
             </div>
             <div style={{ width: "30%" }} className="d-flex justify-content-end align-item-center h-100 fsremark_10_invp1011 fslineh_10_invp1011">
               {isImageWorking && (headerData?.PrintLogo !== "" &&
@@ -523,6 +523,10 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
             <div className="fw-bold col-6 fsremark_10_invp1011 fslineh_10_invp1011">DATE</div>
             <div className="col-6 fsremark_10_invp1011 fslineh_10_invp1011">{headerData?.EntryDate} </div>
           </div>
+          <div className="d-flex">
+            <div className="fw-bold col-6 fsremark_10_invp1011 fslineh_10_invp1011">HSN</div>
+            <div className="col-6 fsremark_10_invp1011 fslineh_10_invp1011">{headerData?.HSN_No} </div>
+          </div>
           {/* <div className="d-flex">
             <div className="fw-bold col-6">{headerData?.HSN_No_Label}</div>
             <div className="col-6">{headerData?.HSN_No} </div>
@@ -535,7 +539,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
             <div className="fw-bold col-6 fsremark_10_invp1011 fslineh_10_invp1011">PLACE OF SUPPLY</div>
             <div className="col-6 fsremark_10_invp1011 fslineh_10_invp1011">{headerData?.customerstate} </div>
           </div>
-          {  headerData?.DueDays !== 0 && <div className="d-flex">
+          {headerData?.DueDays !== 0 && <div className="d-flex">
             <div className="fw-bold col-6 fsremark_10_invp1011 fslineh_10_invp1011">TERMS</div>
             <div className="col-6 fsremark_10_invp1011 fslineh_10_invp1011">{headerData?.DueDays} </div>
           </div>}
@@ -561,9 +565,9 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
         </div>
         <div className="d-flex border-start border-black border-end border-bottom border-black">
           <div className={`col-3 border-end border-black d-flex align-items-center justify-content-center flex-column ${style.pbia_invpc11}`}>
-            <p className="w-100 text-center fsremark_10_invp1011">{ ((
-              mainData?.diamonds?.length + mainData?.colorStones?.length + 
-              mainData?.miscs?.length + mainData?.misc2?.length) > 0 ) ? `STUDDED JEWELLERY` : 'PLAIN JEWELLERY'}</p>
+            <p className="w-100 text-center fsremark_10_invp1011">{((
+              mainData?.diamonds?.length + mainData?.colorStones?.length +
+              mainData?.miscs?.length + mainData?.misc2?.length) > 0) ? `DIAMOND STUDDED JEWELLERY` : 'PLAIN JEWELLERY'}</p>
             <div className="d-flex pt-1">
               <div className="fw-bold col-6 fsremark_10_invp1011">{headerData?.HSN_No_Label}</div>
               <div className="col-6 fsremark_10_invp1011">{headerData?.HSN_No} </div>
@@ -606,9 +610,10 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                 <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(e?.Amount, 2)}</p></div>
               </div>
             })}
+            {/* { e?.MaterialTypeName !== '' && `(${e?.MaterialTypeName})`} */}
             {mainData?.diamonds?.map((e, i) => {
               return <div className="d-flex" key={i}>
-                <div style={{ minWidth: "17%", width: "17%" }} className="px-1"><p className="line_height_ivp11 fsremark_10_invp1011">DIA { e?.MaterialTypeName !== '' && `(${e?.MaterialTypeName})`}</p></div>
+                <div style={{ minWidth: "17%", width: "17%" }} className="px-1"><p className="line_height_ivp11 fsremark_10_invp1011">DIAMOND </p></div> {/* { e?.MaterialTypeName !== '' && `(${e?.MaterialTypeName})`} */}
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "7%", width: "7%" }} className="px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(e?.Pcs, 0)}</p></div>
@@ -619,7 +624,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
             })}
             {mainData?.colorStones?.map((e, i) => {
               return <div className="d-flex" key={i}>
-                <div style={{ minWidth: "17%", width: "17%" }} className=" px-1"><p className="line_height_ivp11 fsremark_10_invp1011">CS { e?.MaterialTypeName !== '' && `(${e?.MaterialTypeName})`}</p></div>
+                <div style={{ minWidth: "17%", width: "17%" }} className=" px-1"><p className="line_height_ivp11 fsremark_10_invp1011">COLOR STONE</p></div>
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className=" px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className=" px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "7%", width: "7%" }} className=" px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(e?.Pcs, 0)}</p></div>
@@ -630,7 +635,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
             })}
             {mainData?.misc2?.map((e, i) => {
               return <div className="d-flex" key={i}>
-                <div style={{ minWidth: "17%", width: "17%" }} className="px-1"><p className="line_height_ivp11 fsremark_10_invp1011">MISC { e?.MaterialTypeName !== '' && `(${e?.MaterialTypeName})`} </p></div>
+                <div style={{ minWidth: "17%", width: "17%" }} className="px-1"><p className="line_height_ivp11 fsremark_10_invp1011">OTHER MATERIAL </p></div>
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
                 <div style={{ minWidth: "7%", width: "7%" }} className="px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(e?.Pcs, 0)}</p></div>
@@ -651,15 +656,38 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
               </div>
             })}
             {mainData?.findingLabourArr?.map((ele, ind) => {
-              return <div className="d-flex" key={ind}>
-                <div style={{ minWidth: "17%", width: "17%" }} className="px-1"><p className="line_height_ivp11 fsremark_10_invp1011">LABOUR</p></div>
-                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
-                <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end"><p></p></div>
-                <div style={{ minWidth: "7%", width: "7%" }} className="px-1 text-end"><p></p></div>
-                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end"><p></p></div>
-                <div style={{ minWidth: "17%", width: "17%" }} className="px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(ele?.SettingRate, 2)}</p></div>
-                <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end"><p className="line_height_ivp11 fsremark_10_invp1011">{NumberWithCommas(ele?.SettingAmount, 2)}</p></div>
-              </div>
+              // Only render if SettingRate is not 0
+              if (!ele?.SettingRate) return null;
+
+              return (
+                <div className="d-flex" key={ind}>
+                  <div style={{ minWidth: "17%", width: "17%" }} className="px-1">
+                    <p className="line_height_ivp11 fsremark_10_invp1011">LABOUR</p>
+                  </div>
+                  <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                    <p></p>
+                  </div>
+                  <div style={{ minWidth: "14.5%", width: "14.5%" }} className="px-1 text-end">
+                    <p></p>
+                  </div>
+                  <div style={{ minWidth: "7%", width: "7%" }} className="px-1 text-end">
+                    <p></p>
+                  </div>
+                  <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                    <p></p>
+                  </div>
+                  <div style={{ minWidth: "17%", width: "17%" }} className="px-1 text-end">
+                    <p className="line_height_ivp11 fsremark_10_invp1011">
+                      {NumberWithCommas(ele?.SettingRate, 2)}
+                    </p>
+                  </div>
+                  <div style={{ minWidth: "15%", width: "15%" }} className="px-1 text-end">
+                    <p className="line_height_ivp11 fsremark_10_invp1011">
+                      {NumberWithCommas(ele?.SettingAmount, 2)}
+                    </p>
+                  </div>
+                </div>
+              );
             })}
             {mainData?.miscs?.map((e, i) => {
               return <div className="d-flex" key={i}>
@@ -793,13 +821,13 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
           dangerouslySetInnerHTML={{ __html: headerData?.Declaration }}
         ></div>
         <p className="p-1 no_break">
-          <span className={`fw-bold ${style?.fsremark_10}`}> REMARKS :</span> <span className={`${style?.fsremark_10}`} dangerouslySetInnerHTML={{ __html: headerData?.PrintRemark }}></span> 
+          <span className={`fw-bold ${style?.fsremark_10}`}> REMARKS :</span> <span className={`${style?.fsremark_10}`} dangerouslySetInnerHTML={{ __html: headerData?.PrintRemark }}></span>
         </p>
         {/* {footer} */}
         <div className={`${footerStyle.container} no_break border-black ${style?.fsremark_10}`}>
           <div
-            className={`${footerStyle.block1f3} border-black`}
-            style={{ width: "33.33%", borderRight: "1px solid #e8e8e8" }}
+            className={`  `}
+            style={{ width: "33.33%", borderRight: "1px solid black",padding:"5px" }}
           >
             <div className={`${style?.fsremark_10}`} style={{ fontWeight: "bold" }}>Bank Detail</div>
             <div className={`${style?.fsremark_10}`}>Bank Name: {headerData?.bankname}</div>
@@ -819,6 +847,7 @@ const InvoicePrint11Clone = ({ token, invoiceNo, printName, urls, evn, ApiVer })
           </div>
           <div className={footerStyle.block2f3} style={{ width: "33.33%" }}>
             <div className={`${`${style?.fsremark_10}`} fw-normal`}>Signature</div>
+            <img src={headerData?.DigitalSignature}  alt="" />
             <div className={`${style?.fsremark_10}`}>{headerData?.CompanyFullName}</div>
           </div>
         </div>

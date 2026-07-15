@@ -1,6 +1,6 @@
 //code of version 66 
 import React, { useEffect, useState } from "react";
-import JewelleryTaxInvoiceSale from './JewelleryTaxInvoiceEventWise/JewelleryTaxInvoiceSale';
+import JewelleryTaxInvoiceSale from './JewelleryTaxInvoiceEventWise/JewelleryTaxInvoiceSale'; // For Estimate Also This 
 import JewelleryTaxInvoiceQuote from './JewelleryTaxInvoiceEventWise/JewelleryTaxInvoiceQuote';
 import JewelleryTaxInvoiceMemo from './JewelleryTaxInvoiceEventWise/JewelleryTaxInvoiceMemo';
 
@@ -8,7 +8,6 @@ const JewelleryTaxInvoice = ({ urls, token, invoiceNo, printName, evn, ApiVer })
   
   return (
     <>
-          {/* { (atob(evn)?.trim()?.toLowerCase() === 'sale' || atob(evn)?.trim()?.toLowerCase() === "memo") && <JewelleryTaxInvoiceSale urls={urls} token={token} invoiceNo={invoiceNo} printName={printName} evn={evn} ApiVer={ApiVer}  /> }       */}
           { (atob(evn)?.trim()?.toLowerCase() === 'sale' || atob(evn)?.trim()?.toLowerCase() === "memo"|| atob(evn)?.trim()?.toLowerCase() === "sale return") && <JewelleryTaxInvoiceSale urls={urls} token={token} invoiceNo={invoiceNo} printName={printName} evn={evn} ApiVer={ApiVer}  /> } 
           { atob(evn)?.trim()?.toLowerCase() === 'quote' && <JewelleryTaxInvoiceQuote urls={urls} token={token} invoiceNo={invoiceNo} printName={printName} evn={evn} ApiVer={ApiVer} /> }      
           { atob(evn)?.trim()?.toLowerCase() === 'memo return' && <JewelleryTaxInvoiceSale urls={urls} token={token} invoiceNo={invoiceNo} printName={printName} evn={evn} ApiVer={ApiVer} /> }      

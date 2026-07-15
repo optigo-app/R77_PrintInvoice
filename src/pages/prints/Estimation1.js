@@ -240,12 +240,15 @@ const Estimation1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               <b>{e?.MetalAmount?.toFixed(2)}</b>
                             </p>
                           </div>
-                          <div className="fontDmdClr" style={{ display: "flex", flexDirection: "column", gap: "4px"  }}>
+                          <div className="fontDmdClr" style={{ display: "flex", flexDirection: "column"   }}>
                             {detalsFlag ? (
                               <>
                                 {e?.diamonds?.map((el, index) => (
+                                  
+                               
                                   <div key={index} style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
-                                    <p style={{ width: "20%" }}>{el?.ShapeName} {el?.SizeName}</p>
+                                           
+                                    <p style={{ width: "20%" }}> {el?.IsSolGem==1?"S: ":""} {el?.ShapeName} {el?.SizeName}</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{fixedValues(el?.Wt, 3)}CT</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{el?.Pcs} pcs</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{NumberWithCommas(el?.Rate, 2)}</p>
@@ -254,20 +257,33 @@ const Estimation1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 ))}
                               </>
                             ) : (
-                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <>
+                                <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <p style={{ width: "20%" }}>Diamond</p>
                                 <p>{e?.totals?.diamonds?.Wt?.toFixed(3)}CT</p>
                                 <p>{e?.totals?.diamonds?.Pcs} pcs </p>
                                 <p>{NumberWithCommas(e?.totals?.diamonds?.Amount,2)}</p>
                               </div>
+                              {e?.solitair_weight >0 &&(
+                                   <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                   <p style={{ width: "20%" }}>Diamond: S</p>
+                                   <p>{e?.solitair_weight?.toFixed(3)}CT</p>
+                                   <p>{e?.solitair_pieces} pcs </p>
+                                   <p>{NumberWithCommas(e?.solitair_totalamount,2)}</p>
+                                 </div>
+                            )}
+                             
+                              </>
+                              
+                              
                             )}
                           </div>
-                          <div className="fontDmdClr" style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <div className="fontDmdClr" style={{ display: "flex", flexDirection: "column"  }}>
                             {detalsFlag ? (
                               <>
                                 {e?.colorstone?.map((el, index) => (
                                   <div key={index} style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
-                                    <p style={{ width: "20%" }}>{el?.ShapeName} {el?.SizeName}</p>
+                                    <p style={{ width: "20%" }}>  {el?.IsSolGem==1?"G: ":""}  {el?.ShapeName} {el?.SizeName}</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{fixedValues(el?.Wt, 3)}CT</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{el?.Pcs} pcs</p>
                                     <p style={{ width: "20%", textAlign: "end" }}>{NumberWithCommas(el?.Rate, 2)}</p>
@@ -276,12 +292,26 @@ const Estimation1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 ))}
                               </>
                             ) : (
-                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+
+                              <>
+                                  <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <p style={{ width: "20%" }}>ColorStone</p>
                                 <p>{e?.totals?.colorstone?.Wt?.toFixed(3)}CT</p>
                                 <p>{e?.totals?.colorstone?.Pcs} pcs</p>
                                 <p>{NumberWithCommas(e?.totals?.colorstone?.Amount, 2)}</p>
                               </div>
+
+                              {e?.gemstone_weight >0&&(
+                                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                  <p style={{ width: "20%" }}>ColorStone: G</p>
+                                  <p>{e?.gemstone_weight?.toFixed(3)}CT</p>
+                                  <p>{e?.gemstone_pieces} pcs</p>
+                                  <p>{NumberWithCommas(e?.totals?.colorstone?.Amount, 2)}</p>
+                                </div>
+                              )}
+                              
+                              </>
+                            
                             )}
                           </div>
                           <div className="fontDmdClr"

@@ -132,13 +132,9 @@ const BagPrint10A = ({ queries, headers }) => {
     fetchData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // useEffect(() => {
-  //   if (data?.length !== 0) {
-  //     setTimeout(() => {
-  //       window.print();
-  //     }, 5000);
-  //   }
-  // }, [data]);
+
+  // console.log("data", data);
+
   return (
     <>
       {data.length === 0 ? (
@@ -670,6 +666,7 @@ const BagPrint10A = ({ queries, headers }) => {
                         </div>
                       </div>
                     )}
+                    
                     <div className="print10A">
                       <div className="container10A">
                         <div className="header10AD">

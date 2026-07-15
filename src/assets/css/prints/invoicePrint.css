@@ -97,6 +97,11 @@
     word-wrap: break-word;
 }
 
+.fsh2_s2{
+    font-size: 12px !important;
+    line-height: 14px !important;
+}
+
 @media print{
     .print_sec_sum4 {
         display: none !important;
@@ -123,5 +128,8 @@
     .minh_invp_830_2{
         min-height: 120px;
     }
-    
+    .fsh2_s2{
+        font-size: 9px !important;
+        line-height: 11px !important;
+    }
 }

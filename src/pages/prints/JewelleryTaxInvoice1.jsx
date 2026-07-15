@@ -232,7 +232,10 @@ const JewelleryTaxInvoice1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
         setIsImageWorking(false);
       };
   
-
+      const totalTaxAmount = result?.allTaxes?.reduce(
+        (sum, e) => sum + Number(e?.amount || 0),
+        0
+      );
   return (
     <>
     {
@@ -295,7 +298,7 @@ const JewelleryTaxInvoice1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                                                 <div className='py-2'>{e?.MetalTypePurity} {e?.MetalColorCode} | {e?.grosswt?.toFixed(3)} gms GW | {e?.NetWt?.toFixed(3)} gms NW</div>
                                                 <div className='py-2'>Design: <span className='fw-bold'>{e?.designno}</span> 
                                                 <span className='fw-bold'>{e?.BulkPurchaseQTY > 0 ? ` (${e?.BulkPurchaseQTY}) ` : ' '} </span>
-                                                {result?.header?.HSN_No_Label}: <span className='fw-bold'>{result?.header?.HSN_No}</span></div>
+                                                {result?.header?.HSN_No_Label}: <span className='fw-bold'>{e?.HSNNo}</span></div>
                                                 <div className='py-2'>{e?.Categoryname} , {e?.SubCategoryname}</div>
                                             </div>
                                             <div className='col4_jti1 brr_jtip1 center_jtip1 align-items-start justify-content-end p-1'>{formatAmount((e?.MetalRatePrimaryMetal))}</div>
@@ -350,7 +353,7 @@ const JewelleryTaxInvoice1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                             {
                                 result?.allTaxes?.map((e, i) => <div className='d-flex justify-content-end align-items-center pe-1' key={i}><span className='pe-1  ' dangerouslySetInnerHTML={{__html:result?.header?.Currencysymbol}}></span>{formatAmount(e?.amount)}</div>)
                             }
-                                <div className=' d-flex justify-content-end align-items-center pe-1'><span className='pe-1' dangerouslySetInnerHTML={{__html:result?.header?.Currencysymbol}}></span>{formatAmount((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))}</div>
+                                <div className=' d-flex justify-content-end align-items-center pe-1'><span className='pe-1' dangerouslySetInnerHTML={{__html:result?.header?.Currencysymbol}}></span>{(formatAmount((result?.mainTotal?.total_amount + totalTaxAmount ) / result?.header?.CurrencyExchRate))}</div>
                                 <div className=' pe-1  d-flex justify-content-end align-items-center'><span className='pe-1' dangerouslySetInnerHTML={{__html:result?.header?.Currencysymbol}}></span>{formatAmount((result?.header?.AddLess / result?.header?.CurrencyExchRate))}</div>
                                 <div className=' pe-1  d-flex justify-content-end align-items-center'><span className='pe-1' dangerouslySetInnerHTML={{__html:result?.header?.Currencysymbol}}></span>{formatAmount((result?.header?.FreightCharges / result?.header?.CurrencyExchRate))}</div>
                             </div>
@@ -362,7 +365,7 @@ const JewelleryTaxInvoice1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                     <div className='col3_jti1 brr_jtip1 center_jtip1 '></div>
                     <div className='col4_jti1 brr_jtip1 center_jtip1 '></div>
                     <div className='col5_jti1 brr_jtip1 d-flex justify-content-end align-items-center p-1  fs2_jtip1 text-break brl_jtip1'>GRAND TOTAL</div>
-                    <div className='col6_jti1 d-flex justify-content-end align-items-center fs2_jtip1 p-1'>{formatAmount(((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate)))}</div>
+                    <div className='col6_jti1 d-flex justify-content-end align-items-center fs2_jtip1 p-1'>{formatAmount(((result?.mainTotal?.total_amount +totalTaxAmount/ result?.header?.CurrencyExchRate)))}</div>
                 </div>
                 <div className='mt-1 d-flex border fs_jtip1 pgia_jtip1'>
                     <div className='w33_jts border-end p-1 text-break'>

@@ -1,3 +1,7 @@
+html {
+    scrollbar-gutter: stable;
+}
+
 .containerdp10_pcl7{
     box-sizing: border-box;
     word-break: break-all;

@@ -168,7 +168,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       let count = 0;
       let metalWt = 0;
       let otherMiscAmount = 0;
-      data?.BillPrint_Json2.forEach((ele, ind) => {
+      data?.BillPrint_Json2.forEach((ele) => {
         if (ele?.StockBarcode === e?.SrJobno) {
           if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
             // if (i === 0) {
@@ -187,7 +187,27 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             rowWiseDiamondTotal.Amount += ele?.Amount;
             SettingAmount += ele?.SettingAmount;
           } else if (ele?.MasterManagement_DiamondStoneTypeid === 2) {
-            colors.push(ele);
+            const groupingKey = `${ele?.ShapeName}-${ele?.QualityName}-${ele?.Colorname}-${ele?.Rate}`;
+            let existingGroup = colors.find(item => item.groupKey === groupingKey);
+            
+            if (existingGroup) {
+              existingGroup.Pcs += ele?.Pcs || 0;
+              existingGroup.Wt += ele?.Wt || 0;
+              existingGroup.Amount += ele?.Amount || 0;
+              existingGroup.SettingAmount += ele?.SettingAmount || 0;
+            } else {
+              colors.push({
+                groupKey: groupingKey,
+                ShapeName: ele?.ShapeName,
+                QualityName: ele?.QualityName,
+                Colorname: ele?.Colorname,
+                Rate: ele?.Rate,
+                Pcs: ele?.Pcs || 0,
+                Wt: ele?.Wt || 0,
+                Amount: ele?.Amount || 0,
+                SettingAmount: ele?.SettingAmount || 0,
+              });
+            }
             rowWiseColorStoneTotal.Wt += ele?.Wt;
             rowWiseColorStoneTotal.Pcs += ele?.Pcs;
             rowWiseColorStoneTotal.Amount += ele?.Amount;
@@ -208,7 +228,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             object.rate += ele?.Rate;
             object.amount += ele?.Amount;
             metalAmount += ele?.Amount;
-            rowWiseMetalTotal.Amount += ele?.Amount;
+            if(ele?.IsPrimaryMetal ==1){
+
+              rowWiseMetalTotal.Amount += ele?.Amount;
+            }
             if (i === 0) {
               metalTotal.Pcs += ele?.Pcs;
               metalTotal.Amount += ele?.Amount;
@@ -298,149 +321,6 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       clrStoneSettignAmount: clrStoneSettignAmount,
     });
 
-    // let finalArr = [];
-    // newArr.forEach((e, i) => {
-    //     let findRecord = finalArr.findIndex((ele, ind) => ele?.GroupJob === e?.GroupJob && e?.GroupJob !== "");
-    //     let obj = { ...e };
-    //     if (findRecord === -1) {
-    //         obj.goldPrice = obj.metalRate;
-    //         let obbj = {
-    //             kt: obj.MetalTypePurity,
-    //             grwt: obj.grosswt,
-    //             netwt: obj.NetWt,
-    //             rate: obj.goldPrice,
-    //             amount: obj.metalAmount
-    //         }
-    //         obj.metals.forEach((e, i) => {
-    //             e.kt = obj.MetalTypePurity;
-    //             e.grwt = obj.grosswt;
-    //             e.netwt = obj.NetWt;
-    //         })
-    //         obj.otherTotal = obj.otherCharge;
-    //         finalArr.push(obj);
-    //     } else {
-    //         let obbj = {
-    //             kt: "",
-    //             grwt: 0,
-    //             netwt: 0,
-    //             rate: 0,
-    //             amount: 0
-    //         }
-    //         if (finalArr[findRecord]?.GroupJob !== finalArr[findRecord]?.SrJobno) {
-    //             finalArr[findRecord].JewelCodePrefix = obj?.JewelCodePrefix;
-    //             finalArr[findRecord].designno = obj?.designno;
-    //             finalArr[findRecord].SrJobno = obj?.SrJobno;
-    //             finalArr[findRecord].DesignImage = obj?.DesignImage;
-    //             finalArr[findRecord].MetalTypePurity = obj?.MetalTypePurity;
-    //             obbj.kt = finalArr[findRecord].MetalTypePurity;
-    //         } else {
-    //             obbj.kt = obj.MetalTypePurity;
-    //         }
-    //         let rowWiseDiamondTotal = {
-    //             Wt: 0,
-    //             Pcs: 0,
-    //             Amount: 0,
-    //         }
-    //         let rowWiseColorStoneTotal = {
-    //             Wt: 0,
-    //             Pcs: 0,
-    //             Amount: 0,
-    //         }
-    //         let rowWiseMetalTotal = {
-    //             grossWt: 0,
-    //             NetWt: 0,
-    //             Amount: 0,
-    //         }
-    //         // metal logic
-    //         let findMetalDetails = metalArr.findIndex((elem, indd) => elem.groupjob === finalArr[findRecord]?.GroupJob);
-    //         if (findMetalDetails !== 1) {
-    //             obbj.grwt = metalArr[findMetalDetails].grosswt;
-    //             obbj.netwt = metalArr[findMetalDetails].netwt;
-    //             obbj.rate = (metalArr[findMetalDetails].amount) / (obbj.netwt * exchangerate);
-    //             obbj.amount = metalArr[findMetalDetails].amount;
-    //         }
-    //         rowWiseMetalTotal.grossWt = obbj.grwt;
-    //         rowWiseMetalTotal.NetWt = obbj.netwt;
-    //         rowWiseMetalTotal.Amount = obbj.amount;
-    //         let metals = [finalArr[findRecord].metals, obj.metals].flat();
-    //         let blankMetals = [];
-    //         metals.forEach((ele, ind) => {
-    //             let findRec = blankMetals.findIndex(elem => elem?.ShapeName === ele?.ShapeName && elem?.Colorname === ele?.Colorname &&
-    //                 elem?.QualityName === ele?.QualityName && elem?.Rate === ele?.Rate);
-    //             if (findRec === -1) {
-    //                 blankMetals.push(ele)
-    //             } else {
-    //                 blankMetals[findRec].amount += ele?.Amount;
-    //             }
-    //         });
-    //         blankMetals.forEach((ell, inn) => {
-    //             ell.kt = obbj.kt;
-    //             ell.grwt = obbj.grwt;
-    //             ell.netwt = obbj.netwt;
-    //             ell.Rate = obbj.rate;
-    //         });
-    //         finalArr[findRecord].metals = blankMetals;
-
-    //         // diamond logic
-    //         let diamonds = [finalArr[findRecord].diamonds, obj.diamonds].flat();
-    //         let blankDiamonds = [];
-    //         diamonds.forEach((el, indd) => {
-    //             let findRec = blankDiamonds.findIndex(ele => ele?.ShapeName === el?.ShapeName && ele?.Colorname === el?.Colorname &&
-    //                 ele?.QualityName === el?.QualityName && ele?.Rate === el?.Rate && el?.SizeName === ele?.SizeName);
-    //             if (findRec === -1) {
-    //                 blankDiamonds.push(el)
-    //             } else {
-    //                 blankDiamonds[findRec].Amount += el?.Amount;
-    //                 blankDiamonds[findRec].Wt += el?.Wt;
-    //                 blankDiamonds[findRec].Pcs += el?.Pcs;
-    //                 blankDiamonds[findRec].Rate = (blankDiamonds[findRec].Rate + el?.Rate) / 2;
-    //             }
-    //             rowWiseDiamondTotal.Wt = el?.Wt;
-    //             rowWiseDiamondTotal.Pcs = el?.Pcs;
-    //             rowWiseDiamondTotal.Amount = el?.Amount;
-    //         });
-    //         finalArr[findRecord].diamonds = blankDiamonds;
-
-    //         // colorstone logic
-    //         let colorStones = [finalArr[findRecord].colors, obj.colors].flat();
-    //         let blankColorstones = [];
-    //         colorStones.forEach((el, indd) => {
-    //             let findRec = blankColorstones.findIndex(ele => ele?.ShapeName === el?.ShapeName && ele?.Colorname === el?.Colorname &&
-    //                 ele?.QualityName === el?.QualityName && ele?.Rate === el?.Rate && el?.SizeName === ele?.SizeName);
-    //             if (findRec === -1) {
-    //                 blankColorstones.push(el)
-    //             } else {
-    //                 blankColorstones[findRec].Amount += el?.Amount;
-    //                 blankColorstones[findRec].Wt += el?.Wt;
-    //                 blankColorstones[findRec].Pcs += el?.Pcs;
-    //                 blankColorstones[findRec].Rate = (blankColorstones[findRec].Rate + el?.Rate) / 2;
-    //             }
-    //             rowWiseColorStoneTotal.Wt = el?.Wt;
-    //             rowWiseColorStoneTotal.Pcs = el?.Pcs;
-    //             rowWiseColorStoneTotal.Amount = el?.Amount;
-    //         });
-    //         finalArr[findRecord].colors = blankColorstones;
-
-    //         // other charges logic
-    //         let otherTotal = [finalArr[findRecord]?.otherCharge, obj?.otherCharge].flat();
-    //         let blankOtherTotal = [];
-    //         otherTotal.forEach((el, indd) => {
-    //             let findRec = blankOtherTotal.findIndex(ell => ell?.label === el?.label);
-    //             if (findRec === -1) {
-    //                 blankOtherTotal.push(el);
-    //             } else {
-    //                 blankOtherTotal[findRec].value = +blankOtherTotal[findRec]?.value + +el?.value;
-    //             }
-    //         });
-    //         finalArr[findRecord].otherTotal = blankOtherTotal;
-
-    //         // rowwise total logic
-    //         finalArr[findRecord].rowWiseDiamondTotal = rowWiseDiamondTotal;
-    //         finalArr[findRecord].rowWiseColorStoneTotal = rowWiseColorStoneTotal;
-    //         finalArr[findRecord].rowWiseMetalTotal = rowWiseMetalTotal;
-    //     }
-    // });
-
     setTaxes(taxValue);
 
     // newArr.sort((a, b) => {
@@ -506,7 +386,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     };
     
     const updatedData = processJewelryData(newArr);
-    console.log('Updated Data:', updatedData);
+    // console.log('Updated Data:', updatedData);
     setData(updatedData);
     // setData(newArr);
   };
@@ -574,6 +454,17 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     }, []);
   };
 
+  // console.log("data", data);
+  
+  const discountCriteria = [
+    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond' ,disAmount:"DiamondDiscountAmount" },
+    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal' ,disAmount:"MetalDiscountAmount" },
+    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone' ,disAmount:"StoneDiscountAmount" },
+    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour' ,disAmount:"LabourDiscountAmount" },
+    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire' ,disAmount:"SolitaireDiscountAmount1" },
+    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc' ,disAmount:"MiscDiscountAmount" },
+  ];
+  
   return (
     <>
       {loader ? (
@@ -609,6 +500,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 />
               </div>
             </div>
+
             {/* Print Logo */}
             <div className="pt-2">
               {isImageWorking && json0Data?.PrintLogo !== "" && (
@@ -619,7 +511,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   onError={handleImageErrors}
                   height={120}
                   width={150}
-                  style={{ maxWidth: "116px" }}
+                  style={{ maxWidth: "108px" }}
                 />
               )}
               {/* <img src={json0Data?.PrintLogo} alt="" className={`logoimg  d-block mx-auto`} /> */}
@@ -632,7 +524,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
               {json0Data?.PrintHeadLabel !== "" && (
                 <p
                   className={`fw-bold text-center pt-1 pb-2  `}
-                  style={{ fontSize: "18px" }}
+                  style={{ fontSize: "17px" }}
                 >
                   {json0Data?.PrintHeadLabel}
                 </p>
@@ -644,6 +536,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 ></p>
               )}
             </div>
+
             {/* Party */}
             <div
               className={`pt-4 d-flex justify-content-between align-items-between`}
@@ -655,23 +548,24 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </p>
               </div>
               <div
-                className={`text-end  ${style?.font_12}`}
+                className={`text-end ${style?.font_11}`}
                 style={{ width: "180px", minWidth: "180px" }}
               >
                 <div className="d-flex justify-content-end pb-1">
-                  <p style={{ width: "90px" }}>Invoice No :</p>
-                  <p className="text-end fw-bold" style={{ width: "60px" }}>
+                  <p className={`${style?.font_11}`} style={{ width: "90px" }}>Invoice No :</p>
+                  <p className={`${style?.font_11} text-end fw-bold`} style={{ width: "70px" }}>
                     {json0Data?.InvoiceNo}
                   </p>
                 </div>
                 <div className="d-flex justify-content-end pb-2">
-                  <p style={{ width: "90px" }}>Date :</p>
-                  <p className="text-end fw-bold" style={{ width: "60px" }}>
+                  <p className={`${style?.font_11}`} style={{ width: "90px" }}>Date :</p>
+                  <p className={`${style?.font_11} text-end fw-bold`} style={{ width: "70px" }}>
                     {json0Data?.EntryDate}
                   </p>
                 </div>
               </div>
             </div>
+
             {/* Table Header */}
             <div
               className={`border-black border-start border-end border-top mb-1 no_break ${style?.rowWisePad} ${style?.rowHeader} ${style?.word_break}`}
@@ -728,7 +622,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         Gr Wt
                       </p>
                       <p className={`${style?.wid_20} text-center border-end`}>
-                        Net Wt
+                        {data?.find((e) => e?.LossWt !== 0) ? "N + L" : "Net Wt"}
                       </p>
                       <p className={`${style?.wid_20} text-center border-end`}>
                         Rate
@@ -802,9 +696,21 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </div>
               </div>
             </div>
+
             {/* Table Data */}
             {data?.length > 0 &&
               data?.map((e, i) => {
+                
+                const discountDisplay = discountCriteria
+                .filter(({ key }) => e?.[key] > 0)
+                .map(({ key, isAmountKey, label,disAmount }) => {
+                  const num = Number(e[key]);  
+                  const am= Number(e[disAmount])
+                  const decimals = e[isAmountKey] === 1 ? 3 : 2;  
+                  const val = num.toFixed(decimals);  
+                  return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                })
+                .join(', ');
                 return (
                   <div
                     key={i}
@@ -817,6 +723,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         >
                           <p>{NumberWithCommas(i + 1, 0)}</p>
                         </div>
+
+                        {/* Jewelcode */}
                         <div
                           className={`${style?.pad_1}  ${style?.design} border-end`}
                         >
@@ -839,57 +747,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             )}
                           </div>
                         </div>
-                        {/* {processDiamonds(data?.diamonds)?.map((el, indd) => (
-                          <div
-                            key={indd}
-                            className={`border-top no_break ${style?.rowWisePad} ${style?.word_break}`}
-                          >
-                            <div
-                              className={` ${style?.diamond} border-end d-flex flex-wrap`}
-                            >
-                              <div className="d-flex w-100 ">
-                                <div
-                                  className={`col-2 border-end pb-3 position-relative h-100`}
-                                >
-                                  <p>
-                                    {el?.ShapeName} {diaQlty && el?.QualityName}
-                                  </p>
-                                </div>
-                                <div
-                                  className={`col-2 border-end pb-3 position-relative h-100`}
-                                >
-                                  <p className="text-center">{el?.SizeName}</p>
-                                </div>
-                                <div
-                                  className={`col-2 text-end border-end pb-3 position-relative h-100`}
-                                >
-                                  <p>{NumberWithCommas(el?.Wt, 3)}</p>
-                                </div>
-                                <div
-                                  className={`col-2 text-end border-end pb-3 position-relative h-100 `}
-                                >
-                                  <p>{NumberWithCommas(el?.Pcs, 0)}</p>
-                                </div>
-                                <div
-                                  className={`col-2 text-end border-end pb-3 position-relative h-100`}
-                                >
-                                  <p>{NumberWithCommas(el?.Rate, 2)}</p>
-                                </div>
-                                <div
-                                  className={`col-2 text-end border-end pb-3 position-relative h-100`}
-                                >
-                                  <p>
-                                    {NumberWithCommas(
-                                      el?.Amount / json0Data?.CurrencyExchRate,
-                                      2
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div> */}
-                        {/* ))} */}
-
+                        
+                        {/* Diamond */}
                         <div
                           className={` ${style?.diamond} border-end d-flex flex-wrap`}
                         >
@@ -900,7 +759,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {e?.diamonds.map((el, indd) => {
                                 return (
                                   <p key={indd}>
-                                    {el?.ShapeName} {diaQlty && el?.QualityName}
+                                    {el?.Shape_Code} {diaQlty && el?.QualityName}
                                   </p>
                                 );
                               })}
@@ -911,7 +770,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {e?.diamonds.map((el, indd) => {
                                 return (
                                   <p key={indd} className="text-center">
-                                    {el?.SizeName}
+                                    {el?.CustomSize !== "" && el?.SizeName?.toLowerCase() === "custom" 
+                                      ? `C:${el?.CustomSize}` 
+                                      : el?.SizeName
+                                    }
                                   </p>
                                 );
                               })}
@@ -965,81 +827,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
-
-                        {/* {e?.diamonds.map((el1, indd) => {
-                          <div
-                            className={` ${style?.diamond} border-end d-flex flex-wrap`}
-                          >
-                            <div className="d-flex w-100 ">
-                              <div
-                                className={`col-2 border-end pb-3 position-relative h-100`}
-                              >
-                                <p key={indd}>
-                                  {el1?.ShapeName} {diaQlty && el1?.QualityName}
-                                </p>
-                              </div>
-                              <div
-                                className={`col-2 border-end pb-3 position-relative h-100`}
-                              >
-                                {e?.diamonds.map((el, indd) => {
-                                  return (
-                                    <p key={indd} className="text-center">
-                                      {el?.SizeName}
-                                    </p>
-                                  );
-                                })}
-                              </div>
-                              <div
-                                className={`col-2 text-end border-end pb-3 position-relative h-100`}
-                              >
-                                {e?.diamonds.map((el, indd) => {
-                                  return (
-                                    <p key={indd}>
-                                      {NumberWithCommas(el?.Wt, 3)}
-                                    </p>
-                                  );
-                                })}
-                              </div>
-                              <div
-                                className={`col-2 text-end border-end pb-3 position-relative h-100 `}
-                              >
-                                {e?.diamonds.map((el, indd) => {
-                                  return (
-                                    <p key={indd}>
-                                      {NumberWithCommas(el?.Pcs, 0)}
-                                    </p>
-                                  );
-                                })}
-                              </div>
-                              <div
-                                className={`col-2 text-end border-end pb-3 position-relative h-100`}
-                              >
-                                {e?.diamonds.map((el, indd) => {
-                                  return (
-                                    <p key={indd}>
-                                      {NumberWithCommas(el?.Rate, 2)}
-                                    </p>
-                                  );
-                                })}
-                              </div>
-                              <div
-                                className={`col-2 text-end pb-3 position-relative h-100`}
-                              >
-                                {e?.diamonds.map((el, indd) => {
-                                  return (
-                                    <p key={indd}>
-                                      {NumberWithCommas(
-                                        el?.Amount /
-                                          json0Data?.CurrencyExchRate,
-                                        2
-                                      )}
-                                    </p>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>;
-                        })} */}
+                        
+                        {/* Metal */}
                         <div
                           className={` ${style?.metal} border-end d-flex flex-wrap`}
                         >
@@ -1074,9 +863,6 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div
                               className={`${style?.wid_20} text-end border-end`}
                             >
-                              {/* {e?.metals.map((el, indd) => {
-                                                return <p key={indd}>{indd === 0 && NumberWithCommas(e?.NetWt + e?.LossWt, 3)}</p>
-                                            })} */}
                               <p>{NumberWithCommas(e?.netWtLoss, 3)}</p>
                             </div>
                             <div
@@ -1113,6 +899,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           )}
                         </div>
+
+                        {/* Stone */}
                         <div
                           className={` ${style?.stone} border-end d-flex flex-wrap`}
                         >
@@ -1173,6 +961,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Labour */}
                         <div
                           className={` ${style?.labour} border-end d-flex flex-wrap`}
                         >
@@ -1195,6 +985,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Other */}
                         <div
                           className={` ${style?.other} border-end d-flex flex-wrap`}
                         >
@@ -1207,7 +999,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                   ele?.Amount !== 0 && (
                                     <p
                                       key={ind}
-                                      className={`${style?.min_height}`}
+                                      className={`${style?.min_height} ${style?.spbrWord} text-end`}
                                     >
                                       {ele?.ShapeName}
                                     </p>
@@ -1215,7 +1007,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 );
                               })}
                               {e?.otherMiscAmount !== 0 && (
-                                <p className={`${style?.min_height}`}>Other</p>
+                                <p className={`${style?.min_height} ${style?.spbrWord} text-end`}>Other</p>
                               )}
                               {e?.otherCharge?.map((ele, ind) => {
                                 return (
@@ -1223,7 +1015,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                   ind <= 2 && (
                                     <p
                                       key={ind}
-                                      className={`${style?.min_height}`}
+                                      className={`${style?.min_height} ${style?.spbrWord} text-end`}
                                     >
                                       {ele?.label}
                                     </p>
@@ -1233,8 +1025,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
                               {e?.TotalDiamondHandling !== 0 && (
                                 <p
-                                  className={`${style?.min_height}`}
-                                  style={{ wordBreak: "normal" }}
+                                  className={`${style?.min_height} ${style?.spbrWord} text-end`}
                                 >
                                   Charges Handling
                                 </p>
@@ -1290,6 +1081,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Price */}
                         <div
                           className={` fw-bold ${style?.price} d-flex flex-wrap`}
                         >
@@ -1308,6 +1101,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         </div>
                       </div>
                     </div>
+
                     <div className="border-start border-end border-black">
                       <div className={`d-flex  ${style?.packingListRow}`}>
                         <div
@@ -1396,6 +1190,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             >
                               <p className={`fw-bold w-100 border-top  `}></p>
                             </div>
+                            {console.log("e?.rowWiseMetalTotal", e?.rowWiseMetalTotal)}
                             <div className={`${style?.wid_20} text-end`}>
                               <p className={`fw-bold w-100 border-top  `}>
                                 {e?.rowWiseMetalTotal.Amount !== 0 &&
@@ -1507,6 +1302,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         </div>
                       </div>
                     </div>
+                    
+
+                    {/* Per Job Discount Row */}
                     {e?.DiscountAmt !== 0 && (
                       <div className="border-start border-end border-black">
                         <div className="d-flex border-bottom border-top">
@@ -1614,21 +1412,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             className={` ${style?.discounts} border-end d-flex flex-wrap lightGrey text-end w-100`}
                           >
                             {/* <p className={` w-100 fw-bold`}>Discount {e?.Discount}% On Amount</p> */}
+
+
                             <p className="fw-bold text-end">
-                              Discount {e?.Discount}% @
-                              {e?.IsCriteriabasedAmount === 1
-                                ? e?.discountElements?.map((ele, ind) => {
-                                    return (
-                                      <React.Fragment key={ind}>
-                                        {ele?.label}{" "}
-                                        {ind !== e?.discountElements?.length - 1
-                                          ? ","
-                                          : ""}
-                                      </React.Fragment>
-                                    );
-                                  })
-                                : "Total "}
-                              Amount{" "}
+                              Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}
                             </p>
                           </div>
                           <div
@@ -1664,7 +1451,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   </div>
                 );
               })}
-            {/* Total */}
+
+            {/* Final Total Row */}
             <div
               className={`border-start border-end border-black no_break ${style?.rowWisePad} ${style?.word_break}`}
             >
@@ -1842,7 +1630,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </div>
               </div>
             </div>
-            {/* Tax */}
+
+            {/* Taxes & Total */}
             <div
               className={`d-flex border-start border-end border-bottom border-black no_break ${style?.rowWisePad} ${style?.word_break}`}
             >

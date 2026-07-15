@@ -68,3 +68,10 @@ html {
 .fontCheck {
   font-size: 14px;
 }
+
+
+@media print{
+  .d_none_jts{
+    display: none !important;
+  }
+}

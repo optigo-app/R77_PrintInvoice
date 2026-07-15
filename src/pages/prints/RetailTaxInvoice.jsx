@@ -350,6 +350,24 @@ const RetailTaxInvoice = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
         sendData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const merged = clrwise.reduce(
+      (acc, item) => {
+        acc.Pcs += Number(item.Pcs || 0);
+        acc.Wt += Number(item.Wt || 0);
+        acc.Amount += Number(item.Amount || 0);
+        acc.Rate += Number(item._rate || 0);
+        return acc;
+      },
+      {
+        Pcs: 0,
+        Wt: 0,
+        Amount: 0,
+        Rate: 0,
+      }
+    );
+    
+    console.log("TCL: merged", merged)
     return (
         <>  {loader ? <Loader /> : msg === "" ? 
         <div className=''>
@@ -447,16 +465,15 @@ const RetailTaxInvoice = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                     {
                       // result?.resultArray?.map((e, i) => (
                         <React.Fragment>
-                          {clrwise?.map((el, k) => {
-                            return  <div className='d-flex pbiarti' key={k}>
-                              <div className='tcol1rti ps-2'>{el?.MasterManagement_DiamondStoneTypeName} { el?.MaterialTypeName === '' ? '' : `(${el?.MaterialTypeName})` }</div>
-                              <div className='tcol2rti end_rti pe-1'>{(el?.Wt)?.toFixed(3)}</div>
+                           <div className='d-flex pbiarti' >
+                              <div className='tcol1rti ps-2'>Stone</div>
+                              <div className='tcol2rti end_rti pe-1'>{(merged?.Wt)?.toFixed(3)}</div>
                               {/* <div className='tcol3rti end_rti pe-1'>{Math.round(((el?.Amount / (el?.isRateOnPcs === 1 ? (el?.Pcs === 0 ? 1 : el?.Pcs) : (el?.Wt === 0 ? 1 : el?.Wt)) / (result?.header?.CurrencyExchRate))))}</div> */}
-                              <div className='tcol3rti end_rti pe-1'>{Math.round(el?._rate)}</div>
+                              <div className='tcol3rti end_rti pe-1'>{Math.round(merged?.Rate)}</div>
                               {/* <div className='tcol3rti end_rti pe-1'>{el?.Rate}</div> */}
-                              <div className='tcol4rti brrightrti end_rti pe-1'>{formatAmount(el?.Amount)}</div>
+                              <div className='tcol4rti brrightrti end_rti pe-1'>{formatAmount(merged?.Amount)}</div>
                             </div>
-                          })}
+                          
                         </React.Fragment>
                       // ))
                     }

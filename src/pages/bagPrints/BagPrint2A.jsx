@@ -12,7 +12,7 @@ import { handlePrint } from "../../GlobalFunctions/HandlePrint";
 import { organizeData } from "../../GlobalFunctions/OrganizeBagPrintData";
 import { GetUniquejob } from "../../GlobalFunctions/GetUniqueJob";
 import { checkArr, checkInstruction } from "./../../GlobalFunctions";
-import BarcodeGenratorStcok from "../../components/BarcodeGenratorStcok.jsx";
+import BarcodeGenratorStcok from "../../components/BarcodeGenratorStcok";
 import { justifyContent } from "@mui/system";
 
 function BagPrint2A({ queries, headers }) {
@@ -1114,9 +1114,6 @@ function BagPrint2A({ queries, headers }) {
                         </div>
                       </>
                     )}
-
-                    
-                   { console.log("BarcodeGenratorStcok =", BarcodeGenratorStcok)}
 
 { e?.data?.rd2?.length > 0 && (
   /* Flex wrapper to display cards side-by-side */

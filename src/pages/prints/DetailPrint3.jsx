@@ -7,6 +7,9 @@ import {
   handleImageError,
   handlePrint,
   isObjectEmpty,
+  mergeMetals,
+  mergeFindings,
+  NumberWithCommas
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
@@ -24,7 +27,7 @@ const DetailPrint3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const [MetShpWise, setMetShpWise] = useState([]);
   const [notGoldMetalTotal, setNotGoldMetalTotal] = useState(0);
   const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
-    const [isImageWorking, setIsImageWorking] = useState(true);
+  const [isImageWorking, setIsImageWorking] = useState(true);
 
   useEffect(() => {
     const sendData = async () => {
@@ -163,7 +166,7 @@ const DetailPrint3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const isloss = result?.resultArray?.every(e => e?.LossWt === 0) ? 1 : 0;
 
 
-console.log("TCL: ",result )
+  console.log("TCL: ", result)
   return (
     <>
       {loader ? (
@@ -241,82 +244,82 @@ console.log("TCL: ",result )
                   </div>
                 </div>
 
-            
 
-<>
-                    <div>
-                      <div className="headlabeldp3 fw-bold">
-                        {result?.header?.PrintHeadLabel}
-                      </div>
-                           {/* Company Details */}
-            {
-              headerflag &&(
-                <div className="d-flex align-items-center pb-2 border-bottom recordDetailPrint1" style={{marginBottom:"10px"}}>
-                <div className="col-6 headerfontsize" style={{lineHeight:"0.9"}}>
-                  <h2 className="fw-bold detailPrint1L_font_16 pb-1">{result?.header?.CompanyFullName}</h2>
-                  {result?.header?.CompanyAddress !== "" && (<p className="lhDetailPrint1 pb-1">{result?.header?.CompanyAddress}</p>)}
-                  {result?.header?.CompanyAddress2 !== "" && (<p className="lhDetailPrint1 pb-1">{result?.header?.CompanyAddress2}</p>)}
-                  <p className="lhDetailPrint1 pb-1">
-                    {result?.header?.CompanyCity !== "" && `${result?.header?.CompanyCity}`}{result?.header?.CompanyPinCode !== "" && `-${result?.header?.CompanyPinCode},`}
-                    {result?.header?.CompanyState !== "" && `${result?.header?.CompanyState}`}{result?.header?.CompanyCountry !== "" && `${(result?.header?.CompanyCountry)}`}
-                  </p>
-                  {result?.header?.CompanyTellNo !== "" && (<p className="lhDetailPrint1 pb-1">T {result?.header?.CompanyTellNo}</p>)}
-                  <p className="lhDetailPrint1 pb-1">
-                    {result?.header?.CompanyEmail} {result?.header?.CompanyWebsite !== "" && `| ${result?.header?.CompanyWebsite}`}
-                  </p>
-                  <p className="lhDetailPrint1 pb-1">
-                    {result?.header?.Company_VAT_GST_No} 
-                    {result?.header?.Company_CST_STATE_No !== "" && `| ${result?.header?.Company_CST_STATE}`}
-                    {result?.header?.Company_CST_STATE_No !== "" && `-${result?.header?.Company_CST_STATE_No}`} {result?.header?.Pannumber !== "" && `| PAN-${result?.header?.Pannumber}`}
-                  </p>
-                </div>
-                <div className="col-6">
-                  {isImageWorking && (result?.header?.PrintLogo !== "" &&
-                    <img src={result?.header?.PrintLogo} alt=""
-                      className='w-25 h-auto ms-auto d-block object-fit-contain'
-                      onError={handleImageErrors} height={120} width={150} />)}
-                </div>
-              </div>
-              )
-            }
-                      <div className="d-flex justify-content-between align-items-center fs_dp3">
-                        <div className="w-25">
-                          <div className="ps-2">To,</div>
-                          <div className="fw-bold ps-2 fs14_dp3">
-                            {result?.header?.Customercode}
+
+                <>
+                  <div>
+                    <div className="headlabeldp3 fw-bold">
+                      {result?.header?.PrintHeadLabel}
+                    </div>
+                    {/* Company Details */}
+                    {
+                      headerflag && (
+                        <div className="d-flex align-items-center pb-2 border-bottom recordDetailPrint1" style={{ marginBottom: "10px" }}>
+                          <div className="col-6 headerfontsize" style={{ lineHeight: "0.9" }}>
+                            <h2 className="fw-bold detailPrint1L_font_16 pb-1">{result?.header?.CompanyFullName}</h2>
+                            {result?.header?.CompanyAddress !== "" && (<p className="lhDetailPrint1 pb-1">{result?.header?.CompanyAddress}</p>)}
+                            {result?.header?.CompanyAddress2 !== "" && (<p className="lhDetailPrint1 pb-1">{result?.header?.CompanyAddress2}</p>)}
+                            <p className="lhDetailPrint1 pb-1">
+                              {result?.header?.CompanyCity !== "" && `${result?.header?.CompanyCity}`}{result?.header?.CompanyPinCode !== "" && `-${result?.header?.CompanyPinCode},`}
+                              {result?.header?.CompanyState !== "" && `${result?.header?.CompanyState}`}{result?.header?.CompanyCountry !== "" && `${(result?.header?.CompanyCountry)}`}
+                            </p>
+                            {result?.header?.CompanyTellNo !== "" && (<p className="lhDetailPrint1 pb-1">T {result?.header?.CompanyTellNo}</p>)}
+                            <p className="lhDetailPrint1 pb-1">
+                              {result?.header?.CompanyEmail} {result?.header?.CompanyWebsite !== "" && `| ${result?.header?.CompanyWebsite}`}
+                            </p>
+                            <p className="lhDetailPrint1 pb-1">
+                              {result?.header?.Company_VAT_GST_No}
+                              {result?.header?.Company_CST_STATE_No !== "" && `| ${result?.header?.Company_CST_STATE}`}
+                              {result?.header?.Company_CST_STATE_No !== "" && `-${result?.header?.Company_CST_STATE_No}`} {result?.header?.Pannumber !== "" && `| PAN-${result?.header?.Pannumber}`}
+                            </p>
+                          </div>
+                          <div className="col-6">
+                            {isImageWorking && (result?.header?.PrintLogo !== "" &&
+                              <img src={result?.header?.PrintLogo} alt=""
+                                className='w-25 h-auto ms-auto d-block object-fit-contain'
+                                onError={handleImageErrors} height={120} width={150} />)}
                           </div>
                         </div>
-                        <div className="w-25">
-                          <div className="d-flex w-100">
-                            <div className="w-50 end_dp3">
-                              Invoice#&nbsp;&nbsp;&nbsp;:
-                            </div>
-                            <div className="fw-bold w-50 start_dp3">
-                              {result?.header?.InvoiceNo}
-                            </div>
-                          </div>
-                          <div className="d-flex w-100">
-                            <div className="w-50 end_dp3">
-                              Date&nbsp;&nbsp;&nbsp;:
-                            </div>
-                            <div className="fw-bold w-50 start_dp3">
-                              {result?.header?.EntryDate}
-                            </div>
-                          </div>
-                          {result?.header?.HSN_No !== "" && (
-                            <div className="d-flex w-100">
-                              <div className="w-50 end_dp3">
-                                 HSN&nbsp;&nbsp;&nbsp;:
-                              </div>
-                              <div className="fw-bold w-50 start_dp3">
-                                {result?.header?.HSN_No}
-                              </div>
-                            </div>
-                          )}
+                      )
+                    }
+                    <div className="d-flex justify-content-between align-items-center fs_dp3">
+                      <div className="w-25">
+                        <div className="ps-2">To,</div>
+                        <div className="fw-bold ps-2 fs14_dp3">
+                          {result?.header?.Customercode}
                         </div>
                       </div>
-                    </div> {/* Changed from <div/> to </div> */}
-                  </>
+                      <div className="w-25">
+                        <div className="d-flex w-100">
+                          <div className="w-50 end_dp3">
+                            Invoice#&nbsp;&nbsp;&nbsp;:
+                          </div>
+                          <div className="fw-bold w-50 start_dp3">
+                            {result?.header?.InvoiceNo}
+                          </div>
+                        </div>
+                        <div className="d-flex w-100">
+                          <div className="w-50 end_dp3">
+                            Date&nbsp;&nbsp;&nbsp;:
+                          </div>
+                          <div className="fw-bold w-50 start_dp3">
+                            {result?.header?.EntryDate}
+                          </div>
+                        </div>
+                        {result?.header?.HSN_No !== "" && (
+                          <div className="d-flex w-100">
+                            <div className="w-50 end_dp3">
+                              HSN
+                            </div>
+                            <div className="fw-bold w-50 start_dp3">
+                              {result?.header?.HSN_No}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div> {/* Changed from <div/> to </div> */}
+                </>
 
                 {/* table */}
                 <div>
@@ -416,6 +419,8 @@ console.log("TCL: ",result )
                   {/* table body */}
                   <div>
                     {result?.resultArray?.map((e, i) => {
+                      const mergedMetals = mergeMetals(e?.metal);
+                      const mergedFindings = mergeFindings(e?.finding);
                       return (
                         <div className="fs_dp3 " key={i}>
                           <div className="d-flex border-black border-start border-end border-bottom-secondary w-100 dp3_pgia">
@@ -493,67 +498,139 @@ console.log("TCL: ",result )
                             </div>
                             <div className="col4_dp3 border-secondary border-end" style={{ width: "27%" }}>
                               <div>
-                                {e?.metal?.map((el, ind) => {
+                                {mergedMetals?.map((el, ind) => {
                                   return (
                                     <div key={ind}>
-                                      {el?.IsPrimaryMetal === 1 ? (
-                                        <div className="d-flex border-secondary border-bottom">
+
+                                      <div className="d-flex border-secondary">
+                                        <div
+                                          className="start_dp3"
+                                          style={{
+                                            wordBreak: "break-word",
+                                            lineHeight: "11px",
+                                            width: withRate ? "20%" : "25%",
+                                          }}
+                                        >
+                                          {el?.ShapeName + " " + el?.QualityName}
+                                        </div>
+                                        {/* <div className="w-25 end_dp3">{e?.grosswt?.toFixed(3)}</div> */}
+                                        <div
+                                          className="end_dp3"
+                                          style={{
+                                            width: withRate ? "15%" : "25%",
+                                          }}
+                                        >
+
+                                          {
+                                            el?.IsPrimaryMetal == 1
+                                              ? (
+                                                ind === 0
+                                                  ? NumberWithCommas(
+                                                    e?.NetWt + (e?.totals?.diamonds?.Wt / 5),
+                                                    3
+                                                  )
+                                                  : NumberWithCommas(el?.Wt, 3)
+                                              )
+                                              : ""
+                                          }
+                                        </div>
+                                        {/* <div className="w-25 end_dp3">{(e?.NetWt + e?.LossWt)?.toFixed(3)}</div> */}
+                                        {/* <div className="w-25 end_dp3">{(e?.NetWt + e?.LossWt)?.toFixed(3)}</div> */}
+                                        <div
+                                          style={{
+                                            width: withRate ? "15%" : "25%",
+                                          }}
+                                          className=" end_dp3"
+                                        >
+                                          {NumberWithCommas(el?.Wt, 3)}
+                                        </div>
+                                        {withRate && (
                                           <div
-                                            className="start_dp3"
-                                            style={{
-                                              wordBreak: "break-word",
-                                              lineHeight: "11px",
-                                              width: withRate ? "20%" : "25%",
-                                            }}
-                                          >
-                                            {e?.MetalTypePurity}
-                                          </div>
-                                          {/* <div className="w-25 end_dp3">{e?.grosswt?.toFixed(3)}</div> */}
-                                          <div
-                                            className="end_dp3"
-                                            style={{
-                                              width: withRate ? "15%" : "25%",
-                                            }}
-                                          >
-                                            {(
-                                              e?.totals?.diamonds?.Wt / 5 +
-                                              e?.NetWt
-                                            )?.toFixed(3)}
-                                          </div>
-                                          {/* <div className="w-25 end_dp3">{(e?.NetWt + e?.LossWt)?.toFixed(3)}</div> */}
-                                          {/* <div className="w-25 end_dp3">{(e?.NetWt + e?.LossWt)?.toFixed(3)}</div> */}
-                                          <div
-                                            style={{
-                                              width: withRate ? "15%" : "25%",
-                                            }}
                                             className=" end_dp3"
-                                          >
-                                            {((e?.totals?.metal?.IsPrimaryMetal)+(e?.LossWt))?.toFixed(
-                                              3
-                                            )}
-                                          </div>
-                                          {withRate && (
-                                            <div
-                                              className=" end_dp3"
-                                              style={{
-                                                width: "25%",
-                                              }}
-                                            >
-                                              {formatAmount(el?.Rate)}
-                                            </div>
-                                          )}
-                                          <div
-                                            className="end_dp3 fw-bold"
                                             style={{
                                               width: "25%",
                                             }}
                                           >
-                                            {formatAmount(el?.Amount)}
+                                            {formatAmount(el?.Rate)}
                                           </div>
+                                        )}
+                                        <div
+                                          className="end_dp3 fw-bold"
+                                          style={{
+                                            width: "25%",
+                                          }}
+                                        >
+                                          {formatAmount(el?.Amount)}
                                         </div>
-                                      ) : (
-                                        ""
-                                      )}
+                                      </div>
+
+                                    </div>
+                                  );
+                                })}
+
+                                {mergedFindings?.map((data, ind) => {
+                                  return (
+                                    <div key={ind}>
+
+                                      <div className="d-flex border-secondary">
+                                        <div
+                                          className="start_dp3"
+                                          style={{
+                                            wordBreak: "break-word",
+                                            lineHeight: "11px",
+                                            width: withRate ? "20%" : "25%",
+                                          }}
+                                        >
+                                          {e?.GroupJob !== '' ? "FINDING ACCESSORIES" : data?.FindingTypename + " " + data?.QualityName}
+                                        </div>
+
+                                        <div
+                                          className="end_dp3"
+                                          style={{
+                                            width: withRate ? "15%" : "25%",
+                                          }}
+                                        >
+
+                                        </div>
+
+                                        <div
+                                          style={{
+                                            width: withRate ? "15%" : "25%",
+                                          }}
+                                          className=" end_dp3"
+                                        >
+                                          {data?.Wt?.toFixed(3)}
+                                        </div>
+                                        {withRate && (
+                                          <div
+                                            className=" end_dp3"
+                                            style={{
+                                              width: "25%",
+                                            }}
+                                          >
+                                            {e?.GroupJob !== ''
+                                              ? e?.metal
+                                                ?.filter((m) => m?.IsPrimaryMetal === 1)[0]
+                                                ?.Rate?.toFixed(2)
+                                              : data?.Rate?.toFixed(2)
+                                            }
+                                          </div>
+                                        )}
+                                        <div
+                                          className="end_dp3 fw-bold"
+                                          style={{
+                                            width: "25%",
+                                          }}
+                                        >
+                                          {e?.GroupJob !== ''
+                                            ? (e?.metal
+                                              ?.filter((m) => m?.IsPrimaryMetal === 1)[0]
+                                              ?.Rate * (parseFloat(data?.Wt) || 0))?.toFixed(2)
+                                            : data?.Amount?.toFixed(2)
+                                          }
+                                        </div>
+                                      </div>
+
                                     </div>
                                   );
                                 })}
@@ -619,7 +696,7 @@ console.log("TCL: ",result )
                             <div className="col7_dp3 border-secondary border-end">
                               <div className="d-flex">
                                 <div className="w-50 d-flex justify-content-center align-items-center">
-                                  { e?.MakingChargeDiscount >0 ? formatAmount(e?.MakingChargeDiscount, 2)+" %"   :  formatAmount(e?.MaKingCharge_Unit)}
+                                  {e?.MakingChargeDiscount > 0 ? formatAmount(e?.MakingChargeDiscount, 2) + " %" : formatAmount(e?.MaKingCharge_Unit)}
                                 </div>
                                 {/* <div className="w-50 end_top_dp3">{formatAmount(e?.totals?.makingAmount_settingAmount)}</div></div> */}
                                 <div className="w-50 end_top_dp3">
@@ -708,9 +785,11 @@ console.log("TCL: ",result )
                                       width: withRate ? "15%" : "25%",
                                     }}
                                   >
-                                    {(e?.totals?.metal?.IsPrimaryMetal + e?.LossWt)?.toFixed(
+                                    {/* {(e?.totals?.metal?.IsPrimaryMetal + e?.LossWt)?.toFixed(
                                       3
-                                    )}
+                                    )} */}
+
+                                    {NumberWithCommas((e?.totals?.metal?.Wt + e?.totals?.finding?.Wt), 3)}
                                   </div>
                                   <div
                                     className="end_dp3"
@@ -718,13 +797,18 @@ console.log("TCL: ",result )
                                       width: withRate ? "50%" : "25%",
                                     }}
                                   >
-                                    {e?.totals?.metal?.IsPrimaryMetal_Amount ===
+                                    {/* {e?.totals?.metal?.IsPrimaryMetal_Amount ===
                                       0.0
                                       ? ""
                                       : formatAmount(
                                         e?.totals?.metal
                                           ?.IsPrimaryMetal_Amount
-                                      )}
+                                      )} */}
+                                    {e?.totals?.metal?.Amount !== 0 &&
+                                      NumberWithCommas(
+                                        (e?.totals?.metal?.Amount + e?.totals?.finding?.Amount) /
+                                        result?.header?.CurrencyExchRate
+                                        , 2)}
                                   </div>
                                 </div>
                               </div>
@@ -934,14 +1018,14 @@ console.log("TCL: ",result )
                             <div className="border-secondary border-start pad_s_dp3 fw-bold ps-2">
                               GOLD IN 24KT
                             </div>
-                           
+
                             <div className="border-secondary border-end pad_e_dp3 pe-2">
-                                    {(
-                                      result?.mainTotal?.total_purenetwt -
-                                      notGoldMetalWtTotal
-                                    )?.toFixed(3)}{" "}
-                                    gm
-                                  </div>
+                              {(
+                                result?.mainTotal?.total_purenetwt -
+                                notGoldMetalWtTotal
+                              )?.toFixed(3)}{" "}
+                              gm
+                            </div>
                           </div>
 
                           {MetShpWise?.map((e, i) => {

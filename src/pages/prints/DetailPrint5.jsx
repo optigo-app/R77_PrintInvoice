@@ -10,6 +10,8 @@ import {
   handlePrint,
   isObjectEmpty,
   taxGenrator,
+  mergeFindings,
+  mergeMetals,
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import style from "../../assets/css/prints/detailPrint5.module.css";
@@ -25,6 +27,16 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const [address, setAddress] = useState([]);
   const [total, setTotal] = useState({
     diaTotal: {
+      Pcs: 0,
+      Wt: 0,
+      Amount: 0,
+    },
+    solTotal: {
+      Pcs: 0,
+      Wt: 0,
+      Amount: 0,
+    },
+    gemTotal: {
       Pcs: 0,
       Wt: 0,
       Amount: 0,
@@ -91,8 +103,19 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       let diamonds = [];
       let colorStones = [];
       let metals = [];
+      let findings = [];
       let otherAmt = 0;
       let diaTotal = {
+        Pcs: 0,
+        Wt: 0,
+        Amount: 0,
+      };
+      let solTotal = {
+        Pcs: 0,
+        Wt: 0,
+        Amount: 0,
+      };
+      let gemTotal = {
         Pcs: 0,
         Wt: 0,
         Amount: 0,
@@ -122,13 +145,19 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         if (ele?.StockBarcode === e?.SrJobno) {
           obj.MakingAmount += ele.SettingAmount;
 
+
+          if (ele?.MasterManagement_DiamondStoneTypeid === 5) {
+            findings.push(ele);
+          }
           if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
             diamonds.push(ele);
             diaTotal.Pcs += ele?.Pcs;
             diaTotal.Wt += ele?.Wt;
             diaTotal.Amount += ele?.Amount;
+
+
             diamonds = diamonds.reduce((acc, diamond) => {
-              const key = `${diamond?.MaterialTypeName}-${diamond?.ShapeName}-${diamond?.QualityName}-${diamond?.Colorname}-${diamond?.SizeName}`;
+              const key = `${diamond?.MaterialTypeName}-${diamond?.ShapeName}-${diamond?.QualityName}-${diamond?.Colorname}-${diamond?.SizeName}-${diamond?.IsSolGem}`;
 
               if (acc[key]) {
                 acc[key].Pcs += diamond?.Pcs || 0;
@@ -170,6 +199,11 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             csTotal.Wt += ele?.Wt;
             csTotal.Amount += ele?.Amount;
             csTotal.Pcs += ele?.Pcs;
+            if (ele?.IsSolGem === 1) {
+              gemTotal.Pcs += ele?.Pcs;
+              gemTotal.Wt += ele?.Wt;
+              gemTotal.Amount += ele?.Amount;
+            }
             colorStones.sort((a, b) => {
               const sizeA = a.SizeName;
               const sizeB = b.SizeName;
@@ -215,12 +249,18 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       totals.diaTotal.Amount += diaTotal.Amount;
       totals.diaTotal.Pcs += diaTotal.Pcs;
       totals.diaTotal.Wt += diaTotal.Wt;
+      totals.solTotal.Amount += e?.solitair_totalamount;
+      totals.solTotal.Pcs += e?.solitair_pieces;
+      totals.solTotal.Wt += e?.solitair_weight;
       totals.gold24kt += e?.convertednetwt; // Calculation is "metalWt * Tunch / 100" if metal Is primary and rate is 0
       // totals.gold24kt += e?.PureNetWt; // Bug Solving 24/11/2025
 
       totals.csTotal.Amount += csTotal.Amount;
       totals.csTotal.Pcs += csTotal.Pcs;
       totals.csTotal.Wt += csTotal.Wt;
+      totals.gemTotal.Amount += gemTotal.Amount;
+      totals.gemTotal.Pcs += gemTotal.Pcs;
+      totals.gemTotal.Wt += gemTotal.Wt;
 
       totals.OtherCharges += otherAmt;
       totals.MaKingCharge_Unit += obj?.MaKingCharge_Unit;
@@ -244,11 +284,14 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       totals.metalTotal.NL += netWtLoss;
       metalTotal.NL += netWtLoss;
       obj.diamonds = diamonds;
+      obj.findings = findings;
       obj.netWtLoss = netWtLoss;
       obj.colorStones = colorStones;
       obj.metals = metals;
       obj.findingSetting = findingSetting;
       obj.diaTotal = diaTotal;
+      obj.solTotal = solTotal;
+      obj.gemTotal = gemTotal;
       obj.metalTotal = metalTotal;
       obj.csTotal = csTotal;
       obj.otherAmt = otherAmt;
@@ -268,7 +311,8 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             (elem) =>
               elem?.ShapeName === ele?.ShapeName &&
               elem?.Colorname === ele?.Colorname &&
-              elem?.QualityName === ele?.QualityName
+              elem?.QualityName === ele?.QualityName &&
+              elem?.IsSolGem === ele?.IsSolGem
           );
           if (findRnd === -1) {
             let obj = { ...ele };
@@ -429,12 +473,12 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   // ];
 
   const discountCriteria = [
-    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond' ,disAmount:"DiamondDiscountAmount" },
-    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal' ,disAmount:"MetalDiscountAmount" },
-    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone' ,disAmount:"StoneDiscountAmount" },
-    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour' ,disAmount:"LabourDiscountAmount" },
-    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire' ,disAmount:"SolitaireDiscountAmount1" },
-    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc' ,disAmount:"MiscDiscountAmount" },
+    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond', disAmount: "DiamondDiscountAmount" },
+    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal', disAmount: "MetalDiscountAmount" },
+    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone', disAmount: "StoneDiscountAmount" },
+    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour', disAmount: "LabourDiscountAmount" },
+    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire', disAmount: "SolitaireDiscountAmount1" },
+    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc', disAmount: "MiscDiscountAmount" },
   ];
   const IsEvnQuote = atob(evn)?.toLowerCase() === "quote";
 
@@ -452,7 +496,7 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             id="imghs"
             onChange={(e) => setImage(!image)}
           />
-          <label className="form-check-label" htmlFor="imghs" style={{ paddingTop: "3px" }}>With Image</label>
+          <label className="form-check-label" htmlFor="imghs" style={{ paddingTop: "3px" }}>With Image me</label>
         </div>
         <div className="form-check ps-3">
           <input
@@ -651,7 +695,7 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         {data.map((e, i) => {
           {/* For Discount Criteria */ }
 
-          
+
           // const activeDiscounts = discountCriteria
           //   .filter(({ key }) => e?.[key] > 0)
           //   .map(({ label }) => label)
@@ -660,14 +704,20 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
           const discountDisplay = discountCriteria
             .filter(({ key }) => e?.[key] > 0)
-            .map(({ key, isAmountKey, label,disAmount }) => {
-              const num = Number(e[key]);  
-              const am= Number(e[disAmount])
-              const decimals = e[isAmountKey] === 1 ? 3 : 2;  
-              const val = num.toFixed(decimals);  
+            .map(({ key, isAmountKey, label, disAmount }) => {
+              const num = Number(e[key]);
+              const am = Number(e[disAmount])
+              const decimals = e[isAmountKey] === 1 ? 3 : 2;
+              const val = num.toFixed(decimals);
               return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
             })
             .join(', ');
+
+          const mergedMetals = mergeMetals(e?.metals);
+         const mergedFindings = mergeFindings(e?.findings);
+
+        
+        console.log("TCL: eeeee",e )
 
           return (
             <div className="PgeBrakInsid SpBrdersBtom" key={i}>
@@ -722,6 +772,7 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     return (
                       <div className="d-flex w-100" key={ind}>
                         <div className={`ATWdthSpDCM1 spbrWord`}>
+                          {ele?.IsSolGem === 1 ? "S:" : ""}
                           {ele?.MaterialTypeName} {ele?.ShapeName} {ele?.QualityName} {ele?.Colorname}
                         </div>
                         <div className={`ATWdthSpDCM2 ${style?.wordBreak} text-end`}>{ele?.SizeName}</div>
@@ -743,27 +794,62 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 </div>
 
                 <div className={`${style?.metal} border-end position-relative pb-1`} >
-                  {e?.metals.map((ele, ind) => {
+                  {mergedMetals.map((ele, ind) => {
                     return (
                       <div className="d-flex w-100" key={ind}>
                         <div className={`${style?.w_20} spbrWord`}>
                           {ele?.ShapeName} {ele?.QualityName}{" "}
                         </div>
                         <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
-                          {fixedValues(ele?.Wt, 3)}
+                          {
+                            ele?.IsPrimaryMetal == 1
+                              ? (
+                                ind === 0
+                                  ? NumberWithCommas(
+                                    e?.NetWt,
+                                    3
+                                  )
+                                  : NumberWithCommas(ele?.Wt, 3)
+                              )
+                              : ""
+                          }
                         </div>
                         <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
-                          {ind === 0 && e?.metals?.length <= 1 ? fixedValues(e?.netWtLoss, 3)
+                          {/* {ind === 0 && e?.metals?.length <= 1 ? fixedValues(e?.netWtLoss, 3)
                             : ind === 0 && e?.metals?.length >= 1 && ele?.IsPrimaryMetal === 0 ? fixedValues(ele?.Wt - e?.netWtLoss, 3)
                               : ele?.IsPrimaryMetal === 1 ? fixedValues(ele?.Wt, 3)
                                 : ele?.IsPrimaryMetal === 0 && fixedValues(ele?.Wt, 3)
-                          }
+                          } */}
+                          {NumberWithCommas(ele?.Wt, 3)}
                         </div>
                         <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
                           {ele?.Rate?.toFixed(2)}
                         </div>
                         <div className={`${style?.w_20} text-end ${style?.wordBreak}`}>
                           {ele?.IsPrimaryMetal !== 1 ? <p className="fw-bold">{IsEvnQuote ? (ele?.Amount / headerData?.CurrencyExchRate)?.toFixed(2) : ele?.Amount?.toFixed(2)}</p> : <p>{IsEvnQuote ? (ele?.Amount / headerData?.CurrencyExchRate)?.toFixed(2) : ele?.Amount?.toFixed(2)}</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {mergedFindings.map((ele, ind) => {
+                    return (
+                      <div className="d-flex w-100" key={ind}>
+                        <div className={`${style?.w_20} spbrWord`}>
+                          {ele?.ShapeName} {ele?.QualityName}{" "}
+                        </div>
+                        <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
+                          
+                        </div>
+                        <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
+                       
+                          {NumberWithCommas(ele?.Wt, 3)}
+                        </div>
+                        <div className={`${style?.w_20} text-end  ${style?.wordBreak}`}>
+                          {ele?.Rate?.toFixed(2)}
+                        </div>
+                        <div className={`${style?.w_20} text-end ${style?.wordBreak}`}>
+                          {   <p> {  ele?.Amount?.toFixed(2)}</p>}
                         </div>
                       </div>
                     );
@@ -784,6 +870,7 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     return (
                       <div className="d-flex w-100" key={ind}>
                         <div className={`ATWdthSpDCM1 spbrWord`}>
+                          {ele?.IsSolGem === 1 ? "G:" : ""}
                           {ele?.MaterialTypeName} {ele?.ShapeName} {ele?.QualityName} {ele?.Colorname}
                         </div>
                         <div className={`ATWdthSpDCM2 text-center ${style?.wordBreak}`}>
@@ -886,19 +973,27 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   <div className={`d-flex w-100 ${style?.wordBreak}`}>
                     {/* <div className={`${style?.w_20} text-end`}></div> */}
                     <div className={`${style?.w_20} text-end fw-bold`} style={{ width: '40%' }}>
-                      {e?.metals?.filter((e) => e?.IsPrimaryMetal === 1)
+                      {/* {e?.metals?.filter((e) => e?.IsPrimaryMetal === 1)
+                      
                         ?.map((e) => NumberWithCommas(e?.Wt, 3))
-                      }
+                      } */}
+
+                      { fixedValues(e?.NetWt + (e?.diaTotal?.Wt / 5 || 0), 3)}
                     </div>
                     <div className={`${style?.w_20} text-end fw-bold`}>
-                      {e?.netWtLoss !== 0 &&
-                        NumberWithCommas(e?.netWtLoss, 3)}
+                      {/* {e?.netWtLoss !== 0 &&  NumberWithCommas(e?.netWtLoss, 3)} */}
+                      {fixedValues((e?.metalTotal?.Wt + e?.findingTotal?.Wt ), 3)}
                     </div>
                     {/* <div className={`${style?.w_20} text-end`}></div> */}
                     <div className={`${style?.w_20} text-end fw-bold`} style={{ width: '40%' }}>
-                      {e?.metals?.filter((e) => e?.IsPrimaryMetal === 1)?.map((e) =>
+                      {/* {e?.metals?.filter((e) => e?.IsPrimaryMetal === 1)?.map((e) =>
                         IsEvnQuote ? NumberWithCommas(e?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(e?.Amount, 2))
-                      }
+                      } */}
+                       {e?.metalTotal?.Amount !== 0 &&
+                                                       NumberWithCommas(
+                                                         (e?.metalTotal?.Amount + e?.findingTotal?.Amount) /
+                                                         headerData?.CurrencyExchRate
+                                                      ,2 )}
                     </div>
                   </div>
                 </div>
@@ -1163,15 +1258,29 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold">DIAMOND WT</p>
                         <p>
-                          {NumberWithCommas(total?.diaTotal?.Pcs, 0)} /{" "}
-                          {NumberWithCommas(total?.diaTotal?.Wt, 3)} Cts
+                          {NumberWithCommas(total?.diaTotal?.Pcs - total?.solTotal?.Pcs, 0)} /{" "}
+                          {NumberWithCommas(total?.diaTotal?.Wt - total?.solTotal?.Wt, 3)} Cts
+                        </p>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <p className="fw-bold">SOLITAIRE WT</p>
+                        <p>
+                          {NumberWithCommas(total?.solTotal?.Pcs, 0)} /{" "}
+                          {NumberWithCommas(total?.solTotal?.Wt, 3)} Cts
                         </p>
                       </div>
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold">STONE WT</p>
                         <p>
-                          {NumberWithCommas(total?.csTotal?.Pcs, 0)} /{" "}
-                          {NumberWithCommas(total?.csTotal?.Wt, 3)} Cts
+                          {NumberWithCommas(total?.csTotal?.Pcs - total?.gemTotal?.Pcs, 0)} /{" "}
+                          {NumberWithCommas(total?.csTotal?.Wt - total?.gemTotal?.Wt, 3)} Cts
+                        </p>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <p className="fw-bold">GEMSTONE WT</p>
+                        <p>
+                          {NumberWithCommas(total?.gemTotal?.Pcs, 0)} /{" "}
+                          {NumberWithCommas(total?.gemTotal?.Wt, 3)} Cts
                         </p>
                       </div>
                       <div
@@ -1198,11 +1307,19 @@ const DetailPrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       }
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold">DIAMOND</p>
-                        <p>{IsEvnQuote ? NumberWithCommas(total?.diaTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.diaTotal?.Amount, 2)}</p>
+                        <p>{IsEvnQuote ? NumberWithCommas(total?.diaTotal?.Amount - total?.solTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.diaTotal?.Amount - total?.solTotal?.Amount, 2)}</p>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <p className="fw-bold">SOLITAIRE</p>
+                        <p>{IsEvnQuote ? NumberWithCommas(total?.solTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.solTotal?.Amount, 2)}</p>
                       </div>
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold">CST</p>
-                        <p>{IsEvnQuote ? NumberWithCommas(total?.csTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.csTotal?.Amount, 2)}</p>
+                        <p>{IsEvnQuote ? NumberWithCommas(total?.csTotal?.Amount - total?.gemTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.csTotal?.Amount - total?.gemTotal?.Amount, 2)}</p>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <p className="fw-bold">GEMSTONE</p>
+                        <p>{IsEvnQuote ? NumberWithCommas(total?.gemTotal?.Amount / headerData?.CurrencyExchRate, 2) : NumberWithCommas(total?.gemTotal?.Amount, 2)}</p>
                       </div>
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold">MAKING</p>

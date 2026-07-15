@@ -218,7 +218,7 @@ export default function Print1JewelleryBook({
   ) : msg !== "" ? (
     <p className="text-danger fs-2 fw-bold mt-5 text-center w-50 mx-auto">{msg}</p>
   ) : (
-    <>
+    <div className="MrgnSpac">
       <div className="w-full fil_sec">
         <div className="w-full flex prnt_btn mb-1">
           <input
@@ -393,6 +393,6 @@ export default function Print1JewelleryBook({
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

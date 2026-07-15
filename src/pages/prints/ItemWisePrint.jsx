@@ -63,15 +63,15 @@ const ItemWisePrint = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         Wt: 0,
         SizeName: 0
       };
-      let sizeWt =0
+      let sizeWt = 0
       data?.BillPrint_Json2?.forEach((ele, ind) => {
         if (ele?.MasterManagement_DiamondStoneTypeid === 5 && ele?.StockBarcode === e?.SrJobno) {
-          findings.Wt += ele?.Wt 
+          findings.Wt += ele?.Wt
           findings.SizeName += +ele?.SizeName;
-          sizeWt += (+ele?.SizeName* ele?.Wt);
+          sizeWt += (+ele?.SizeName * ele?.Wt);
         }
       });
-      let fineWtss = (((e?.NetWt-findings?.Wt)*e?.Tunch)/100) + ((sizeWt)/100);
+      let fineWtss = (((e?.NetWt - findings?.Wt) * e?.Tunch) / 100) + ((sizeWt) / 100);
 
       obj.fineWtss = fineWtss;
       totals.fineWts += fineWtss;
@@ -286,8 +286,8 @@ const ItemWisePrint = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           setLoader(false);
           // setMsg(data?.Message);
           const err = checkMsg(data?.Message);
-                    console.log(data?.Message);
-                    setMsg(err);
+          console.log(data?.Message);
+          setMsg(err);
         }
       } catch (error) {
         console.error(error);
@@ -331,7 +331,9 @@ const ItemWisePrint = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
               <p className="ps-3 pe-2" style={{ lineHeight: "150%" }}>{json0Data?.customerstreet}</p>
               <p className="ps-3 pe-2" style={{ lineHeight: "150%" }}>{json0Data?.customerregion}</p>
               <p className="ps-3 pe-2" style={{ lineHeight: "150%" }}>
-                {json0Data?.customercity}-{json0Data?.PinCode}
+                {json0Data?.customercity}
+                {json0Data?.customercity && json0Data?.PinCode ? "-" : ""}
+                {json0Data?.PinCode}
               </p>
               <p className="ps-3 pe-2" style={{ lineHeight: "150%" }}>Phno:-{json0Data?.customermobileno}</p>
             </div>
@@ -632,41 +634,45 @@ const ItemWisePrint = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             <p className="fw-bold text-end">{finalTotal?.pkgWt !== 0 && NumberWithCommas(finalTotal?.pkgWt, 3)}</p>
           </div>
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'countItemWisePrint' : 'countItemWisePrint1'} border-end`}>
-            <p className="fw-bold text-end">{total.count}</p>
+            <p className="fw-bold text-end">{total?.count && <>{total.count}</>}</p>
           </div>
           {(atob(printName).toLowerCase() === "item wise print") && (
             <>
               <div className="dpcsItemWisePrint border-end">
-                <p className="fw-bold text-end">{total?.dPcs}</p>
+                <p className="fw-bold text-end">{total?.dPcs > 0 ? total.dPcs : ""}</p>
               </div>
               <div className="dpcsItemWisePrint border-end">
-                <p className="fw-bold text-end">{NumberWithCommas(total?.dWt, 3)}</p>
+                <p className="fw-bold text-end">{total?.dWt ? NumberWithCommas(total.dWt, 3) : ""}</p>
               </div>
               <div className="dpcsItemWisePrint border-end">
                 <p className="fw-bold text-end"></p>
               </div>
               <div className="dpcsItemWisePrint border-end">
-                <p className="fw-bold text-end">{NumberWithCommas(total?.dAmt, 2)}</p>
+              
+                <p className="fw-bold text-end">{total?.dAmt ? NumberWithCommas(total?.dAmt, 2) : ""}</p>
               </div>
               <div className="dpcsItemWisePrint border-end">
-                <p className="fw-bold text-end">{NumberWithCommas(total?.cPcs, 0)}</p>
+              
+                <p className="fw-bold text-end">{total?.cPcs ? NumberWithCommas(total?.cPcs, 0) : ""}</p>
               </div>
               <div className="dpcsItemWisePrint border-end">
-                <p className="fw-bold text-end">{NumberWithCommas(total?.cWt, 3)}</p>
+             
+                <p className="fw-bold text-end">{total?.cWt ? NumberWithCommas(total?.cWt, 3) : ""}</p>
               </div>
               <div className="dpcsItemWisePrint border-end">
                 <p className="fw-bold text-end"></p>
               </div>
               <div className="cAmtItemWisePrint border-end">
-                <p className="fw-bold text-end">{NumberWithCommas(total?.cAmt, 2)}</p>
+               
+                <p className="fw-bold text-end">{total?.cAmt ? NumberWithCommas(total?.cAmt, 2) : ""}</p>
               </div>
             </>
           )}
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'gwtItemWisePrint' : 'gwtItemWisePrint1'} border-end`}>
-            <p className="fw-bold text-end">{NumberWithCommas(total?.gwt, 3)}</p>
+            <p className="fw-bold text-end">{total?.gwt ? NumberWithCommas(total?.gwt, 3) : ""}</p>
           </div>
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'gwtItemWisePrint' : 'gwtItemWisePrint1'} border-end`}>
-            <p className="fw-bold text-end">{NumberWithCommas(total?.nwt, 3)}</p>
+            <p className="fw-bold text-end">{total?.nwt ? NumberWithCommas(total?.nwt, 3) : ""}</p>
           </div>
 
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'rateItemWisePrint' : 'rateItemWisePrint1'} border-end`}>
@@ -674,11 +680,16 @@ const ItemWisePrint = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           </div>
 
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'mAmtItemWisePrint' : 'mAmtItemWisePrint1'} border-end`}>
-            <p className="fw-bold text-end">{NumberWithCommas(total?.mamt, 2)}</p>
+            <p className="fw-bold text-end">{total?.mamt ? NumberWithCommas(total?.mamt, 2) : ""}</p>
+            
+
           </div>
 
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'otherAmtItemWisePrint' : 'otherAmtItemWisePrint1'} border-end`}>
-            <p className="fw-bold text-end">{NumberWithCommas(finalTotal?.otherAmt, 2)}</p>
+      
+            <p className="fw-bold text-end">{finalTotal?.otherAmt ? NumberWithCommas(finalTotal?.otherAmt, 2) : ""}</p>
+           
+
           </div>
 
           <div className={`${(atob(printName).toLowerCase() === "item wise print") ? 'percentageItemWiseprint' : 'percentageItemWiseprint1'} border-end

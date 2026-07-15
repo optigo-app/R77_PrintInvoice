@@ -20,18 +20,7 @@ const ExportPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const loadData = (data) => {
         setInvoice(data?.BillPrint_Json[0]?.InvoiceNo);
         setCustomerCode(data?.BillPrint_Json[0]?.Customercode);
-
-        // const sortedData = data?.BillPrint_Json1.sort((a, b) => {
-        //     const nameA = a.SrJobno.toLowerCase();
-        //     const nameB = b.SrJobno.toLowerCase();
-        //     if (nameA < nameB) {
-        //         return -1;
-        //     }
-        //     if (nameA > nameB) {
-        //         return 1;
-        //     }
-        //     return 0;
-        // });
+ 
 
        const sortedData = data?.BillPrint_Json1?.sort((a, b) => {
             const designNoA = parseInt(((a?.id)?.toString())?.match(/\d+/)[0]);
@@ -65,15 +54,22 @@ const ExportPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         {/* print button */}
         <div className={`d-flex justify-content-end align-items-center ${style?.print_sec_sum4} pb-4 mt-5 w-100`} >
             <div className="form-check d-flex align-items-center">
-                <input className="border-dark me-2" type="checkbox" checked={checkBox?.invoiceNo} onChange={e => handleChange(e)} name='invoiceNo' />
-                <label className="">
+                <input className="border-dark me-2" type="checkbox" id="invoiceNo" checked={checkBox?.invoiceNo} onChange={e => handleChange(e)} name='invoiceNo' />
+                <label className="" htmlFor="invoiceNo">
                     Invoice No
                 </label>
             </div>
             <div className="form-check d-flex align-items-center">
-                <input className="border-dark me-2" type="checkbox" checked={checkBox?.customerCode} onChange={e => handleChange(e)} name='customerCode' />
-                <label className="">
+                <input className="border-dark me-2" type="checkbox" id="customerCode"  checked={checkBox?.customerCode} onChange={e => handleChange(e)} name='customerCode' />
+                <label className="" htmlFor="customerCode">
                     Customer Code
+                </label>
+            </div>
+
+            <div className="form-check d-flex align-items-center">
+                <input className="border-dark me-2" type="checkbox" id="mrp"   checked={checkBox?.mrp} onChange={e => handleChange(e)} name='mrp' />
+                <label className="" htmlFor="mrp">
+                    MRP
                 </label>
             </div>
             <div className="form-check ps-3">
@@ -93,7 +89,17 @@ const ExportPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <p className='fw-bold'>{NumberWithCommas(i + 1, 0)}</p>
                                 <p className='fw-bold'>{e?.designno}</p>
                             </div>
-                            { atob(evn)?.toLowerCase() === 'quote' ? '' : <div className={`fw-bold px-1 ${style?.lh_ep}`}>{e?.SrJobno} </div>}
+                            
+                                 <div className="d-flex  w-100 px-1" style={{justifyContent:"space-between"}}>
+                                    { atob(evn)?.toLowerCase() === 'quote' ? '' : <div className={`fw-bold ${style?.lh_ep}`}>{e?.SrJobno} </div>}
+
+
+                                    {checkBox?.mrp && (
+                                    <p className='fw-bold'>{e?.UnitCost}</p>
+                                 )}
+                                
+                                  </div>
+                            
                         </div>
                     </div>
                 </div>

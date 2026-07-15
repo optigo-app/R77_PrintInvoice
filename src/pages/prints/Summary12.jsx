@@ -438,7 +438,7 @@ const Summary12 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                             <div className="logo_sec_sum4">
                                 {isImageWorking && (billPrintJson?.PrintLogo !== "" &&
-                                    <img src={billPrintJson?.PrintLogo} alt=""
+                                    <img src={billPrintJson?.PrintLogo} width="150px" alt=""
                                         // className={`${style2.headerImg}`}
                                         onError={handleImageErrors} />)}
                                 {/* <img src={billPrintJson?.PrintLogo} alt="Logo" /> */}

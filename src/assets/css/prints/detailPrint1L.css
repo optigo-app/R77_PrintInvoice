@@ -1,0 +1,245 @@
+.containerDetailPrint1 {
+    /* max-width: 297mm !important; */
+    max-width: 1200px !important;
+    padding: 0 5px !important;
+    font-family: Calibri;
+}
+
+.containerDetailPrint1 p,
+.containerDetailPrint1 p span {
+    word-break: break-all;
+    /* font-size: 8px; */
+    font-size: 12px;
+    line-height: 100%;
+    font-family: Calibri;
+}
+
+.containerDetailPrint1 * {
+    font-size: 10px;
+}
+
+.jewelleryPackingList {
+    background-color: #939292;
+}
+
+.lhDetailPrint1 {
+    line-height: 130%;
+}
+
+.srNoDetailprint11 {
+    /* width: 21px;
+    min-width: 21px; */
+    width: 2%;
+    min-width: 2%;
+}
+
+.designDetalPrint1 {
+    /* width: 65px;
+    min-width: 65px; */
+    width: 10%;
+    min-width: 10%;
+}
+
+.diamondDetailPrint1l {
+    /* width: 181.9px;
+    min-width: 181.9px; */
+    width: 22.9%;
+    min-width: 22.9%;
+}
+
+.diamondDetailPrint1p {
+    /* width: 181.9px;
+    min-width: 181.9px; */
+    width: 21.9%;
+    min-width: 21.9%;
+}
+
+.stoneDetailsPrint1l {
+    /* width: 174.3px;
+    min-width: 174.3px; */
+    width: 23.8%;
+    min-width: 23.8%;
+}
+
+.stoneDetailsPrint1p {
+    /* width: 174.3px;
+    min-width: 174.3px; */
+    width: 20.8%;
+    min-width: 20.8%;
+}
+
+
+
+.metalDetailPrint1 {
+    width: 200px;
+    min-width: 200px;
+}
+
+.stoneDetailPrint1 {
+    width: 200px;
+    min-width: 200px;
+}
+
+.otherAmountDetailPrint1 {
+    width: 11.3%;
+    min-width: 11.3%;
+}
+
+.otherAmountDetailPrint1p {
+    width: 10.3%;
+    min-width: 10.3%;
+}
+
+.otherAmountDetailPrint1l {
+    width: 5.3%;
+    min-width: 5.3%;
+}
+
+.labourAmountDetailPrint1 {
+    width: 9%;
+    min-width: 9%;
+}
+
+.totalAmountDetailPrint1 {
+    width: 5%;
+    min-width: 5%;
+}
+
+.metalGoldDetailPrint1,
+.metalTotalDetailPrint1 {
+    width: 20%;
+    min-width: 20%;
+}
+
+.metalGoldDetailPrint1l,
+.metalTotalDetailPrint1l {
+    width: 22%;
+    min-width: 22%;
+}
+
+.metalGoldDetailPrint1p,
+.metalTotalDetailPrint1p {
+    width: 20%;
+    min-width: 20%;
+}
+
+.diamondDetailPrint1l *, .diamondDetailPrint1p * {
+    word-break: break-all;
+}
+
+.parentDetailPrint1 {
+    display: inline-flex;
+    justify-content: space-between;
+}
+
+.designDetalPrint1Total {
+    width: 12%;
+    min-width: 12%;
+}
+
+.cgstDetailPrint1 {
+    min-width: 95%;
+    width: 95%;
+}
+
+.cgstTotalDetailPrint1 {
+    min-width: 5%;
+    width: 5%;
+}
+
+.summaryPadBotDetailPrint1 {
+    padding-bottom: 30px;
+}
+
+.totalLineDetailPrint1 {
+    min-height: 21px;
+}
+
+.createdByDetailPrint1 {
+    min-height: 116px;
+}
+
+.paddingBottomTotalDetailPrint1 {
+    padding-bottom: 22px;
+}
+
+.totalMinHeightDetailPrint1 {
+    min-height: 18px;
+}
+.containerDetailPrint1 .detailPrint1L_font_13 *,
+.containerDetailPrint1 .detailPrint1L_font_13 {
+    font-size: 13px;
+}
+.containerDetailPrint1 .detailPrint1L_font_14 *,
+.containerDetailPrint1 .detailPrint1L_font_14 {
+    font-size: 14px;
+}
+
+.containerDetailPrint1 .detailPrint1L_font_16 *,
+.containerDetailPrint1 .detailPrint1L_font_16 {
+    font-size: 16px;
+}
+
+.containerDetailPrint1 .detailPrint1L_font_11 *,
+.containerDetailPrint1 .detailPrint1L_font_11 {
+    font-size: 11px;
+}
+
+.containerDetailPrint1 .detailPrint1L_font_12 *,
+.containerDetailPrint1 .detailPrint1L_font_12 {
+    font-size: 12px;
+}
+
+.paddingLeftDetailPrint1{
+    padding-left: 2px !important;
+}
+
+.paddingRightDetailPrint1{
+    padding-right: 2px !important;
+}
+
+.paddingLeftDetailPrint1l{
+    padding-left: 4px !important;
+}
+
+.paddingRightDetailPrint1l{
+    padding-right: 4px !important;
+}
+
+.SpBrders {
+    border-bottom: 1px solid #f0f0f0;
+    border-left: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+}
+
+@media print {
+    .containerDetailPrint1 {
+        zoom: unset;
+        margin: 0;
+    }
+
+    .totalLineDetailPrint1 {
+        min-height: 18px;
+    }
+    .recordDetailPrint1 {
+        page-break-inside: avoid;
+    }
+
+    .containerDetailPrint1 p,
+    .containerDetailPrint1 p span {
+        font-size: 7px;
+    }
+
+    .print_sec_sum4 {
+        display: none !important;
+    }
+
+    .containerDetailPrint1 .detailPrint1L_font_11 *,
+    .containerDetailPrint1 .detailPrint1L_font_11 {
+        font-size: 7px;
+    }
+
+    .PgeBrakInsid {
+        page-break-inside: avoid;
+    }
+}

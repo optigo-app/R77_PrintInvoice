@@ -1080,7 +1080,7 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                             {result?.mainTotal?.DiscountAmt !== 0 && (
                                                 <div className="w-100 d-flex align-items-center tb_fs_pcls">
                                                     <div
-                                                        style={{ width: "50%", textAlign: "left" }}
+                                                        style={{ width: "50%", textAlign: "center" }}
                                                         className="end_pcls pdr_pcls"
                                                     >
                                                         Total Discount
@@ -1096,7 +1096,7 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                                 </div>
                                             )}
                                             <div className="w-100 d-flex align-items-center tb_fs_pcls">
-                                                <div style={{ width: "50%", textAlign: "left" }} className="end_pcls pdr_pcls">
+                                                <div style={{ width: "50%", textAlign: "center" }} className="end_pcls pdr_pcls">
                                                     Total Amount
                                                 </div>
                                                 <div style={{ width: "50%", textAlign: "right" }} className="end_pcls pdr_pcls">
@@ -1141,7 +1141,7 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                             {result?.header?.FreightCharges !== 0 && (
                                                 <div className="w-100 d-flex align-items-center tb_fs_pcls">
                                                     <div
-                                                        style={{ width: "50%", textAlign: "left" }}
+                                                        style={{ width: "50%", textAlign: "center" }}
                                                         className="end_pcls pdr_pcls"
                                                     >
                                                         {result?.header?.ModeOfDel}
@@ -1156,7 +1156,7 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                                 </div>
                                             )}
                                             <div className="w-100 d-flex align-items-center tb_fs_pcls fw-bold">
-                                                <div style={{ width: "50%", textAlign: "left" }} className="end_pcls pdr_pcls">
+                                                <div style={{ width: "50%", textAlign: "center" }} className="end_pcls pdr_pcls">
                                                     Final Amount
                                                 </div>
                                                 <div style={{ width: "50%", textAlign: "right" }} className="end_pcls pdr_pcls">

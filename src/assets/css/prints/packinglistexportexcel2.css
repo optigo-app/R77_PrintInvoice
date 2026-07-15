@@ -1,0 +1,65 @@
+.invoice-table {
+    width: 100%;
+    border: 1px solid #000;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+  
+  .invoice-table th,
+  .invoice-table td {
+    border: 1px solid #000 !important;
+    padding: 4px 6px;
+    vertical-align: top;
+    text-align: left;
+    overflow-wrap: normal;
+    word-break: normal;
+    word-wrap: break-word; /* only breaks if a single word truly can't fit */
+  }
+  
+  .invoice-table thead th {
+    text-align: center;
+    font-weight: bold;
+    background-color: #fff;
+    white-space: normal;
+    min-width: 60px; /* safety net so no column can collapse to near-zero */
+  }
+  
+  .invoice-table tbody td {
+    white-space: pre-line;
+  }
+  
+  .desc-cell {
+    white-space: normal;
+  }
+  
+  .ritc {
+    color: #b8860b;
+    font-weight: bold;
+  }
+  
+  .qty-cell div,
+  .rate-cell,
+  .amount-cell {
+    text-align: left;
+  }
+  
+  .pkg-cell {
+    text-align: center;
+  }
+  
+  .rate-cell,
+  .amount-cell {
+ 
+  }
+  
+  .total-row td {
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .total-row td:first-child {
+    text-align: left;
+  }

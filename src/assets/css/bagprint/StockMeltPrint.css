@@ -1,0 +1,81 @@
+/* Base Table Settings for Screen View */
+.jewelry-table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  .jewelry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    text-align: center;
+    table-layout: fixed;
+  }
+  
+  .jewelry-table th, 
+  .jewelry-table td {
+    border: 1px solid #000;
+  }
+  
+  .jewelry-table thead tr {
+    background-color: #f9f9f9;
+  }
+  
+  .nested-barcode-table {
+    width: 100%;
+    border-collapse: collapse;
+    height: 100%;
+  }
+  
+  /* Global utility for preventing word breaking */
+  .no-wrap {
+    white-space: nowrap !important;
+  }
+  
+  .bold-text {
+    font-weight: bold;
+  }
+  
+ 
+  @media print {
+    @page {
+      size: landscape;
+      margin: 10mm;
+    }
+    .printbtn{
+        display: none !important;
+    }
+    
+    body {
+      background: none;
+      color: #000;
+    }
+  
+    /* Strip containers of screen-only layouts */
+    .jewelry-table-container {
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+  
+    /* Force table layout to adjust safely to fit the page horizontally */
+    .jewelry-table {
+      width: 100% !important;
+      table-layout: auto !important; 
+      font-size: 11px !important; 
+    }
+  
+    /* Apply clean padding rules and prevent string fragmentation */
+    .jewelry-table th, 
+    .jewelry-table td {
+      white-space: nowrap !important; 
+      padding: 6px 4px !important;   
+    }
+  
+    /* Ensure deep nesting respects parent cell heights */
+    .nested-barcode-table {
+      height: 100% !important;
+    }
+  }

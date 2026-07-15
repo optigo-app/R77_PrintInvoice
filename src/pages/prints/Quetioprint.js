@@ -6,6 +6,9 @@ import {
   formatAmount,
   handleImageError,
   isObjectEmpty,
+  mergeMetals,
+  mergeFindings,
+  NumberWithCommas
 } from "../../GlobalFunctions";
 import { OrganizeInvoicePrintData } from "../../GlobalFunctions/OrganizeInvoicePrintData";
 import Loader from "../../components/Loader";
@@ -442,12 +445,17 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                     <b style={{ width: "100px", display: "flex" }}>DATE </b>
                     {result?.header?.EntryDate}
                   </p>
-                 {result?.header?.HSN_No &&(  
-                  <p className="qut1_address_box_p">
-                    <b style={{ width: "100px", display: "flex" }}>HSN  </b>{" "}
-                    {result?.header?.HSN_No}
-                  </p>
-                 )}  
+                 {
+                  result?.header?.HSN_No && (
+                    <p className="qut1_address_box_p">
+                      <b style={{ width: "100px", display: "flex" }}>
+                        {" "}
+                        HSN
+                      </b>
+                      {result?.header?.HSN_No}
+                    </p>
+                  )
+                 }
                 </div>
               </div>
 
@@ -559,6 +567,8 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                 <div>
                   <div>
                     {result?.resultArray?.map((data, ind) => {
+                        const mergedMetals = mergeMetals(data?.metal);
+                        const mergedFindings = mergeFindings(data?.finding);
                       return (
                         <div className="Qut1_table_Data_main">
                           <div className="Qut1_table_Data_col1">
@@ -680,17 +690,19 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                           </div>
                           <div className="Qut1_table_Data_col4">
                             <div>
-                              {data?.metal?.map((e, i) => {
+                              {mergedMetals?.map((e, i) => {
                                 return (
                                   <div
                                     className="qut1_table_header_col4_subheader"
                                     key={i}
                                   >
                                     <p
-                                      className="qut1_table_header_col4_subheader_data"
+                                      className="qut1_table_header_col4_subheader_data "
                                       style={{
                                         display: "flex",
                                         justifyContent: "flex-start",
+                                        wordBreak: "break-word",  
+                                        textAlign:"left",
                                       }}
                                     >
                                       {e?.ShapeName} {e?.QualityName}
@@ -702,7 +714,19 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                         justifyContent: "flex-end",
                                       }}
                                     >
-                                      {data?.grosswt?.toFixed(2)}
+                                      {/* {data?.grosswt?.toFixed(2)} */}
+                                      {
+                                                                            e?.IsPrimaryMetal == 1
+                                                                              ? (
+                                                                                i === 0
+                                                                                  ? NumberWithCommas(
+                                                                                    data?.NetWt + (data?.totals?.diamonds?.Wt / 5),
+                                                                                    3
+                                                                                  )
+                                                                                  : NumberWithCommas(e?.Wt, 3)
+                                                                              )
+                                                                              : ""
+                                                                          }
                                     </p>
                                     <p
                                       className="qut1_table_header_col4_subheader_data"
@@ -711,7 +735,8 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                         justifyContent: "flex-end",
                                       }}
                                     >
-                                      {e?.RMwt?.toFixed(2)}
+                                      {/* {e?.RMwt?.toFixed(2)} */}
+                                           {NumberWithCommas(e?.Wt  , 3)}
                                     </p>
                                     <p
                                       className="qut1_table_header_col4_subheader_data"
@@ -734,7 +759,7 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                     >
                                       <b>
                                         {(
-                                          data?.MetalAmount /
+                                          e?.Amount /
                                           result?.header?.CurrencyExchRate
                                         )?.toFixed(2)}
                                       </b>
@@ -745,13 +770,13 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                               })}
                             </div>
                             <div>
-                              {data?.finding?.map((e, i) => {
+                              {mergedFindings?.map((e, i) => {
                                 return (
                                   <div
                                     className="qut1_table_header_col4_subheader"
                                     key={i}
                                   >
-                                    <p className="qut1_table_header_col4_subheader_data">
+                                    <p className="qut1_table_header_col4_subheader_data" style={{textAlign:"left"}}>
                                       {e?.ShapeName +
                                         " " +
                                         e?.QualityName +
@@ -818,7 +843,7 @@ function Qutation({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                               <p className="qut1_table_header_col4_subheader_data_total">
                                 <b>
                                   {(
-                                    data?.totals?.metal?.Amount /
+                                    (data?.totals?.metal?.Amount +data?.totals?.finding?.Amount) /
                                     result?.header?.CurrencyExchRate
                                   )?.toFixed(2)}{" "}
                                 </b>

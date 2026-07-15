@@ -416,6 +416,12 @@
 .w_40_jrtic{
     width: 40%;
 }
+
+.declarationWrapper div span{
+    white-space: normal;
+    word-break: normal !important;        /* Do NOT break words */
+    overflow-wrap: break-word !important; /* Wrap only if needed */
+}
 @media print {
     .trowJL {
         page-break-inside: avoid;

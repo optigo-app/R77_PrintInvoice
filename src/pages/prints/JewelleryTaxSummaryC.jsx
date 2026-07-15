@@ -325,7 +325,7 @@ const JewelleryTaxSummaryC = ({
                             </div>
                             <div className="text-break lh_jts">{e?.Size}</div>
                           </div>
-                          <div className="col3_jts d-flex align-items-start justify-content-start p-1 brr_jts text-break">
+                          <div className="col3_jts d-flex align-items-start justify-content-start p-1 brr_jts text-break" style={{flexDirection: "column"}}>
                             {e?.MetalTypePurity} {e?.MetalColor} |{" "}
                             {e?.grosswt?.toFixed(3)} gms GW |{" "}
                             {e?.NetWt?.toFixed(3)} gms NW
@@ -346,6 +346,12 @@ const JewelleryTaxSummaryC = ({
                                 )} gms `}
                             {/* | DIA: {e?.totals?.diamonds?.Wt?.toFixed(3)} Cts | CS: {e?.totals?.colorstone?.Wt?.toFixed(3)} Cts | MISC: {e?.totals?.misc?.Wt?.toFixed(3)} gms */}
                             <br />{e?.Categoryname}
+                            
+                            {e?.JobRemark !== "" && (
+                      <p className="pt-1">
+                        <span className="fw-bold">REMARKS:</span> {e?.JobRemark}
+                      </p>
+                    )}
                           </div>
                           <div className="col4_jts d-flex align-items-start justify-content-end p-1">
                             <span

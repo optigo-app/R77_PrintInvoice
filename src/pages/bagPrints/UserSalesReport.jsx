@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 // import "../../assets/css/bagprint/fgsaleprint.css";
 
 import Loader from "../../components/Loader";
-import { GetFgSaleData } from "../../GlobalFunctions/GetFgSaleData.js";
+import { GetFgSaleData } from "../../GlobalFunctions/GetFgSaleData";
 import { GetUniquejob } from "../../GlobalFunctions/GetUniqueJob";
 import { handleImageError, } from "../../GlobalFunctions";
 import { handlePrint } from "../../GlobalFunctions/HandlePrint";

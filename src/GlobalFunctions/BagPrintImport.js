@@ -3,6 +3,7 @@ export const bagPrintConditions = [
   { printName: "bagprint2a", componentName: "BagPrint2A" },
   { printName: "bagprint3a", componentName: "BagPrint3A" },
   { printName: "bagprint4a", componentName: "BagPrint4A" },
+
   { printName: "titanbagprint", componentName: "TitanBagPrint" },
   { printName: "bagprint4b", componentName: "BagPrint4B" },
   { printName: "bagprint4c", componentName: "BagPrint4C" },
@@ -18,15 +19,14 @@ export const bagPrintConditions = [
   { printName: "bagprint12a", componentName: "BagPrint12A" },
   { printName: "bagprint13a", componentName: "BagPrint13A" },
   { printName: "bagprint14a", componentName: "BagPrint14A" },
+  { printName: "bagprint14n", componentName: "BagPrint14N" },
   { printName: "bagprint15a", componentName: "BagPrint15A" },
-  { printName: "bagprint14n", componentName: "BagPrint14N" },  //amish
   { printName: "bagprint16", componentName: "PrintDesign16" },
   { printName: "bagprint0", componentName: "PrintDesign0" },
   { printName: "bagprint16m", componentName: "PrintDesign16M" },
   { printName: "bagprint16d", componentName: "PrintDesign16D" },
   { printName: "bagprint16a", componentName: "PrintDesign16A" },
   { printName: "bagprint17", componentName: "PrintDesign17" },
-  { printName: "bagprint17s", componentName: "BagPrint17S" },
   { printName: "bagprint18", componentName: "BagPrint18A" },
   { printName: "bagprint20", componentName: "BagPrint20A" },
   { printName: "bagprint21", componentName: "BagPrint21A" },
@@ -35,6 +35,14 @@ export const bagPrintConditions = [
   { printName: "jobbagsticker3", componentName: "Jobbagsticker3" },
   { printName: "searchmaterial", componentName: "SearchMaterial" },
   { printName: "multipartbagprint", componentName: "MultiPart" },
+  { printName: "diamond_stock", componentName: "DiamondStock" },
+  { printName: "wipprint", componentName: "WIPReport" },
+  { printName: "printreport", componentName: "FGSalePrint" }, 
+  { printName: "qualitytagprint", componentName: "FgSaleTag" },
+  { printName: "stockbook", componentName: "Stockbook" },
   { printName: "usersaleprint", componentName: "UserSalesReport" },
-  { printName: "wipprint", componentName: "WIPReport" },       //amish
+  { printName: "bagprint17s", componentName: "BagPrint17S" },
+  { printName: "stockmeltprint", componentName: "StockMeltPrint" },
+  { printName: "stockmeltexcel", componentName: "StockMeltExcel" },
+ 
 ];

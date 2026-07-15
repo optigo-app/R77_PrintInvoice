@@ -53,6 +53,14 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
             Amount:0,
             SettingAmount:0,
         },
+        solitaire : {
+            Wt:0,
+            Pcs:0,
+            Rate:0,
+            rate:0,
+            Amount:0,
+            SettingAmount:0,
+        },
 
         colorstone:{
             Wt:0,
@@ -63,6 +71,16 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
             SettingAmount:0,
         },
 
+        gemstone:{
+            Wt:0,
+            Pcs:0,
+            Rate:0,
+            rate:0,
+            Amount:0,
+            SettingAmount:0,
+        },
+
+        
         metal:{
             Wt: 0,
             Pcs: 0,
@@ -316,6 +334,16 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
                     mainTotal.diamonds.SettingAmount += obj2?.SettingAmount;
 
                 }
+                if(j2?.MasterManagement_DiamondStoneTypeid === 1 && j2?.IsSolGem === 1){
+                    mainTotal.solitaire.Wt += j2?.Wt;
+                    mainTotal.solitaire.Pcs += j2?.Pcs;
+                    mainTotal.solitaire.Rate += j2?.Rate;
+                    mainTotal.solitaire.Amount += j2?.Amount;
+                    mainTotal.solitaire.SettingAmount += +j2?.SettingAmount;
+                    
+                  }
+
+
                 if(obj2?.MasterManagement_DiamondStoneTypeid === 2){
 
                     colorstoneList.push(j2);
@@ -335,6 +363,14 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
                     mainTotal.colorstone.SettingAmount += obj2?.SettingAmount;
                     
                 }
+                if(j2?.MasterManagement_DiamondStoneTypeid === 2 && j2?.IsSolGem === 1){
+                    mainTotal.gemstone.Wt += j2?.Wt;
+                    mainTotal.gemstone.Pcs += j2?.Pcs;
+                    mainTotal.gemstone.Rate += j2?.Rate;
+                    mainTotal.gemstone.Amount += j2?.Amount;
+                    mainTotal.gemstone.SettingAmount += +j2?.SettingAmount;
+                    
+                  }
                 if(obj2?.MasterManagement_DiamondStoneTypeid === 3){
                     
                     miscList.push(j2);

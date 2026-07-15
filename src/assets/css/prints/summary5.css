@@ -9,12 +9,15 @@
     margin: 0 auto;
     margin-top: 1rem;
 }
+.spacDisplayLooks {
+    margin-bottom: 100px;
+}
 .fsgs5{
     font-size: 14px;
 }
 .logos5{
-    width: 40%;
-    height: 70%;
+    width: auto;
+    height: 70px;
 }
 .imgs5{
     width: 80%;
@@ -168,25 +171,85 @@
 .wp3s5{
     width: 30%;
 }
+
 .pb10s5{
     padding-top: 10px;
 }
+
+.MadSpacLft {
+    padding-left: 2px;
+}
+
+.MadSpacRigt {
+    padding-right: 2px;
+}
+
+.fs-5 {
+    line-height: 21px !important;
+}
+
+.SmalLineHigt {
+    line-height: 17px;
+}
+
+.WdthDvisor {
+    width: 38%;
+}
+
+.WdthDvisor1 {
+    width: 62%;
+}
+
 @media print {
+    @page {
+        margin: 15px 15px;
+    }
+
     .HSs5{
         display: none !important;
     }
+
     .containers5{
         max-width: 1200px;
         margin: 0 auto;
         margin-top: 5px !important;
         padding: 10px;
     }
+
+    .spacDisplayLooks {
+        margin-bottom: 0px;
+    }
+
+    .fs-5 {
+        font-size: 13px !important;
+        line-height: 16px !important;
+    }
+
+    .SmalLineHigt {
+        line-height: 11px;
+    }
+
+    .logos5{
+        width: auto;
+        height: 30px;
+    }
+
+    .MadSpacLft {
+        padding-left: 1px;
+    }
+    
+    .MadSpacRigt {
+        padding-right: 1px;
+    }
+
     .fsgs5{
         font-size: 9px;
     }
+    
     .pbiag{
         page-break-inside: avoid;
     }
+
     .pb10s5{
         padding-top: 10px;
     }

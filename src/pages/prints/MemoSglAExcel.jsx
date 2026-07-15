@@ -1,4 +1,4 @@
-// http://localhost:3001/?tkn=NjU3MjIyNjE4MzcxODg3OA==&invn=Sk1JLzEvMjAyNA==&evn=TWVtbw==&pnm=TWVtbyBTR0wgQQ==&up=aHR0cDovL256ZW4vam8vYXBpLWxpYi9BcHAvU2FsZUJpbGxfSnNvbg==&etp=ZXhjZWw=&ctv=NzE=
+// http://localhost:3000/?tkn=OTA2NTQ3MTcwMDUzNTY1MQ==&invn=Sk1JLzQxMC8yMDI1&evn=bWVtbw==&pnm=TWVtbyBTR0wgQQ==&up=aHR0cDovL256ZW4vam8vYXBpLWxpYi9BcHAvU2FsZUJpbGxfSnNvbg==&ctv=NzE=&ifid=PackingList3&pid=undefined&etp=ZXhjZWw=
 import React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
@@ -8,7 +8,7 @@ import Loader from '../../components/Loader';
 import { OrganizeDataPrint } from '../../GlobalFunctions/OrganizeDataPrint';
 import { MetalShapeNameWiseArr } from '../../GlobalFunctions/MetalShapeNameWiseArr';
 
-const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
+const MemoSglAExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const [result, setResult] = useState(null);
     const [loader, setLoader] = useState(true);
     const [msg, setMsg] = useState("");
@@ -287,6 +287,7 @@ const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <tr>
                                 <td height={40} style={{ ...styBld, }}>Date</td>
                                 <td style={{ textAlign: "left" }}>{result?.header?.EntryDate}</td>
+                                
                                 <td height={40} style={{ ...styBld, }}>Client</td>
                                 <td colSpan={3} style={{ textAlign: "left" }}>{result?.header?.CompanyFullName}</td>
                                 <td />
@@ -503,4 +504,4 @@ const InvoiceExcelO = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     )
 }
 
-export default InvoiceExcelO;
+export default MemoSglAExcel;

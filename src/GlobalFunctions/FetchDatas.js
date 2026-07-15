@@ -26,6 +26,10 @@ export const FetchDatas = async (queryParams, resultString, queries, headers) =>
                     diaPcs: 0,
                     diaWt: 0
                 };
+                let fin = {
+                    finPcs: 0,
+                    finWt: 0
+                };
                 let misc = {
                     miscWt: 0
                 };
@@ -42,6 +46,10 @@ export const FetchDatas = async (queryParams, resultString, queries, headers) =>
                     } else if (e?.MasterManagement_DiamondStoneTypeid === 4) {
                         clr.clrPcs = clr.clrPcs + e?.ActualPcs;
                         clr.clrWt = clr.clrWt + e?.ActualWeight;
+
+                    } else if (e?.MasterManagement_DiamondStoneTypeid === 5) {
+                        fin.finPcs = fin.finPcs + e?.ActualPcs;
+                        fin.finWt = fin.finWt + e?.ActualWeight;
                     } else if (e?.MasterManagement_DiamondStoneTypeid === 7) {
                         misc.miscWt = misc.miscWt + e?.ActualWeight;
                     }
@@ -57,7 +65,7 @@ export const FetchDatas = async (queryParams, resultString, queries, headers) =>
                 imagePath = atob(queryParams?.imagepath);
                 
                 let img = imagePath + a?.rd?.ThumbImagePath;
-                responseData.push({ data: a, additional: { length: length, clr: clr, dia: dia, img: img, misc: misc }, allDatas:allDatas });
+                responseData.push({ data: a, additional: { length: length, clr: clr, dia: dia, img: img, misc: misc, fin: fin }, allDatas:allDatas });
               })
               return responseData;
     } catch (error) {

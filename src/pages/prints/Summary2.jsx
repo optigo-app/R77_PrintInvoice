@@ -10,6 +10,8 @@ import {
   handlePrint,
   isObjectEmpty,
   numberToWord,
+  mergeMetals,
+  mergeFindings
 } from "../../GlobalFunctions";
 import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
 import Loader from "../../components/Loader";
@@ -419,6 +421,12 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   {/* table body */}
                   <div>
                     {result?.resultArray?.map((e, i) => {
+
+                      
+                         const mergedMetals = mergeMetals(e?.metal);
+                        const mergedFindings = mergeFindings(e?.finding);
+                        
+                        console.log("TCL: mergedMetals",mergedMetals )
                       return (
                         <div className="d-flex border border-top-0 trows2 pbias2 fsh2_s2" key={i}>
                           <div className={`${classIs.col1} border-end d-flex justify-content-center align-items-start fsh2_s2`}>{i + 1}</div>
@@ -429,7 +437,16 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className="centers2">{e?.HUID}</div>
                             <div className="centers2 fw-bold">Tunch : {e?.Tunch?.toFixed(3)}</div>
                           </div>
-                          <div className={`${classIs.col3} border-end toplefts2 ps-1`}>{e?.MetalTypePurity}</div>
+                          {/* <div className={`${classIs.col3} border-end toplefts2 ps-1`}>{e?.MetalTypePurity}</div> */}
+                          <div className={`${classIs.col3} border-end `}>
+                            {
+                              mergedMetals?.map((el) => {
+                                return (
+                                  <div className="toplefts2 ps-1">  {el?.ShapeName + " " + el?.QualityName}</div>
+                                )
+                              })
+                            }
+                          </div>
                           <div className={`${classIs.col4} border-end `}>
                             {
                               e?.diamonds?.map((el) => {
@@ -467,7 +484,16 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             }
                           </div>
                           <div className={`${classIs.col8} border-end tops2 pe-1`}>{e?.grosswt?.toFixed(3)}</div>
-                          {hsnetwt ? <div className={`${classIs.col9} border-end tops2 pe-1`}>{e?.NetWt?.toFixed(3)}</div> : ''}
+                          {/* {hsnetwt ? <div className={`${classIs.col9} border-end tops2 pe-1`}>{e?.NetWt?.toFixed(3)}</div> : ''} */}
+                          <div className={`${classIs.col9} border-end `}>
+                            {
+                              mergedMetals?.map((el) => {
+                                return (
+                                  <div className="toplefts2 ps-1">   {(el?.Wt - e?.totals?.finding?.Wt).toFixed(3)}</div>
+                                )
+                              })
+                            }
+                          </div>
                           <div className={`${classIs.col10} border-end tops2 pe-1`}>
                             {
                               formatAmount(
@@ -478,7 +504,16 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           </div>
                           <div className={`${classIs.col11} border-end tops2 pe-1`}>{formatAmount(e?.totals?.colorstone?.Amount)}</div>
                           <div className={`${classIs.col12} border-end tops2 pe-1`}>{e?.convertednetwt?.toFixed(3)}</div>
-                          <div className={`${classIs.col13} border-end tops2 pe-1`}>{formatAmount(e?.MetalAmount)}</div>
+                          {/* <div className={`${classIs.col13} border-end tops2 pe-1`}>{formatAmount(e?.MetalAmount)}</div> */}
+                          <div className={`${classIs.col13} border-end `}>
+                            {
+                              mergedMetals?.map((el) => {
+                                return (
+                                  <div className="toplefts2 ps-1">  {el?.Amount?.toFixed(2)}</div>
+                                )
+                              })
+                            }
+                          </div>
                           <div className={`${classIs.col14} tops2 pe-1`} style={{ width: `${hsnetwt ? '' : '14%'}` }}>{formatAmount(e?.TotalAmount)}</div>
                         </div>
                       );

@@ -656,7 +656,7 @@ const DetailPrint6 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 <div className='fw-bold p-1'>{toWords?.convert(+((((result?.mainTotal?.total_amount)/(result?.header?.CurrencyExchRate)) +  result?.header?.FreightCharges + (result?.allTaxesTotal) + ((result?.header?.AddLess)/(result?.header?.CurrencyExchRate)))?.toFixed(2)))} Only</div>
               </div>
               <div className='p-1 border border-top-0 pbia_dp6 fs_dp6' dangerouslySetInnerHTML={{__html:result?.header?.Declaration}}></div>
-              <div className='border p-1 border-top-0 pbia_dp6'><b className='fs_dp6'>REMARKS:</b>&nbsp; <span className='fw-bold' dangerouslySetInnerHTML={{ __html: result?.header?.PrintRemark }}></span></div>
+              <div className='border p-1 border-top-0 pbia_dp6'><b className='fs_dp6'>REMARKS:</b>&nbsp; <span className='fw-bold' dangerouslySetInnerHTML={{ __html: result?.header?.BillReferenceNo }}></span></div>
               <div className='d-flex border border-top-0 pbia_dp6'>
                 <div className='w_dp6_f border-end p-1'>
                   <div className='fw-bold'>Bank Detail</div>

@@ -1,10 +1,12 @@
 .detailprint8 *{
     font-size: 11px;
     line-height: 120%;
-    word-break: normal;
+    word-break: break-all;
     font-family: Calibri;
 }
-
+.word-wrap{
+    word-break: break-all !important;
+}
  .qty, .totalt{
     width: 5%;
     min-width: 5%;
@@ -111,4 +113,7 @@
     .detailprint8 *{
         font-size: 9px !important;
     }
+    .detailprint8 .fnt-print {
+        font-size: 20px !important;
+      }
 }

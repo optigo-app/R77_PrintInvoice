@@ -41,7 +41,7 @@ const TaxInvoice1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   };
 
   const findMaterials = (json2, json1, json0) => {
-  
+
     const groupedObjects = {};
 
     json2.forEach((item) => {
@@ -71,8 +71,8 @@ const TaxInvoice1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       e?.data?.forEach((ele, ind) => {
         if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
           diamondCsWt += ele?.Wt;
-          let findDiamond = diamonds?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName && 
-          elem?.QualityName === ele?.QualityName && elem?.Colorname === ele?.Colorname &&
+          let findDiamond = diamonds?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName &&
+            elem?.QualityName === ele?.QualityName && elem?.Colorname === ele?.Colorname &&
             elem?.Rate === ele?.Rate);
           if (findDiamond === -1) {
             diamonds?.push(ele);
@@ -237,205 +237,225 @@ const TaxInvoice1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       toWords.convert(+totalobj.netBalanceAmount?.toFixed(2)) + " Only";
     // setResultArr(finalArr);
 
-    let semiFinalArr = [];
+    // let semiFinalArr = [];
 
-    finalArr.forEach((e, i) => {
+    // finalArr.forEach((e, i) => {
+    //   let obj = cloneDeep(e);
+    //   obj.metalRate = obj?.data?.find((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4 && ele?.IsPrimaryMetal === 1)?.Rate || 0;
+    //   if (obj?.mainData?.GroupJob === "") {
+    //     let findMetals = obj.data?.findIndex((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
+    //     if (findMetals !== -1) {
+    //       //   obj.data[findMetals].materialCharges = obj.data[findMetals]?.Amount;
+    //     }
+    //     semiFinalArr.push(obj);
+    //   } else {
+    //     let findRec = semiFinalArr.findIndex((ele, ind) => ele?.mainData?.GroupJob === obj?.mainData?.GroupJob && ele?.metalRate === obj?.metalRate);
+    //     if (findRec === -1) {
+    //       semiFinalArr.push(obj);
+    //     } else {
+    //       let mainMetals = [];
+    //       let whichArr = "";
+    //       if (semiFinalArr[findRec].mainData.SrJobno !== semiFinalArr[findRec].mainData.GroupJob) {
+    //         semiFinalArr[findRec].mainData.SrJobno = semiFinalArr[findRec].mainData.GroupJob;
+    //       } else {
+    //         mainMetals = semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
+    //         whichArr = "semiFinal";
+    //       }
+    //       if (obj.mainData.SrJobno === obj.mainData.GroupJob) {
+    //         semiFinalArr[findRec].mainData.Categoryname = obj.mainData.Categoryname;
+    //         semiFinalArr[findRec].mainData.SubCategoryname = obj.mainData.SubCategoryname;
+    //         semiFinalArr[findRec].mainData.Collectionname = obj.mainData.Collectionname;
+    //         semiFinalArr[findRec].mainData.designno = obj.mainData.designno;
+    //         semiFinalArr[findRec].mainData.HUID = obj.mainData.HUID;
+    //         mainMetals = obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
+    //         whichArr = "obj";
+    //       }
+    //       let alldiamonds = [...obj?.diamonds, ...semiFinalArr[findRec]?.diamonds]?.flat();
+    //       let blankDiamonds = [];
+    //       alldiamonds?.forEach((ele, ind) => {
+    //         let findDiamond = blankDiamonds?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName && elem?.QualityName === ele?.QualityName && elem?.Colorname === ele?.Colorname &&
+    //           elem?.Rate === ele?.Rate);
+    //         if (findDiamond === -1) {
+    //           blankDiamonds?.push(ele);
+    //         } else {
+    //           blankDiamonds[findDiamond].Wt += ele?.Wt;
+    //           blankDiamonds[findDiamond].Pcs += ele?.Pcs;
+    //           blankDiamonds[findDiamond].Amount += ele?.Amount;
+    //         }
+    //       })
+    //       let allColorStones = [...obj?.colorStones, ...semiFinalArr[findRec]?.colorStones]?.flat();
+    //       let blankColorStones = [];
+    //       allColorStones?.forEach((ele, ind) => {
+    //         let findColorStone = blankColorStones?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName && elem?.QualityName === ele?.QualityName && 
+    //         elem?.Colorname === ele?.Colorname && elem?.isRateOnPcs === ele?.isRateOnPcs && elem?.Rate === ele?.Rate);
+    //         if (findColorStone === -1) {
+    //           blankColorStones?.push(ele);
+    //         } else {
+    //           blankColorStones[findColorStone].Wt += ele?.Wt;
+    //           blankColorStones[findColorStone].Pcs += ele?.Pcs;
+    //           blankColorStones[findColorStone].Amount += ele?.Amount;
+    //         }
+    //       })
+    //       let allMiscs = [...obj?.miscs, ...semiFinalArr[findRec]?.miscs]?.flat();
+    //       let blankMiscs = [];
+    //       allMiscs?.forEach((ele, ind) => {
+    //         let findMiscs = blankMiscs?.findIndex((elem, index) => ele?.ShapeName === elem?.ShapeName);
+    //         if (findMiscs === -1) {
+    //           blankMiscs?.push(ele);
+    //         } else {
+    //           blankMiscs[findMiscs].Wt += ele?.Wt;
+    //           blankMiscs[findMiscs].Pcs += ele?.Pcs;
+    //           blankMiscs[findMiscs].Amount += ele?.Amount;
+    //         }
+    //       })
+    //       semiFinalArr[findRec].mainData.MakingAmount += obj.mainData.MakingAmount;
+    //       semiFinalArr[findRec].mainData.TotalAmount += obj.mainData.TotalAmount;
+    //       semiFinalArr[findRec].mainData.grosswt += obj.mainData.grosswt;
+    //       semiFinalArr[findRec].mainData.NetWt += obj.mainData.NetWt;
+    //       semiFinalArr[findRec].mainData.LossWt += obj.mainData.LossWt;
+    //       semiFinalArr[findRec].mainData.MetalAmount += obj.mainData.MetalAmount;
+    //       semiFinalArr[findRec].mainData.UnitCost = +semiFinalArr[findRec].mainData.UnitCost + +obj.mainData.UnitCost;
+    //       semiFinalArr[findRec].mainData.OtherCharges += obj.mainData.OtherCharges;
+    //       semiFinalArr[findRec].mainData.TotalDiamondHandling += obj.mainData.TotalDiamondHandling;
+    //       semiFinalArr[findRec].diamonds = blankDiamonds;
+    //       semiFinalArr[findRec].colorStones = blankColorStones;
+    //       semiFinalArr[findRec].miscs = blankMiscs;
+
+    //       // for metals
+    //       let blankMetals = [];
+    //       if (whichArr === "semiFinal") {
+    //         let otherMetals = obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
+    //         otherMetals.forEach((ele, ind) => {
+    //           let objj = { ...ele };
+    //           let newMetal = true;
+    //           mainMetals.forEach((elem, index) => {
+    //             if (elem?.ShapeName === objj?.ShapeName) {
+    //               elem.Amount += objj?.Amount;
+    //               elem.Pcs += objj?.Pcs;
+    //               elem.Wt += objj?.Wt;
+    //               newMetal = false;
+    //               if (
+    //                 elem?.IsPrimaryMetal !== 1 &&
+    //                 objj?.IsPrimaryMetal === 1
+    //               ) {
+    //                 elem.QualityName = objj?.QualityName;
+    //               }
+    //             }
+    //           });
+    //           if (newMetal) {
+    //             mainMetals.push(objj);
+    //           }
+    //         });
+    //         blankMetals = mainMetals;
+    //       } else if (whichArr === "obj") {
+    //         let otherMetals = semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
+    //         otherMetals.forEach((ele, ind) => {
+    //           let objj = { ...ele };
+    //           let newMetal = true;
+    //           mainMetals.forEach((elem, index) => {
+    //             if (elem?.ShapeName === objj?.ShapeName) {
+    //               elem.Amount += objj?.Amount;
+    //               elem.Pcs += objj?.Pcs;
+    //               elem.Wt += objj?.Wt;
+    //               newMetal = false;
+    //               elem.materialCharges += objj.Amount;
+    //               if (
+    //                 elem?.IsPrimaryMetal !== 1 &&
+    //                 objj?.IsPrimaryMetal === 1
+    //               ) {
+    //                 elem.QualityName = objj?.QualityName;
+    //               }
+    //             }
+    //           });
+    //           if (newMetal) {
+    //             mainMetals.push(objj);
+    //           }
+    //         });
+    //         blankMetals = mainMetals;
+    //       } else {
+    //         let metals = [
+    //           semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4),
+    //           obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4
+    //           ),
+    //         ].flat();
+    //         let blankM = [];
+    //         metals.forEach((ele, ind) => {
+    //           let findMetals = blankM.findIndex((elee) => elee?.ShapeName === ele?.ShapeName);
+    //           if (findMetals === -1) {
+    //             blankM.push(ele);
+    //           } else {
+    //             blankM[findMetals].Wt += ele?.Wt;
+    //             blankM[findMetals].Pcs += ele?.Pcs;
+    //             blankM[findMetals].amount += ele?.amount;
+    //             // blankM[findMetals].materialCharges += +((ele.Rate * ele.Wt).toFixed(2));
+    //             blankM[findMetals].materialCharges += ele?.Amount;
+    //             if (
+    //               blankM[findMetals].IsPrimaryMetal !== 1 &&
+    //               ele?.IsPrimaryMetal === 1
+    //             ) {
+    //               blankM[findMetals].QualityName = ele?.QualityName;
+    //             }
+    //           }
+    //         });
+    //         blankMetals = blankM;
+    //       }
+
+    //       let findMetalRate = semiFinalArr[findRec].mainData.MetalAmount / (semiFinalArr[findRec].mainData.NetWt + semiFinalArr[findRec].mainData.LossWt);
+    //       if (blankMetals[0]) {
+    //         blankMetals[0].Rate = findMetalRate;
+    //       }
+    //       // for materials
+    //       let blankMaterials = [];
+    //       let materials = [semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid !== 4), obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid !== 4),].flat();
+    //       materials.forEach((ele, ind) => {
+    //         let findMaterial = blankMaterials.findIndex((elem, index) => elem?.MasterManagement_DiamondStoneTypeid === ele?.MasterManagement_DiamondStoneTypeid && elem?.ShapeName === ele?.ShapeName);
+    //         if (findMaterial === -1) {
+    //           blankMaterials.push(ele);
+    //         } else {
+    //           blankMaterials[findMaterial].Wt += ele?.Wt;
+    //           blankMaterials[findMaterial].Pcs += ele?.Pcs;
+    //           blankMaterials[findMaterial].Amount += ele?.Amount;
+    //           // blankMaterials[findMaterial].materialCharges += +((ele.Rate * ele.Wt).toFixed(2));
+    //           blankMaterials[findMaterial].materialCharges += ele?.Amount;
+    //         }
+    //       });
+    //       blankMaterials.sort((a, b) => {
+    //         if (
+    //           a.MasterManagement_DiamondStoneTypeid ===
+    //           b.MasterManagement_DiamondStoneTypeid
+    //         ) {
+    //           return a.id - b.id; // If mastermanagementtypeid is the same, sort by ID
+    //         } else {
+    //           return (
+    //             a.MasterManagement_DiamondStoneTypeid -
+    //             b.MasterManagement_DiamondStoneTypeid
+    //           );
+    //         }
+    //       });
+    //       semiFinalArr[findRec].data = [...blankMetals,].flat();
+    //     }
+    //   }
+    // });
+
+
+
+    // remove group job effets
+    const semiFinalArr = [];
+
+    finalArr.forEach((e) => {
       let obj = cloneDeep(e);
-      obj.metalRate = obj?.data?.find((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4 && ele?.IsPrimaryMetal === 1)?.Rate || 0;
-      if (obj?.mainData?.GroupJob === "") {
-        let findMetals = obj.data?.findIndex((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
-        if (findMetals !== -1) {
-          //   obj.data[findMetals].materialCharges = obj.data[findMetals]?.Amount;
-        }
-        semiFinalArr.push(obj);
-      } else {
-        let findRec = semiFinalArr.findIndex((ele, ind) => ele?.mainData?.GroupJob === obj?.mainData?.GroupJob && ele?.metalRate === obj?.metalRate);
-        if (findRec === -1) {
-          semiFinalArr.push(obj);
-        } else {
-          let mainMetals = [];
-          let whichArr = "";
-          if (semiFinalArr[findRec].mainData.SrJobno !== semiFinalArr[findRec].mainData.GroupJob) {
-            semiFinalArr[findRec].mainData.SrJobno = semiFinalArr[findRec].mainData.GroupJob;
-          } else {
-            mainMetals = semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
-            whichArr = "semiFinal";
-          }
-          if (obj.mainData.SrJobno === obj.mainData.GroupJob) {
-            semiFinalArr[findRec].mainData.Categoryname = obj.mainData.Categoryname;
-            semiFinalArr[findRec].mainData.SubCategoryname = obj.mainData.SubCategoryname;
-            semiFinalArr[findRec].mainData.Collectionname = obj.mainData.Collectionname;
-            semiFinalArr[findRec].mainData.designno = obj.mainData.designno;
-            semiFinalArr[findRec].mainData.HUID = obj.mainData.HUID;
-            mainMetals = obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
-            whichArr = "obj";
-          }
-          let alldiamonds = [...obj?.diamonds, ...semiFinalArr[findRec]?.diamonds]?.flat();
-          let blankDiamonds = [];
-          alldiamonds?.forEach((ele, ind) => {
-            let findDiamond = blankDiamonds?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName && elem?.QualityName === ele?.QualityName && elem?.Colorname === ele?.Colorname &&
-              elem?.Rate === ele?.Rate);
-            if (findDiamond === -1) {
-              blankDiamonds?.push(ele);
-            } else {
-              blankDiamonds[findDiamond].Wt += ele?.Wt;
-              blankDiamonds[findDiamond].Pcs += ele?.Pcs;
-              blankDiamonds[findDiamond].Amount += ele?.Amount;
-            }
-          })
-          let allColorStones = [...obj?.colorStones, ...semiFinalArr[findRec]?.colorStones]?.flat();
-          let blankColorStones = [];
-          allColorStones?.forEach((ele, ind) => {
-            let findColorStone = blankColorStones?.findIndex((elem, index) => elem?.ShapeName === ele?.ShapeName && elem?.QualityName === ele?.QualityName && 
-            elem?.Colorname === ele?.Colorname && elem?.isRateOnPcs === ele?.isRateOnPcs && elem?.Rate === ele?.Rate);
-            if (findColorStone === -1) {
-              blankColorStones?.push(ele);
-            } else {
-              blankColorStones[findColorStone].Wt += ele?.Wt;
-              blankColorStones[findColorStone].Pcs += ele?.Pcs;
-              blankColorStones[findColorStone].Amount += ele?.Amount;
-            }
-          })
-          let allMiscs = [...obj?.miscs, ...semiFinalArr[findRec]?.miscs]?.flat();
-          let blankMiscs = [];
-          allMiscs?.forEach((ele, ind) => {
-            let findMiscs = blankMiscs?.findIndex((elem, index) => ele?.ShapeName === elem?.ShapeName);
-            if (findMiscs === -1) {
-              blankMiscs?.push(ele);
-            } else {
-              blankMiscs[findMiscs].Wt += ele?.Wt;
-              blankMiscs[findMiscs].Pcs += ele?.Pcs;
-              blankMiscs[findMiscs].Amount += ele?.Amount;
-            }
-          })
-          semiFinalArr[findRec].mainData.MakingAmount += obj.mainData.MakingAmount;
-          semiFinalArr[findRec].mainData.TotalAmount += obj.mainData.TotalAmount;
-          semiFinalArr[findRec].mainData.grosswt += obj.mainData.grosswt;
-          semiFinalArr[findRec].mainData.NetWt += obj.mainData.NetWt;
-          semiFinalArr[findRec].mainData.LossWt += obj.mainData.LossWt;
-          semiFinalArr[findRec].mainData.MetalAmount += obj.mainData.MetalAmount;
-          semiFinalArr[findRec].mainData.UnitCost = +semiFinalArr[findRec].mainData.UnitCost + +obj.mainData.UnitCost;
-          semiFinalArr[findRec].mainData.OtherCharges += obj.mainData.OtherCharges;
-          semiFinalArr[findRec].mainData.TotalDiamondHandling += obj.mainData.TotalDiamondHandling;
-          semiFinalArr[findRec].diamonds = blankDiamonds;
-          semiFinalArr[findRec].colorStones = blankColorStones;
-          semiFinalArr[findRec].miscs = blankMiscs;
 
-          // for metals
-          let blankMetals = [];
-          if (whichArr === "semiFinal") {
-            let otherMetals = obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
-            otherMetals.forEach((ele, ind) => {
-              let objj = { ...ele };
-              let newMetal = true;
-              mainMetals.forEach((elem, index) => {
-                if (elem?.ShapeName === objj?.ShapeName) {
-                  elem.Amount += objj?.Amount;
-                  elem.Pcs += objj?.Pcs;
-                  elem.Wt += objj?.Wt;
-                  newMetal = false;
-                  if (
-                    elem?.IsPrimaryMetal !== 1 &&
-                    objj?.IsPrimaryMetal === 1
-                  ) {
-                    elem.QualityName = objj?.QualityName;
-                  }
-                }
-              });
-              if (newMetal) {
-                mainMetals.push(objj);
-              }
-            });
-            blankMetals = mainMetals;
-          } else if (whichArr === "obj") {
-            let otherMetals = semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4);
-            otherMetals.forEach((ele, ind) => {
-              let objj = { ...ele };
-              let newMetal = true;
-              mainMetals.forEach((elem, index) => {
-                if (elem?.ShapeName === objj?.ShapeName) {
-                  elem.Amount += objj?.Amount;
-                  elem.Pcs += objj?.Pcs;
-                  elem.Wt += objj?.Wt;
-                  newMetal = false;
-                  elem.materialCharges += objj.Amount;
-                  if (
-                    elem?.IsPrimaryMetal !== 1 &&
-                    objj?.IsPrimaryMetal === 1
-                  ) {
-                    elem.QualityName = objj?.QualityName;
-                  }
-                }
-              });
-              if (newMetal) {
-                mainMetals.push(objj);
-              }
-            });
-            blankMetals = mainMetals;
-          } else {
-            let metals = [
-              semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4),
-              obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid === 4
-              ),
-            ].flat();
-            let blankM = [];
-            metals.forEach((ele, ind) => {
-              let findMetals = blankM.findIndex((elee) => elee?.ShapeName === ele?.ShapeName);
-              if (findMetals === -1) {
-                blankM.push(ele);
-              } else {
-                blankM[findMetals].Wt += ele?.Wt;
-                blankM[findMetals].Pcs += ele?.Pcs;
-                blankM[findMetals].amount += ele?.amount;
-                // blankM[findMetals].materialCharges += +((ele.Rate * ele.Wt).toFixed(2));
-                blankM[findMetals].materialCharges += ele?.Amount;
-                if (
-                  blankM[findMetals].IsPrimaryMetal !== 1 &&
-                  ele?.IsPrimaryMetal === 1
-                ) {
-                  blankM[findMetals].QualityName = ele?.QualityName;
-                }
-              }
-            });
-            blankMetals = blankM;
-          }
+      obj.metalRate =
+        obj?.data?.find(
+          (ele) =>
+            ele?.MasterManagement_DiamondStoneTypeid === 4 &&
+            ele?.IsPrimaryMetal === 1
+        )?.Rate || 0;
 
-          let findMetalRate = semiFinalArr[findRec].mainData.MetalAmount / (semiFinalArr[findRec].mainData.NetWt + semiFinalArr[findRec].mainData.LossWt);
-          if (blankMetals[0]) {
-            blankMetals[0].Rate = findMetalRate;
-          }
-          // for materials
-          let blankMaterials = [];
-          let materials = [semiFinalArr[findRec].data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid !== 4), obj.data.filter((ele, ind) => ele?.MasterManagement_DiamondStoneTypeid !== 4),].flat();
-          materials.forEach((ele, ind) => {
-            let findMaterial = blankMaterials.findIndex((elem, index) => elem?.MasterManagement_DiamondStoneTypeid === ele?.MasterManagement_DiamondStoneTypeid && elem?.ShapeName === ele?.ShapeName);
-            if (findMaterial === -1) {
-              blankMaterials.push(ele);
-            } else {
-              blankMaterials[findMaterial].Wt += ele?.Wt;
-              blankMaterials[findMaterial].Pcs += ele?.Pcs;
-              blankMaterials[findMaterial].Amount += ele?.Amount;
-              // blankMaterials[findMaterial].materialCharges += +((ele.Rate * ele.Wt).toFixed(2));
-              blankMaterials[findMaterial].materialCharges += ele?.Amount;
-            }
-          });
-          blankMaterials.sort((a, b) => {
-            if (
-              a.MasterManagement_DiamondStoneTypeid ===
-              b.MasterManagement_DiamondStoneTypeid
-            ) {
-              return a.id - b.id; // If mastermanagementtypeid is the same, sort by ID
-            } else {
-              return (
-                a.MasterManagement_DiamondStoneTypeid -
-                b.MasterManagement_DiamondStoneTypeid
-              );
-            }
-          });
-          semiFinalArr[findRec].data = [...blankMetals,].flat();
-        }
-      }
+
+      semiFinalArr.push(obj);
     });
+
     let lastArr = [];
     let primaryWts = 0;
     semiFinalArr?.forEach((e, i) => {
@@ -472,7 +492,7 @@ const TaxInvoice1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
     lastArr?.forEach((e, i) => {
 
-totalobj.gwt += e?.mainData?.grosswt
+      totalobj.gwt += e?.mainData?.grosswt
     })
     setResultArr(lastArr);
     totalobj.primaryWts = primaryWts;
@@ -525,8 +545,8 @@ totalobj.gwt += e?.mainData?.grosswt
           setLoader(false);
           // setMsg(data?.Message);
           const err = checkMsg(data?.Message);
-                    console.log(data?.Message);
-                    setMsg(err);
+          console.log(data?.Message);
+          setMsg(err);
         }
       } catch (error) {
         console.error(error);
@@ -563,15 +583,41 @@ totalobj.gwt += e?.mainData?.grosswt
             </div>
           </div>
           <div className="d-flex justify-content-center pb-2">
-            <p className="pe-1">{BillPrint_Json?.Company_VAT_GST_No}</p>
-            <p className="ps-1 pe-1">|</p>
-            <p className="ps-1 pe-1">
-              {BillPrint_Json?.Company_CST_STATE}-
-              {BillPrint_Json?.Company_CST_STATE_No}
-            </p>
-            
-            {BillPrint_Json?.Com_pannumber !== "" && <p className="pe-1 ps-1"> | </p>}
-            {BillPrint_Json?.Com_pannumber !== "" && <p className="ps-1">PAN-{BillPrint_Json?.Com_pannumber}</p>}
+            {BillPrint_Json?.Company_VAT_GST_No && (
+              <p className="pe-1">
+                {BillPrint_Json.Company_VAT_GST_No}
+              </p>
+            )}
+
+            {BillPrint_Json?.Company_VAT_GST_No &&
+              (BillPrint_Json?.Company_CST_STATE ||
+                BillPrint_Json?.Company_CST_STATE_No) && (
+                <p className="ps-1 pe-1">|</p>
+              )}
+
+            {( 
+              BillPrint_Json?.Company_CST_STATE_No) && (
+                <p className="ps-1 pe-1">
+                  {BillPrint_Json?.Company_CST_STATE}
+                  {BillPrint_Json?.Company_CST_STATE &&
+                    BillPrint_Json?.Company_CST_STATE_No &&
+                    "-"}
+                  {BillPrint_Json?.Company_CST_STATE_No}
+                </p>
+              )}
+
+            {BillPrint_Json?.Company_CST_STATE_No &&
+              (BillPrint_Json?.Company_VAT_GST_No ||
+                BillPrint_Json?.Company_CST_STATE ||
+                BillPrint_Json?.Company_CST_STATE_No) && (
+                <p className="pe-1 ps-1">|</p>
+              )}
+
+            {BillPrint_Json?.Com_pannumber && (
+              <p className="ps-1">
+                PAN-{BillPrint_Json.Com_pannumber}
+              </p>
+            )}
           </div>
           <div className="taxinvoice1Head fw-bold text-center mb-1" style={{ fontSize: "20px", minHeight: "33px" }}>
             {BillPrint_Json?.PrintHeadLabel}
@@ -585,11 +631,11 @@ totalobj.gwt += e?.mainData?.grosswt
               <p>{BillPrint_Json?.customerAddress1}</p>
               <p>{BillPrint_Json?.customerAddress2}</p>
               <p>
-                {BillPrint_Json?.customercity}
+                {BillPrint_Json?.customercity1}
                 {BillPrint_Json?.customerpincode}
               </p>
-              <p>{BillPrint_Json?.CompanyCountry}</p>
-              <p>{BillPrint_Json?.CompanyEmail}</p>
+              <p>{BillPrint_Json?.customercountry}</p>
+              <p>{BillPrint_Json?.customeremail1}</p>
               <p>Phno:{BillPrint_Json?.customermobileno}</p>
               <p>{BillPrint_Json?.vat_cst_pan} {BillPrint_Json?.aadharno !== "" && ` | Aadhar-${BillPrint_Json?.aadharno}`}</p>
               <p>
@@ -692,12 +738,12 @@ totalobj.gwt += e?.mainData?.grosswt
                     )}
                   </div>
                   <div className="hsn_invoice1 hsn_invoicePrint1 min_padding_invoice1 border-end pad_2_tax_invoice_1">
-                    {BillPrint_Json?.HSN_No}
+                    {e?.mainData?.HSNNo}
                   </div>
                   <div className="material_invoice_inner1 border-end materialInvoicePrint1">
                     {e?.data.map((ele, ind) => {
                       return (
-                       ele?.IsPrimaryMetal === 1 && <div className={`d-flex material_inner_invoice1 pad_2_tax_invoice_1 border-bottom`} key={ind} >
+                        ele?.IsPrimaryMetal === 1 && <div className={`d-flex material_inner_invoice1 pad_2_tax_invoice_1 border-bottom`} key={ind} >
                           <div className="min_padding_invoice1  border-end justify-content-center col-2 pad_2_tax_invoice_1 text-center">
                             {ele?.ShapeName}
                           </div>
@@ -785,7 +831,7 @@ totalobj.gwt += e?.mainData?.grosswt
                       })
                     }
 
-                    {e?.mainData?.OtherCharges !== 0 && <div className={`d-flex  material_inner_invoice1 pad_2_tax_invoice_1`} >
+                    {e?.mainData?.TotalDiamondHandling !== 0 && <div className={`d-flex  material_inner_invoice1 pad_2_tax_invoice_1`} >
                       <div className="min_padding_invoice1  border-end justify-content-center col-2 pad_2_tax_invoice_1 text-center">
                         Other Charge
                       </div>
@@ -798,12 +844,12 @@ totalobj.gwt += e?.mainData?.grosswt
                       <div className="min_padding_invoice1  border-end justify-content-center col-2 pad_2_tax_invoice_1 text-center">
                       </div>
                       <div className="min_padding_invoice1  justify-content-end col-2">
-                        <p className="text-end"></p>
+                        <p className="text-end"> </p>
                       </div>
                     </div>}
                   </div>
                   <div className="d-flex align-items-center justify-content-center making_invoice1 making_invoicePrint1 p-1 border-end">
-                    {NumberWithCommas(e?.mainData?.MaKingCharge_Unit, 2)}
+                    {e?.mainData?.MakingChargeDiscount > 0 ? NumberWithCommas(e?.mainData?.MakingChargeDiscount, 2) + " %" : NumberWithCommas(e?.mainData?.MaKingCharge_Unit, 2)}
                   </div>
                   <div className="others_invoice1 others_invoicePrint1  border-end">
                     <div className="d-grid h-100">
@@ -837,6 +883,11 @@ totalobj.gwt += e?.mainData?.grosswt
                           {(e?.mainData?.OtherCharges + e?.mainData?.TotalDiamondHandling !== 0) && NumberWithCommas((e?.mainData?.OtherCharges + e?.mainData?.TotalDiamondHandling) / BillPrint_Json?.CurrencyExchRate, 2)}
                         </div>
                       )}
+                      {e?.mainData?.TotalDiamondHandling !== 0 && (
+                        <div className="text-end border-bottom material_inner_invoice1 p-1 minHeight20_5_taxInvoice1 d-flex align-items-center justify-content-end">
+                          {(e?.mainData?.OtherCharges + e?.mainData?.TotalDiamondHandling !== 0) && NumberWithCommas((e?.mainData?.OtherCharges + e?.mainData?.TotalDiamondHandling) / BillPrint_Json?.CurrencyExchRate, 2)}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="d-flex align-items-center justify-content-end total_invoice1 total_invoicePrint1 min_padding_invoice1 border-end  ">
@@ -847,7 +898,7 @@ totalobj.gwt += e?.mainData?.grosswt
             })}
           <div className="d-flex headHeightInvoice1 border-bottom print_break_avoid_invoice1 pad_2_tax_invoice_1">
             <div className="p-1 d-flex align-items-center sr_invoice1 sr_invoicePrint1 border-start  "></div>
-            <div className="p-1 d-flex align-items-center product_discription_invoice1 product_discription_invoice_print_1 border-end border-start total_sec_invoice1 fw-bold pad_2_tax_invoice_1" style={{fontSize: "16px"}}>
+            <div className="p-1 d-flex align-items-center product_discription_invoice1 product_discription_invoice_print_1 border-end border-start total_sec_invoice1 fw-bold pad_2_tax_invoice_1" style={{ fontSize: "16px" }}>
               TOTAL
             </div>
             <div className="p-1 d-flex align-items-center hsn_invoice1 hsn_invoicePrint1 border-end"></div>
@@ -910,7 +961,7 @@ totalobj.gwt += e?.mainData?.grosswt
                 bank?.map((e, i) => {
                   return <p key={i}>Recv.in Bank({e?.label})</p>;
                 })}
-                {BillPrint_Json?.BankPayDet === "" && <p>Recv.in Bank</p>}
+              {BillPrint_Json?.BankPayDet === "" && <p>Recv.in Bank</p>}
               <p>Net Bal. Amount</p>
             </div>
             <div className="total_sum_invoice_print_1 total_sum_invoiceprint1 text-end">
@@ -942,14 +993,14 @@ totalobj.gwt += e?.mainData?.grosswt
                 bank?.map((e, i) => {
                   return <p key={i}>{NumberWithCommas(e?.amount, 2)}</p>;
                 })}
-                {BillPrint_Json?.BankPayDet === "" && <p>0.00</p>}
+              {BillPrint_Json?.BankPayDet === "" && <p>0.00</p>}
               {/* <p>{BillPrint_Json?.BankReceived !== undefined && NumberWithCommas(BillPrint_Json?.BankReceived, 2)}</p> */}
               <p>
                 {/* {totalAmount?.netBalanceAmount !== undefined && NumberWithCommas(totalAmount?.netBalanceAmount, 2)} */}
                 {NumberWithCommas(+((totalAmount?.TotalAmount / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)) +
                   (+(BillPrint_Json?.AddLess / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)) +
                   taxes?.reduce((acc, cObj) => acc + +(+(cObj?.amount / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)), 0) - +(BillPrint_Json?.OldGoldAmount?.toFixed(2)) -
-                  +(BillPrint_Json?.AdvanceAmount?.toFixed(2)) - bank?.reduce((acc, cObj) => acc + +((+cObj?.amount))?.toFixed(2), 0) , 2)}
+                  +(BillPrint_Json?.AdvanceAmount?.toFixed(2)) - bank?.reduce((acc, cObj) => acc + +((+cObj?.amount))?.toFixed(2), 0), 2)}
               </p>
             </div>
           </div>
@@ -964,7 +1015,7 @@ totalobj.gwt += e?.mainData?.grosswt
               <p>   GRAND TOTAL</p>
             </div>
             <div className="d-flex align-items-center justify-content-end totalTaxNumberinvoice_print_1 fw-bold totalTaxNumberinvoiceprint1 pad_2_tax_invoice_1">
-              <p>   <span dangerouslySetInnerHTML={{__html: BillPrint_Json?.Currencysymbol}}></span>{" "}
+              <p>   <span dangerouslySetInnerHTML={{ __html: BillPrint_Json?.Currencysymbol }}></span>{" "}
                 {NumberWithCommas(+((totalAmount?.TotalAmount / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)) +
                   (+(BillPrint_Json?.AddLess / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)) +
                   taxes?.reduce((acc, cObj) => acc + +(+(cObj?.amount / BillPrint_Json?.CurrencyExchRate)?.toFixed(2)), 0), 2)}</p>

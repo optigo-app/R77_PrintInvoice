@@ -51,6 +51,8 @@ const AllDesign = () => {
 
   const openProject = (searchUrl) => {
     
+   
+    
     const mappings = [
       { key: "pnm", component: <AllDesignPrint /> },
       { key: "printname", component: <AllDesignBagPrint2 /> },

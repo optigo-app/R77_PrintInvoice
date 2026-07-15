@@ -1199,12 +1199,22 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
     const normalize = s => (s === null || s === undefined ? '' : String(s).trim().toLowerCase());
 
     const groupAndSum = (items, keys, targetArrayName, targetTotalName) => {
+
+ 
       const map = new Map();
       let totalPcs = 0, totalWt = 0;
 
       for (const item of items) {
         if (!item) continue;
         const key = keys.map(k => normalize(item[k])).join('|');
+ 
+
+        console.log({
+          ShapeName: item.ShapeName,
+          SizeName: item.SizeName,
+          IsSolGem: item.IsSolGem,
+          key
+        });
         const pcs = Number(item.Pcs || 0);
         const wt = Number(item.Wt || 0);
 
@@ -1223,6 +1233,8 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
             QualityName: item.QualityName,
             Colorname: item.Colorname,
             SizeName: item.SizeName,
+            IsSolGem: item.IsSolGem,
+
             Pcs: pcs,
             Wt: wt
           });
@@ -1239,13 +1251,18 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
     const allMetals = dataArray.flatMap(job => job.metals || []);
     const allFindings = dataArray.flatMap(job => job.anotherFinding || []);
 
-    groupAndSum(allDiamonds, ['ShapeName', 'QualityName', 'Colorname', 'SizeName'], 'diamonds', 'diamondsTotal');
-    groupAndSum(allColorStones, ['ShapeName', 'QualityName', 'Colorname', 'SizeName'], 'colorStones', 'colorStonesTotal');
+    groupAndSum(allDiamonds, ['ShapeName', 'QualityName', 'Colorname', 'SizeName','IsSolGem'], 'diamonds', 'diamondsTotal');
+    groupAndSum(allColorStones, ['ShapeName', 'QualityName', 'Colorname', 'SizeName','IsSolGem'], 'colorStones', 'colorStonesTotal');
     groupAndSum(allMetals, ['ShapeName', 'QualityName', 'Colorname'], 'metals', 'metalsTotal');
     groupAndSum(allFindings, ['FindingTypename', 'FindingAccessories', 'ShapeName', 'QualityName', 'Colorname'], 'anotherFinding', 'anotherFindingTotal');
 
+    
+    console.log("TCL: groupMaterials -> res dia ", result.diamonds)
     return result;
+    
   }
+
+  
 
   const grouped = useMemo(() => groupMaterials(json2Data), [json2Data]);
   // console.log(grouped.diamonds);
@@ -1359,6 +1376,7 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
     backgroundColor: "#ffffff",
   }
 
+console.log("TCL: OutsourceRetMat -> grouped.colorStones",grouped.colorStones )
   return (
     <>
       {loader ? (
@@ -1502,7 +1520,7 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
                           const isLast = id === grouped?.diamonds?.length - 1;
                           return (
                             <div key={id} className={`d-flex ${!isLast ? 'spBrdrBtom' : ''}`}>
-                              <div className="spacCell proprDvson spBrdrRigt d-flex justify-content-start align-items-center">{el?.ShapeName}</div>
+                              <div className="spacCell proprDvson spBrdrRigt d-flex justify-content-start align-items-center">{el?.IsSolGem==1?'S: ':''}{el?.ShapeName}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.QualityName}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.Colorname}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.SizeName}</div>
@@ -1546,7 +1564,7 @@ const OutsourceRetMat = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
                           const isLast = id === grouped?.colorStones?.length - 1;
                           return (
                             <div key={id} className={`d-flex ${!isLast ? 'spBrdrBtom' : ''}`}>
-                              <div className="spacCell proprDvson spBrdrRigt d-flex justify-content-start align-items-center">{el?.ShapeName}</div>
+                              <div className="spacCell proprDvson spBrdrRigt d-flex justify-content-start align-items-center">{el?.IsSolGem==1?'G: ':''}{el?.ShapeName}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.QualityName}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.Colorname}</div>
                               <div className="proprDvson spBrdrRigt spacCell d-flex justify-content-start align-items-center">{el?.SizeName}</div>

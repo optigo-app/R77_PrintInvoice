@@ -537,7 +537,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
         // for download excel direct
         setTimeout(() => {
           const button = document.getElementById('test-table-xls-button');
-          button.click();
+          // button.click();
         }, 500);
 
 
@@ -603,7 +603,8 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
             <div style={{paddingBottom:'5rem'}}>
                 <ReactHTMLTableToExcel
                     id="test-table-xls-button"
-                    className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5 d-none"
+                    // className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5 d-none"
+                    className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5"
                     table="table-to-xls"
                     filename={`TaxInvoice_${result?.header?.InvoiceNo}_${Date.now()}`}
                     sheet="tablexls"
