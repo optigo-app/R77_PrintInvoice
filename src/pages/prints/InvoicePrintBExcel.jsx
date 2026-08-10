@@ -777,6 +777,10 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                                     <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "center", verticalAlign: "middle" }}>{i + 1}</td>
                                                     <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "center", verticalAlign: "middle", fontSize: "13px" }}>
                                                         {e?.designno} <br />{e?.GroupJob ? `\u200B${e?.Groupjob}` : `\u200B${e?.SrJobno}`}
+                                                        {
+                                                     e?.lineid !== "" && 
+                                                     <>line id: <br /> {e?.lineid}</>
+                                                 }
                                                     </td>
                                                     <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "center", verticalAlign: "middle" }}>
                                                         {/* Explicit inline height/width metrics prevent Excel layout clipping */}
@@ -806,7 +810,7 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                             <td colSpan="4" style={{ border: "1px solid #dbdbdb", padding: "5px", fontWeight: "bold", textAlign: "left", verticalAlign: "middle" }}>Total</td>
                                             <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "center", fontWeight: "bold", verticalAlign: "middle" }}>{totalQty}</td>
                                             <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "right", fontWeight: "bold", verticalAlign: "middle" }}>{formatAmount((result?.mainTotal?.total_unitcost / result?.header?.CurrencyExchRate))}</td>
-                                            <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "right", fontWeight: "bold", verticalAlign: "middle" }}>{formatAmount((result?.mainTotal?.total_discount / result?.header?.CurrencyExchRate))}</td>
+                                            <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "right", fontWeight: "bold", verticalAlign: "middle" }}>{formatAmount((result?.mainTotal?.total_discountAmt / result?.header?.CurrencyExchRate))}</td>
                                             <td style={{ border: "1px solid #dbdbdb", padding: "5px", textAlign: "right", fontWeight: "bold", verticalAlign: "middle" }}>{formatAmount((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))}</td>
                                         </tr>
 
@@ -1050,10 +1054,11 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                             <td colSpan="4" style={{ border: "1px solid #dbdbdb", padding: "8px", verticalAlign: "top" }}>
                                                 <div style={{ fontWeight: "bold", borderBottom: "1px solid #dbdbdb", textAlign: "center", paddingBottom: "3px", marginBottom: "5px" }}>Bank Details</div>
                                                 <div style={{ fontSize: "13px", lineHeight: "1.4" }}>
-                                                    <div><b>Account Name:</b> <span>{result?.header?.bankname}</span></div>
-                                                    <div><b>Account Number:</b> <span>{result?.header?.accountnumber}</span></div>
-                                                    <div><b>Routing Number:</b> <span>{result?.header?.rtgs_neft_ifsc}</span></div>
-                                                    <div><b>Zelle ID.:</b> <span>asasd@gmil.com</span></div>
+                                                    <div><b>Account Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_accountname : result?.header?.accountname}</span></div>
+                                                    <div><b>Bank Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_bankname : result?.header?.bankname}</span></div>
+                                                    <div><b>Account Number:</b> <span>{isMultipleCOmpany === 1 ? result?.header?.MltC_accountno : result?.header?.accountnumber}</span></div>
+                                                    <div><b>Routing Number:</b> <span>{isMultipleCOmpany === 1 ? result?.header?.MltC_routingno : result?.header?.rtgs_neft_ifsc}</span></div>
+                                                    <div><b>Zelle ID.:</b> <span>{isMultipleCOmpany === 1 ? result?.header?.MltC_zelleid : result?.header?.bankaddress}</span></div>
                                                 </div>
                                             </td>
                                             <td colSpan="4" style={{ border: "1px solid #dbdbdb" }}></td>

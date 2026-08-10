@@ -1,0 +1,250 @@
+.containerRetailPrint {
+    max-width: 1120px !important;
+    font-family: Calibri;
+}
+
+.containerRetail1Prints{
+    margin-top: 50px;
+}
+
+.containerRetailPrint {
+    font-size: 14px;
+}
+
+.headlinepRetailPrint {
+    background-color: #939292;
+    color: white;
+    font-size: 20px;
+    line-height: 120%;
+    letter-spacing: 1px;
+    min-height: 31px;
+    padding-top: 3px;
+    padding-bottom: 6px;
+}
+
+.line_height_110 {
+    line-height: 110%;
+}
+
+.min_height_44_retail_print_1 {
+    min-height: 44px;
+}
+
+.ft_12_retailPrint,
+.ft_12_retailPrint *, 
+.ft_12_retail1Print, 
+.ft_12_retail1Print * {
+    font-size: 12px;
+}
+
+.word_break_normal_retail_print * {
+    word-break: normal;
+}
+
+.ft_13_retailPrint,
+.ft_13_retailPrint * {
+    font-size: 13px;
+}
+
+.ft_17_retailPrint,
+.ft_17_retailPrint * {
+    font-size: 17px;
+}
+
+.srNoRetailPrint {
+    width: 4%;
+    min-width: 4%;
+}
+
+.poductDiscriptionRetailPrint {
+    width: 146px;
+    min-width: 146px;
+}
+
+.poductDiscriptionRetailPrint {
+    width: 20%;
+    min-width: 20%;
+}
+
+.materialDescriptionRetailPrint {
+    width: 61%;
+    min-width: 61%;
+}
+
+.materialRetailPrint,
+.amountRetailPrint {
+    width: 25.50%;
+    /* min-width: 25.50%; */
+}
+
+.rateRetailPrint{
+    width: 14%;
+    min-width: 14%;
+}
+
+.wtRetailPrint{
+    width: 21%;
+    min-width: 21%;
+}
+
+.lossWtRetailPrint{
+    width: 13%;
+    min-width: 13%;
+}
+
+.pcsRetailPrint{
+    width: 15%;
+    min-width: 15%;
+}
+
+.qtyRetailPrint {
+    width: 17%;
+    min-width: 17%;
+}
+
+.materialRetailPrintNoRate,
+.amountRetailPrintNoRate {
+    width: 26.6%;
+    /* min-width: 26.6%; */
+}
+
+.wtRetailPrintNoRate {
+    width: 10.8%;
+    /* min-width: 10.8%; */
+}
+
+/* Never Change This Width */
+.lossWtRetailPrintNoRate {
+    width: 17%;
+    /* min-width: 17%; */
+}
+
+.qtyRetailPrintNoRate,
+.pcsRetailPrintNoRate {
+    width: 17.6%;
+    /* min-width: 17.6%; */
+}
+
+
+.materialRetailPrint1 {
+    width: 22%;
+    /* min-width: 22%; */
+}
+
+.wtRetailPrint1,
+.rateRetailPrint1 {
+    width: 24%;
+    /* min-width: 24%; */
+}
+
+.qtyRetailPrint1,
+.pcsRetailPrint1 {
+    width: 15%;
+    /* min-width: 15%; */
+}
+
+.materialRetailPrint1NoRate {
+    width: 28.5%;
+    /* min-width: 28.5%; */
+}
+
+.wtRetailPrint1NoRate {
+    width: 24.5%;
+    /* min-width: 24.5%; */
+}
+
+.qtyRetailPrint1NoRate,
+.pcsRetailPrint1NoRate {
+    width: 23.5%;
+    min-width: 23.5%;
+}
+
+
+.makingRetailPrint,
+.totalRetailPrint,
+.othersRetailPrint {
+    width: 15%;
+    min-width: 15%;
+}
+
+.totalRetail1Print {
+    width: 10%;
+    min-width: 10%;
+}
+
+.totalInWordsRetailPrint {
+    width: 727px;
+    min-width: 727px;
+}
+
+.cgstRetailPrint {
+    width: 220px;
+    min-width: 220px;
+}
+
+.retailPrintLogo {
+    width: 130px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.product_image_retailPrint {
+    max-height: 100px;
+    object-fit: contain;
+}
+
+.printBtnRetailPrint {
+    right: -10%;
+    margin-top: -25px;
+}
+
+.ratePara {
+    font-size: 15px;
+}
+
+.discountSpWdth {
+    width: 80%;
+    justify-content: end;
+}
+
+.retail1PrintInWords {
+    width: 68%;
+    min-width: 68%;
+}
+
+.retail1PrintInNumbers {
+    width: 20%;
+    min-width: 20%;
+}
+
+.retail1PrintInNumbers1{
+    width: 12.1%;
+    min-width: 12.1%;
+}
+
+.headlinepRetail1Print{
+    margin-top: 15px;
+}
+
+@media print {
+    .print_sec_sum4 {
+        display: none !important;
+    }
+    .fs_maintotal_wt_rp{
+        font-size: 9px !important;
+    }
+    
+.ft_12_retailPrint,
+.ft_12_retailPrint * {
+    font-size: 10px;
+}
+
+.containerRetail1Prints{
+    margin-top: 0;
+}
+
+.headlinepRetail1Print{
+    margin-top: 5px;
+}
+
+}

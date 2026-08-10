@@ -41,7 +41,7 @@ export default function FgSaleTag({ headers }) {
         version: queryParams.version,
         url: queryParams.apiurl,
         spno: queryParams.spno,
-        sv: queryParams.report_sv,
+        report_sv: queryParams.report_sv,
         version: queryParams.version,
         StockBarcodeList: queryParams.StockBarcodeList,
     };

@@ -265,7 +265,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
             obj.designno = e?.designno;
           
             obj.dia_code = e?.diamonds[0] ? (e?.diamonds[0]?.ShapeName + " " + e?.diamonds[0]?.QualityName + " " + e?.diamonds[0]?.Colorname) : '';
-            obj.dia_size = e?.diamonds[0] ? e?.diamonds[0]?.SizeName : '';
+            obj.dia_size = e?.diamonds[0] ? e?.diamonds[0]?.SizeName === "Custom"? "C: "+e?.diamonds[0]?.CustomSize:e?.diamonds[0]?.SizeName : '';
             obj.dia_pcs = e?.diamonds[0] ? e?.diamonds[0]?.Pcs : '';
             obj.dia_wt = e?.diamonds[0] ? ((e?.diamonds[0]?.Wt)?.toFixed(3)) : '';
             obj.dia_rate = e?.diamonds[0] ? (Math.round(((e?.diamonds[0]?.Amount / datas?.header?.CurrencyExchRate) / (e?.diamonds[0]?.Wt === 0 ? 1 : e?.diamonds[0]?.Wt)))) : '';
@@ -286,7 +286,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
             obj.cls_code = e?.colorstone[0] ? (` ${e?.colorstone[0]?.MasterManagement_DiamondStoneTypeid === 3 ? 'M:' : ''} ${e?.colorstone[0]?.ShapeName}` + 
               " " + e?.colorstone[0]?.QualityName + 
               " " + e?.colorstone[0]?.Colorname) : '';
-            obj.cls_size = e?.colorstone[0] ? (e?.colorstone[0]?.SizeName) : '';
+            obj.cls_size = e?.colorstone[0] ? (e?.colorstone[0]?.SizeName === "Custom"? "C: "+e?.colorstone[0]?.CustomSize:e?.colorstone[0]?.SizeName) : '';
             obj.cls_pcs = e?.colorstone[0] ? (e?.colorstone[0]?.Pcs) : '';
             obj.cls_wt = e?.colorstone[0] ? ((e?.colorstone[0]?.Wt)?.toFixed(3)) : '';
             // obj.cls_rate = e?.colorstone[0] ? (Math.round(((e?.colorstone[0]?.Amount / result?.header?.CurrencyExchRate)) / ( e?.colorstone[0]?.isRateOnPcs === 1 ? (e?.colorstone[0]?.Pcs === 0 ? 1 : e?.colorstone[0]?.Pcs) :  (e?.colorstone[0]?.Wt === 0 ? 1 : e?.colorstone[0]?.Wt)))) : '';
@@ -334,7 +334,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
                 if(e?.diamonds[ind+1]){
                     obj.diaflag = true;
                     obj.dia_code = (e?.diamonds[ind + 1]?.ShapeName + " " + e?.diamonds[ind + 1]?.QualityName + " " + e?.diamonds[ind + 1]?.Colorname);
-                    obj.dia_size = e?.diamonds[ind + 1]?.SizeName;
+                    obj.dia_size = e?.diamonds[ind+1]?.SizeName === "Custom"? "C: "+e?.diamonds[ind+1]?.CustomSize:e?.diamonds[ind+1]?.SizeName;
                     obj.dia_pcs = e?.diamonds[ind + 1]?.Pcs;
                     obj.dia_wt = ((e?.diamonds[ind + 1]?.Wt)?.toFixed(3));
                     // obj.dia_rate = (Math.round((e?.diamonds[ind + 1]?.Amount / result?.header?.CurrencyExchRate) / (e?.diamonds[ind + 1]?.Wt === 0 ? 1 : e?.diamonds[ind + 1]?.Wt)));
@@ -355,7 +355,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
                     obj.clsflag = true;
                     obj.cls_code = `${e?.colorstone[ind+1]?.MasterManagement_DiamondStoneTypeid === 3 ? 'M:' : ''}  ${e?.colorstone[ind + 1]?.ShapeName}` + 
                     " " + e?.colorstone[ind + 1]?.QualityName + " " + e?.colorstone[ind + 1]?.Colorname;
-                    obj.cls_size = e?.colorstone[ind + 1]?.SizeName;
+                    obj.cls_size = e?.colorstone[ind+1]?.SizeName === "Custom"? "C: "+e?.colorstone[ind+1]?.CustomSize:e?.colorstone[ind+1]?.SizeName;
                     obj.cls_pcs = e?.colorstone[ind + 1]?.Pcs;
                     obj.cls_wt = ((e?.colorstone[ind + 1]?.Wt)?.toFixed(3));
                     // obj.cls_rate = (Math.round(((e?.colorstone[ind + 1]?.Amount / result?.header?.CurrencyExchRate)) / (e?.colorstone[ind + 1]?.Wt === 0 ? 1 : e?.colorstone[ind + 1]?.Wt)));
@@ -537,7 +537,7 @@ const TaxInvoiceExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
         // for download excel direct
         setTimeout(() => {
           const button = document.getElementById('test-table-xls-button');
-          // button.click();
+          button.click();
         }, 500);
 
 

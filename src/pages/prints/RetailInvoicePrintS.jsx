@@ -28,6 +28,7 @@ const RetailInvoicePrintS = ({
   ApiVer,
 }) => {
   const [headerData, setHeaderData] = useState({});
+  console.log("TCL: headerData", headerData)
   const [data, setdata] = useState([]);
   const [msg, setMsg] = useState("");
   const [loader, setLoader] = useState(true);
@@ -412,6 +413,12 @@ const RetailInvoicePrintS = ({
   const decodedValue = atob(evn);
   const IsNotEvenSale = decodedValue === "Quote";
 
+console.log("TCL:datatotal ", total)
+
+const totalUnitCost = data?.reduce(
+  (sum, item) => sum + Number(item.Total_Unit_Cost || 0),
+  0
+);
 
   return (
     <>
@@ -560,6 +567,18 @@ const RetailInvoicePrintS = ({
                       <div className="fslhJL">
                         Phno: {headerData?.customermobileno}
                       </div>
+                      <div className="fslhJL">
+                        {headerData?.CustPanno && (
+                          <>PAN - {headerData.CustPanno}</>
+                        )}
+
+                        {headerData?.CustPanno && headerData?.aadharno && " | "}
+
+                        {headerData?.aadharno && (
+                          <>Aadhar - {headerData.aadharno}</>
+                        )}
+                      </div>
+
                       {headerData?.CustGstNo !== "" && (
                         <div className="fslhJL">
                           GSTIN - {headerData?.CustGstNo}
@@ -583,13 +602,13 @@ const RetailInvoicePrintS = ({
                         </div>
                         <div className="col-6">{headerData?.EntryDate}</div>
                       </div>
-                      {headerData?.HSN_No !== ""&& headerData?.HSN_No !="-Select-"  && (
-                      <div className="d-flex">
-                        <div className="col-6">
-                          <b className="JL13">HSN</b>
+                      {headerData?.HSN_No !== "" && headerData?.HSN_No != "-Select-" && (
+                        <div className="d-flex">
+                          <div className="col-6">
+                            <b className="JL13">HSN</b>
+                          </div>
+                          <div className="col-6">{headerData?.HSN_No}</div>
                         </div>
-                        <div className="col-6">{headerData?.HSN_No}</div>
-                      </div>
                       )}
                     </div>
                   </div>
@@ -630,8 +649,8 @@ const RetailInvoicePrintS = ({
                             <div className="col3_jts d-flex flex-column align-items-start justify-content-start p-1 brr_jts text-break">
                               <div className="d-flex align-items-start">
                                 {e?.MetalTypePurity} {e?.MetalColor} {(e?.diamonds?.[0]?.Color_Code || e?.diamonds?.[0]?.Quality_Code)
-  ? ` - ${e?.diamonds?.[0]?.Color_Code || ""} ${e?.diamonds?.[0]?.Quality_Code || ""}`
-  : ""}  |{" "}
+                                  ? ` - ${e?.diamonds?.[0]?.Color_Code || ""} ${e?.diamonds?.[0]?.Quality_Code || ""}`
+                                  : ""}  |{" "}
                                 {e?.grosswt?.toFixed(3)} gms GW |{" "}
                                 {e?.NetWt?.toFixed(3)} gms NW
                                 {e?.diamondWt === 0
@@ -662,7 +681,8 @@ const RetailInvoicePrintS = ({
                                   __html: headerData?.Currencysymbol,
                                 }}
                               ></span>
-                              {formatAmount(e?.TotalAmount + e?.DiscountAmt)}
+
+                              {decodedValue ==="Quote"? formatAmount(e?.Total_Unit_Cost) : formatAmount(e?.TotalAmount + e?.DiscountAmt)}
                             </div>
                           </div>
                         );
@@ -682,9 +702,13 @@ const RetailInvoicePrintS = ({
                     <div className={`col4_jts d-flex align-items-center justify-content-end`}>
                       <p className="fw-bold TotlFnt text-end p-1">
                         {NumberWithCommas(
-                          total?.total / headerData?.CurrencyExchRate,
+                         (decodedValue ==="Quote"?totalUnitCost : (total?.total) )/ headerData?.CurrencyExchRate,
                           2
                         )}
+                         {/* {NumberWithCommas(
+                         ( totalUnitCost )/ headerData?.CurrencyExchRate,
+                          2
+                        )} */}
                       </p>
                     </div>
                   </div>

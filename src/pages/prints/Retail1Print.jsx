@@ -52,6 +52,7 @@ const Retail1Print = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             making: 0,
             others: 0,
             totalAmount: 0,
+            total: 0,
             sgstAmount: 0,
             cgstAmount: 0,
             addLess: 0,
@@ -66,6 +67,7 @@ const Retail1Print = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             let secondWt = 0;
             let secondaryWt = 0;
             let count = 0
+            totalObj.total += e?.UnitCost;
             e?.metal?.forEach((ele, ind) => {
                 if (ele?.IsPrimaryMetal === 1) {
                     netWtLossWt += ele?.Wt;
@@ -168,7 +170,15 @@ const Retail1Print = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
         setJsonData1(data?.BillPrint_Json[0]);
 
-        let taxValue = taxGenrator(data?.BillPrint_Json[0], totalObj.totalAmount);
+        // let taxValue = taxGenrator(data?.BillPrint_Json[0], totalObj.totalAmount);
+
+        let taxValue = taxGenrator(
+          data?.BillPrint_Json[0],
+          totalObj?.total
+        );
+        
+        console.log("TCL: loadData -> taxValue", taxValue);
+        
         setTaxes(taxValue);
         taxValue.forEach((e, i) => {
             totalObj.grandTotal += +(e?.amount);

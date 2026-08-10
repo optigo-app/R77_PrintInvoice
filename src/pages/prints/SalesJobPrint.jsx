@@ -1254,7 +1254,7 @@ const SalesJobPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             className="spBold sptxtend spbrdrLft spbrdRght spbrdrBtom spdispFlx align-items-center spnfntIns estimatePrintFont_9 spMrgBFive spMrgTFive"
                             style={{ height: "20px", color: "red" }}
                           >
-                            Instruction: {e?.JobRemark}
+                            Instruction: {e?.TitleLine !="" ? e?.TitleLine : e?.JobRemark}
                           </div>
                         </div>
                       </div>

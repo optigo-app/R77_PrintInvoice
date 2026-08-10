@@ -127,6 +127,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
     total_Quantity: 0,
     total_Making_Amount: 0,
     total_discount: 0,
+    total_discountAmt: 0,
     total_diamondHandling: 0,
     total_csamount: 0,
     total_Making_Amount_Other_Charges: 0,
@@ -288,6 +289,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
       maintotal.total_Making_Amount += j1?.MakingAmount;
       maintotal.MetalAmount += j1?.MetalAmount;
       maintotal.total_discount += j1?.Discount;
+      maintotal.total_discountAmt += j1?.DiscountAmt;
       maintotal.total_diamondHandling += j1?.TotalDiamondHandling;
       maintotal.total_Wastage += j1?.Wastage;
       maintotal.convertednetwt += j1?.convertednetwt;

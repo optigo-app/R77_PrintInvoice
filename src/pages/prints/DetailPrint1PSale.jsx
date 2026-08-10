@@ -579,6 +579,28 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
       [key]: parseFloat(value),
     };
   });
+
+  const Multimetal_summary = Object.values(
+    (finalD?.json2 || [])
+      .filter(item => item.MasterManagement_DiamondStoneTypeid === 4 && item.IsPrimaryMetal === 0)
+      .reduce((acc, item) => {
+        if (!acc[item.ShapeName]) {
+          acc[item.ShapeName] = {
+            ShapeName: item.ShapeName,
+            TotalWt: 0,
+            TotalAmount: 0
+          };
+        }
+        acc[item.ShapeName].TotalWt += item.Wt;
+        acc[item.ShapeName].TotalAmount += item.Amount;
+        return acc;
+      }, {})
+  );
+  
+  console.log(Multimetal_summary);
+
+
+
  
   return (
     <>
@@ -1009,7 +1031,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                     {ele?.Colorname}
                                   </p>
                                   <p className="WdthSiz text-center paddingRightDetailPrint1 text-break">
-                                    {ele?.SizeName}
+                                    {ele?.SizeName =="Custom"? `C:${ele?.CustomSize} ` :ele?.SizeName}
                                   </p>
                                   <p className="WdthPcs text-end paddingRightDetailPrint1">
                                     {NumberWithCommas(ele?.Pcs, 0)}
@@ -1169,7 +1191,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                     {ele?.Colorname}
                                   </p>
                                   <p className="WdthSiz text-center paddingRightDetailPrint1 text-break">
-                                    {ele?.SizeName}
+                                  {ele?.SizeName =="Custom"? `C:${ele?.CustomSize} ` :ele?.SizeName}
                                   </p>
                                   <p className="WdthPcs text-end paddingRightDetailPrint1">
                                     {NumberWithCommas(ele?.Pcs, 0)}
@@ -1553,6 +1575,17 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           {finalD?.mainTotal?.metal?.Rate === 0 ? `${fixedValues(finalD?.mainTotal?.total_purenetwt - notGoldMetalWtTotal, 3)} gm` : `0.000 gm`}
                         </p>
                       </div>
+                      {Multimetal_summary?.map((e, i) => {
+                        return(
+                          
+                          <div className="d-flex justify-content-between">
+                          <p className="fw-bold px-1">{e?.ShapeName}</p>
+                          <p className="px-1">
+                            {fixedValues(e?.TotalWt, 3)} gm
+                          </p>
+                        </div>
+                        )
+                      })}
                       {
                         MetShpWise?.map((e, i) => {
                           return <div className="d-flex justify-content-between" key={i}>
@@ -1625,6 +1658,17 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           {NumberWithCommas((finalD?.mainTotal?.MetalAmount - notGoldMetalTotal), 2)}
                         </p>
                       </div>
+                      { Multimetal_summary?.map((e, i) => {
+                        return (
+                          <div key={i} className="d-flex justify-content-between">
+                          <p className="fw-bold px-1">{e?.ShapeName}</p>
+                          <p className="px-1">
+                            {" "}
+                            {NumberWithCommas(e?.TotalAmount, 2)}
+                          </p>
+                        </div>
+                        )
+                      })}
                       {
                         MetShpWise?.map((e, i) => {
                           return <div className="d-flex justify-content-between">

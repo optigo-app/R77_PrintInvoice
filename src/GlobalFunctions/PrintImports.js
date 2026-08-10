@@ -71,6 +71,7 @@ export const printConditions = [
   { printName: 'item wise print1', etpType: 'print', componentName: 'ItemWisePrint' },
   { printName: 'item wise print2', etpType: 'print', componentName: 'ItemWisePrint' },
   { printName: 'item wise print p', etpType: 'print', componentName: 'ItemWisePrintP' },
+  { printName: 'invoice print d', etpType: 'print', componentName: 'ItemWisePrintD' },
   { printName: 'jewellary invoice print', etpType: 'print', componentName: 'JewelleryInvoicePrint' },
   { printName: 'jewellery invoice', etpType: 'print', componentName: 'JewelleryInvoice' },
   { printName: 'jewellery invoice T', etpType: 'print', componentName: 'JewelleryInvoiceT' }, // amish....
@@ -117,7 +118,7 @@ export const printConditions = [
   { printName: 'repair print', etpType: 'print', componentName: 'RepairPrintSale' },
   { printName: 'retail invoice', etpType: 'print', componentName: 'RetailInvoice' },
   { printName: 'retail invoice 2', etpType: 'print', componentName: 'RetailInvoice2_3' },
-  { printName: 'retail invoice 3', etpType: 'print', componentName: 'RetailInvoice2_3' },
+  { printName: 'retail invoice 3', etpType: 'print', componentName: 'RetailInvoice3' },
   { printName: 'retail invoice print 3', etpType: 'print', componentName: 'RetailInvoicePrint3' },
   { printName: 'retail invoice print 4', etpType: 'print', componentName: 'RetailInvoicePrint4' },
   { printName: 'retail invoice print s', etpType: 'print', componentName: 'RetailInvoicePrintS' },
@@ -174,6 +175,10 @@ export const printConditions = [
   { printName: 'RepairJobPrint', etpType: 'print', componentName: 'RepairJobPrint' },
   { printName: 'invoice print b', etpType: 'print', componentName: 'InvoicePrintB' },       // amish
   { printName: 'jewellery invoice 4', etpType: 'print', componentName: 'JewelleryInvoicePrint4' }, // amish
+ 
+  { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
+  { printName: 'print 1', etpType: 'print', componentName: 'Print1' },
+  { printName: 'invoice print vr', etpType: 'print', componentName: 'InvoicePrintVR' },
 
 
 ];

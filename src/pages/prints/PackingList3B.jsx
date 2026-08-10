@@ -859,7 +859,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     const am = Number(e[disAmount])
                     const decimals = e[isAmountKey] === 1 ? 3 : 2;
                     const val = num.toFixed(decimals);
-                    return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                    return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${(val / result?.header?.CurrencyExchRate)?.toFixed(2) } @${label} Amount`;
                   })
                   .join(', ');
 
@@ -934,9 +934,17 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       )}
                       {e?.Tunch !== "" && (
                         <div className="centerall_pcls w-100 text-break">
-                          Tunch :{" "}
-                          <span className="fw-bold">
-                            {e?.Tunch?.toFixed(3)}
+                          Tunch : {" "}
+                          <span className="fw-bold" style={{marginLeft:"2px"}}>
+                          {e?.Tunch?.toFixed(3)}
+                          </span>
+                        </div>
+                      )}
+                      {e?.lineid !== "" && (
+                        <div className="centerall_pcls w-100 text-break">
+                          line id : {" "}
+                          <span className="fw-bold"  style={{marginLeft:"2px"}}>
+                           {e?.lineid}
                           </span>
                         </div>
                       )}
@@ -1000,7 +1008,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               </div>
 
                               <div className="dcol5_pcls end_pcls pdr_pcls" style={{ textAlign: "right" }}>
-                                {formatAmount((el?.Amount/el?.Wt)?.toFixed(2))}
+                                {formatAmount(((el?.Amount/el?.Wt)/ result?.header?.CurrencyExchRate)?.toFixed(2))}
+                                {/* {formatAmount((el?.Rate)?.toFixed(2))} */}
                               </div>
 
                               <div className="dcol6_pcls end_pcls pdr_pcls fw-bold">
@@ -1096,7 +1105,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
                                 </div>
                                 <div className="mcol5_pcls end_pcls pdr_pcls fw-bold">
-                                  {el?.Amount?.toFixed(2)}
+                                  {(el?.Amount / result?.header?.CurrencyExchRate)?.toFixed(2)}
 
                                 </div>
                               </div>
@@ -1172,10 +1181,10 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 >
                                   <p>
                                     {e?.GroupJob !== ''
-                                      ? (e?.metal
+                                      ? ((e?.metal
                                         ?.filter((m) => m?.IsPrimaryMetal === 1)[0]
-                                        ?.Rate * (parseFloat(data?.Wt) || 0))?.toFixed(2)
-                                      : data?.Amount?.toFixed(2)
+                                        ?.Rate * (parseFloat(data?.Wt) || 0))/ result?.header?.CurrencyExchRate)?.toFixed(2)
+                                      : (data?.Amount / result?.header?.CurrencyExchRate)?.toFixed(2)
                                     }
                                   </p>
                                 </div>
@@ -1272,7 +1281,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 {el?.Wt?.toFixed(3)}
                               </div>
                               <div className="dcol5_pcls end_pcls pdr_pcls">
-                                {formatAmount((el?.Amount/el?.Wt)?.toFixed(2))}
+                                {formatAmount(((el?.Amount/el?.Wt)/ result?.header?.CurrencyExchRate)?.toFixed(2))}
+                                {/* {formatAmount((el?.Rate)?.toFixed(2))} */}
                               </div>
                               <div className="dcol6_pcls end_pcls pdr_pcls fw-bold">
                                 {formatAmount(
@@ -1299,7 +1309,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 {el?.Wt?.toFixed(3)}
                               </div>
                               <div className="dcol5_pcls end_pcls pdr_pcls">
-                                {formatAmount((el?.Amount/el?.Wt)?.toFixed(2))}
+                                {formatAmount(((el?.Amount/el?.Wt) / result?.header?.CurrencyExchRate)?.toFixed(2))}
+                              
                               </div>
                               <div className="dcol6_pcls end_pcls pdr_pcls fw-bold">
                                 {formatAmount(
@@ -1353,7 +1364,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 {formatAmount(el?.MakingUnit)}
                               </div>
                               <div className="lcol1_pcls end_pcls pdr_pcls">
-                                {formatAmount(el?.MakingCharge, 2)}
+                                {formatAmount(el?.MakingCharge / result?.header?.CurrencyExchRate, 2)}
                               </div>
                             </div>
                           ))
@@ -1368,7 +1379,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               </div>
                               <div className="lcol1_pcls end_pcls pdr_pcls">
                                 {/* {formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
-                                {formatAmount(e?.MakingAmount)}
+                                {formatAmount(e?.MakingAmount / result?.header?.CurrencyExchRate, 2)}
                                 {/* {e?.MakingChargeOnid==4 ? formatAmount(e?.MaKingCharge_Unit) : formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
                               </div>
                             </div>
@@ -1524,15 +1535,15 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       <div className="start_pcls pdr_pcls fw-bold">
                         {formatAmount(
                           // e?.TotalAmount / result?.header?.CurrencyExchRate
-                          e?.UnitCost + e?.CustomDuty_Amount / result?.header?.CurrencyExchRate
-                        )}
+                          (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                        )} 
                       </div>
                       <div className="start_pcls btop_pcls bg_pcls pdr_pcls fw-bold">
                         &nbsp;
                         {formatAmount(
                           // e?.TotalAmount / result?.header?.CurrencyExchRate
-                          e?.UnitCost + e?.CustomDuty_Amount / result?.header?.CurrencyExchRate
-                        )}
+                          (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                        )} 
                       </div>
                     </div>
 
@@ -1562,10 +1573,10 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                        </div>
                        <div className={duty ? "col5_pcls_duty" : "col5_pcls  bright_pcls"} style={{wordBreak:"break-word"}}>
                           
-                             Discount {discountDisplay || `${NumberWithCommas(e?.Discount, 2)} @ Total Amount`}
+                             Discount {discountDisplay || `${NumberWithCommas(e?.Discount / result?.header?.CurrencyExchRate, 2)} @ Total Amount`}
                        </div>
                        <div style={{textAlign:"right"}} className={duty ? "col6_pcls_duty" : "col6_pcls bright_pcls"}>
-                          {(NumberWithCommas(e?.DiscountAmt, 2))}
+                          {(NumberWithCommas(e?.DiscountAmt / result?.header?.CurrencyExchRate, 2))}
                        </div>
                        {duty && (
                          <div className="col65_pcls end_pcls pdr_pcls bright_pcls">
@@ -1576,8 +1587,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                        )}
                        <div className={duty ? "col7_pcls_duty  end_pcls" : "col7_pcls end_pcls pdr_pcls"}>
                          {formatAmount(
-                           (result?.mainTotal?.TotalAmount +
-                             result?.mainTotal?.DiscountAmt) /
+                           (result?.mainTotal?.TotalAmount  ) /
                            result?.header?.CurrencyExchRate
                          )}
                        </div>

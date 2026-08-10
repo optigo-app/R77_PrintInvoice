@@ -1,25 +1,26 @@
 
 .bagprint22{
   width: 200mm;
-  display: flex ;
-  flex-direction: column;
-  gap: 13px;
+  height: 139mm;
+  display: flex;
+  gap: 17px;
+
 }
 
 .dcf-page {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 9px;
   display: flex;
-  gap: 10px;
+  gap: 7px;
   flex-wrap: wrap;
   background: #fff;
   padding: 20px;
 }
+
 .lineHeight1{
-  line-height: 6px;
+  line-height: 8px;
   font-size: 7.5px !important;
 }
-
 .dcf-wrapper {
   border: 2px solid #000;
   width: 100%;
@@ -121,20 +122,18 @@
 .dcf-col-wt       { flex: 0 0 55px; justify-content: center; font-weight: bold; } */
 
 /* ---- Table column widths in % ---- */
-.dcf-col-material   { flex: 0 0 7.72%; font-weight: bold; }  /* 70px / 720px */
-.dcf-col-rmtype     { flex: 0 0 10.5%; font-weight: bold; }  /* 90px / 720px */
-.dcf-col-rmshape    { flex: 0 0 11.5%; font-weight: bold; }  /* 90px / 720px */
-.dcf-col-rmqty      { flex: 0 0 10.5%; font-weight: bold; }  /* 90px / 720px */
+.dcf-col-material   { flex: 0 0 9.72%; font-weight: bold; }  /* 70px / 720px */
+.dcf-col-rmtype     { flex: 0 0 12.5%; font-weight: bold; }  /* 90px / 720px */
+.dcf-col-rmshape    { flex: 0 0 50.12%; font-weight: bold; }  /* 90px / 720px */
+/* 90px / 720px */
 .dcf-col-sizegroup  { flex: 0 0 15.28%; font-weight: bold; } /* 110px / 720px */
-.dcf-col-rmsize     { flex: 0 0 17.84%; font-weight: bold; } /* 150px / 720px */
+.dcf-col-rmsize     { flex: 0 0 9.84%; font-weight: bold; } /* 150px / 720px */
 .dcf-col-pcs      { flex: 0 0 6%; justify-content: center; font-weight: bold; } /* 30px / 720px */
 .dcf-col-wt       { flex: 0 0 7.17%; justify-content: center; font-weight: bold; }
 
 .barcode_img img{
   object-fit: cover;
-   
   height: 6mm !important;
-  
   transform: translate(0px) rotate(0deg) !important;
   width: 20mm !important;
 }
@@ -153,7 +152,7 @@
   font-weight: bold;
 }
 
-/* colored data text like in original sheet */
+
 .dcf-green-text {
 
   font-weight: bold;
@@ -170,15 +169,15 @@
   font-weight: bold;
 }
 
-/* empty tall rows near bottom */
+
 .dcf-empty-row {
   height: 22px;
 }
 
-/* instruction area */
+
 .dcf-instruction-label {
 
-  font-weight: bold;
+  /* font-weight: bold; */
   padding: 4px 6px;
 }
 .dcf-instruction-box {
@@ -222,7 +221,7 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 17px;
+  height: 17.6px;
   border-bottom: 1px solid #000;
 }
 .pcf-row:last-child {
@@ -444,49 +443,35 @@
   padding: 4px 6px;
 }
 .pcf-instruction-box {
-  height: 72px;
+  height: 48.5px;
 }
 
 
 
 
-@media print {
 
-  @page {
-    padding-left: 15px;
-    padding-top: 15px;
+
+@media print{
+
+  @page{
+     padding-left: 15px;
+     padding-top: 15px;
   }
 
-  .dcf-wrapper {
-    width: 100% !important;
-    height: 48.5vh !important;
-  }
+ 
 
-  .pcf-page {
-    width: 100% !important;
-    height: 50vh !important;
-  }
-
-  .dcf-page {
+  .dcf-page{
     padding: 0px;
   }
+ 
+ .bagprint22{
+  margin-top: 0px;
+ }
 
-  .bagprint22 {
-    margin-top: 0px;
-
-    /* fixes overlap, but no forced page breaks / no wasted gaps */
-    height: auto !important;
-      /* page-break-inside: avoid; */
+  .pcf-image-box img{
+      height: 70px !important;
   }
-
-  /* prevent a single box from splitting across two pages —
-     but do NOT force a break after every box */
-
-  .pcf-image-box img {
-    height: 70px !important;
-  }
-
-  .pcf-instruction-box {
-    height: 72px !important;
+  .pcf-instruction-box{
+      height: 46.5px !important;
   }
 }

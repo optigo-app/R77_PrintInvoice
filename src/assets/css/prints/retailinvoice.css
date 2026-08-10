@@ -2,11 +2,19 @@
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    margin-top: 5rem;
+    margin-top: 1rem;
     padding: 1rem;
     padding-bottom: 5rem;
     color: black;
     font-family: Calibri;
+}
+
+.imgJewelleryRetailinovice{
+    height: auto !important;
+    max-width: 115.75px;
+    max-height: 100px;
+    object-fit: contain;
+    object-position: right;
 }
 .text-center{
     text-align: center;

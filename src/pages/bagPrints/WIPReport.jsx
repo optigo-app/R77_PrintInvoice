@@ -27,7 +27,7 @@ import { borderTop } from "@mui/system";
 
 export default function WIPReport({ queries, headers }) {
 
-    console.log("TCL: WIPReport -> queries", queries)
+     
     const [data, setData] = useState([]);
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
@@ -104,7 +104,7 @@ export default function WIPReport({ queries, headers }) {
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center" }}>
 
-                                <div>
+                                    <div>
                                         <input
                                             type="checkbox"
                                             id="lineid"
@@ -116,10 +116,10 @@ export default function WIPReport({ queries, headers }) {
                                             htmlFor="lineid"
                                             className="me-3 user-select-none"
                                         >
-                                           Line Id
+                                            Line Id
                                         </label>
                                     </div>
-                                    
+
                                     <div>
                                         <input
                                             type="checkbox"
@@ -182,6 +182,7 @@ export default function WIPReport({ queries, headers }) {
                                             fontSize: "28px",
                                             padding: "0px 15px",
                                             letterSpacing: "1px",
+
                                         }}
                                     >
                                         WIP REPORT
@@ -297,22 +298,43 @@ export default function WIPReport({ queries, headers }) {
                                             fontFamily: "Calibri",
                                             fontSize: "11px",
                                             overflow: "hidden",
+                                            // marginBottom: lineflag?"5px":"",
+                                            marginBottom: lineflag && diaflag
+                                                ? "5px"
+                                                : diaflag
+                                                    ? "0px"
+                                                    : lineflag
+                                                        ? "38px"
+                                                        : "39px"
+
                                         }}
                                     >
                                         {/* Header */}
-                                        <div
-                                            style={{
-                                                padding: "0px 8px",
-                                                borderBottom: "1px solid #d9d9d9",
-                                                display: "flex",
-                                                gap: "5px",
-                                            }}
-                                        >
-                                            <span>CUSTOMER CODE:</span>
+                                        <div style={{ display: 'flex', justifyContent: "space-between", borderBottom: "1px solid #d9d9d9", }}>
+                                            <div
+                                                style={{
+                                                    paddingLeft: "8px",
 
-                                            <span style={{ fontWeight: "bold" }}>
-                                                {item?.Customercode}
-                                            </span>
+                                                    display: "flex",
+                                                    gap: "5px",
+                                                }}
+                                            >
+                                                <span>C. CODE:</span>
+
+                                                <span style={{ fontWeight: "bold" }}>
+                                                    {item?.Customercode}
+                                                </span>
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    fontWeight: "bold",
+                                                    paddingRight: "8px",
+                                                }}
+                                                className="line-height1"
+                                            >
+                                                {item?.department || ""}
+                                            </div>
                                         </div>
 
                                         {/* Image */}
@@ -340,17 +362,18 @@ export default function WIPReport({ queries, headers }) {
 
                                         {/* Details */}
                                         <div style={{ padding: "6px 8px" }}>
-                                        {lineflag &&(
-                                                    <div
+                                            {lineflag && (
+                                                <div
                                                     style={{
                                                         display: "flex",
+                                                        fontSize: "12px",
                                                     }}
-                                                    className="line-height1"
+                                                    className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                 >
                                                     <div style={{ width: "90px" }}>LINE ID:</div>
-    
+
                                                     <div style={{ fontWeight: "bold" }}>
-                                                      {item?.lineid} 
+                                                        {item?.lineid}
                                                     </div>
                                                 </div>
 
@@ -361,7 +384,7 @@ export default function WIPReport({ queries, headers }) {
                                                     display: "flex",
 
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>DESIGN:</div>
 
@@ -375,12 +398,12 @@ export default function WIPReport({ queries, headers }) {
                                                     display: "flex",
 
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>JOB NO:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
-                                                    {item?.serialjobno}{" "}[{item?.Locationname}]
+                                                    {item?.serialjobno}{" "}[{item?.Locationname}] {item?.Quantity}
                                                 </div>
                                             </div>
 
@@ -389,7 +412,7 @@ export default function WIPReport({ queries, headers }) {
                                                     display: "flex",
 
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>Size:</div>
 
@@ -400,7 +423,7 @@ export default function WIPReport({ queries, headers }) {
                                                     display: "flex",
 
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>Metal:</div>
 
@@ -413,7 +436,7 @@ export default function WIPReport({ queries, headers }) {
                                                         style={{
                                                             display: "flex",
                                                         }}
-                                                        className="line-height1"
+                                                        className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                     >
                                                         <div style={{ width: "90px" }}>Dia. Qty:</div>
 
@@ -424,7 +447,7 @@ export default function WIPReport({ queries, headers }) {
                                                         style={{
                                                             display: "flex",
                                                         }}
-                                                        className="line-height1"
+                                                        className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                     >
                                                         <div style={{ width: "90px" }}>Dia. Color:</div>
 
@@ -440,12 +463,12 @@ export default function WIPReport({ queries, headers }) {
                                                 style={{
                                                     display: "flex",
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>Dia. weight:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
-                                                  {item?.Diamond_actualusedpcs}/{item?.Diamond_actualused?.toFixed(3) + " cwt"}
+                                                    {item?.Diamond_actualusedpcs}/{item?.Diamond_actualused?.toFixed(3) + " cwt"}
                                                 </div>
                                             </div>
 
@@ -453,26 +476,19 @@ export default function WIPReport({ queries, headers }) {
                                                 style={{
                                                     display: "flex",
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "90px" }}>C. weight:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
-                                                  {item?.ColorStone_actualusedpcs}/{item?.ColorStone_actualused?.toFixed(3) + " cwt"}
+                                                    {item?.ColorStone_actualusedpcs}/{item?.ColorStone_actualused?.toFixed(3) + " cwt"}
                                                 </div>
                                             </div>
 
-                                          
-                                        
 
-                                            <div
-                                                style={{
-                                                    fontWeight: "bold",
-                                                }}
-                                                className="line-height1"
-                                            >
-                                              { item?.department || ""}
-                                            </div>
+
+
+
 
                                             <div
                                                 style={{
@@ -481,7 +497,7 @@ export default function WIPReport({ queries, headers }) {
 
                                                     fontSize: "11px",
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div>
                                                     <span>PRO DATE </span>
@@ -506,7 +522,7 @@ export default function WIPReport({ queries, headers }) {
 
                                                     fontSize: "11px",
                                                 }}
-                                                className="line-height1"
+                                                className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
                                                 <div style={{ width: "35%" }}>
                                                     <span>PRD. Age </span>

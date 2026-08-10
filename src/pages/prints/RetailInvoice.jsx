@@ -214,6 +214,11 @@ const RetailInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         disflag ? setDisflag(false) : setDisflag(true);
     };
 
+    const [isImageWorking, setIsImageWorking] = useState(true);
+    const handleImageErrors = () => {
+        setIsImageWorking(false);
+    };
+
 
     return (
         <>
@@ -245,7 +250,22 @@ const RetailInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 <div className=' d-none_ri'><Button /></div>
                             </div>
 
+                            <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+                                {isImageWorking && result?.header?.PrintLogo !== "" && (
+                                    <img
+                                        src={result?.header?.PrintLogo}
+                                        alt=""
+                                        className={`w-100 d-block  imgJewelleryRetailinovice`}
+                                        onError={handleImageErrors}
+                                        height={120}
+                                        width={150}
+                                    />
+                                )}
+                            </div>
+
                             <div className='printheadlabel_ri'> {result?.header?.PrintHeadLabel} </div>
+
+
                             <div className='d-flex justify-content-between align-items-center p-1 mt-1'>
                                 <div className='box1_ri'><div className='fw-bold w-25'>BILL NO :</div><div className='w-75 center_ri'>{result?.header?.InvoiceNo}</div></div>
                                 {/* <div className='box1_ri'><div className='fw-bold w-25'>{result?.header?.HSN_No_Label} :</div><div className='w-75 center_ri'>{result?.header?.HSN_No}</div></div> */}
@@ -403,7 +423,7 @@ const RetailInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                 )}
                                                             </div>
 
-                                                            {  (
+                                                            {(
                                                                 <div>{totalOtherAmount.toFixed(2)}</div>
                                                             )}
                                                         </>
@@ -491,51 +511,64 @@ const RetailInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 </div>
                             </div>
                             <div className='d-flex w-100 border border-black border-top-0 pbia'>
-                                <div className='w-50'>
-                                    <div className='fw-bold p-1'>Product Details</div>
-                                    <div className='d-flex  border-bottom border-black'>
-                                        <div className='w-25 p-1'>Payment Mode</div>
-                                        <div className='w-25 p-1'>Doc No.</div>
-                                        <div className='w-25 p-1'>Customer Name</div>
-                                        <div className='w-25 p-1 end_ri'>Amount(Rs)</div>
-                                    </div>
-                                    {result?.header?.OldGoldAmount != 0 && (
-                                        <div className='d-flex  border-bottom border-black'  >
-                                            <div className='w-25 p-1'>old Gold </div>
-                                            <div className='w-25 p-1'> </div>
-                                            <div className='w-25 p-1'></div>
-                                            <div className='w-25 p-1 end_ri'>{formatAmount(result?.header?.OldGoldAmount)}</div>
+                                <div className='w-50' style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                                    <div >
+                                        <div className='fw-bold p-1'>Product Details</div>
+                                        <div className='d-flex  border-bottom border-black'>
+                                            <div className='w-25 p-1'>Payment Mode</div>
+                                            <div className='w-25 p-1'>Doc No.</div>
+                                            <div className='w-25 p-1'>Customer Name</div>
+                                            <div className='w-25 p-1 end_ri'>Amount(Rs)</div>
                                         </div>
-                                    )}
-
-                                    {
-                                        result?.header?.mainarr?.map((e, ind) => {
-                                            return <div className='d-flex  border-bottom border-black' key={ind}>
-                                                <div className='w-25 p-1'>{e?.name == "rtgs" ? "RTGS" : e?.name}</div>
-                                                <div className='w-25 p-1'>{e?.docno}</div>
+                                        {result?.header?.OldGoldAmount != 0 && (
+                                            <div className='d-flex  border-bottom border-black'  >
+                                                <div className='w-25 p-1'>old Gold </div>
+                                                <div className='w-25 p-1'> </div>
                                                 <div className='w-25 p-1'></div>
-                                                <div className='w-25 p-1 end_ri'>{formatAmount(e?.amount)}</div>
+                                                <div className='w-25 p-1 end_ri'>{formatAmount(result?.header?.OldGoldAmount)}</div>
                                             </div>
-                                        })
-                                    }
-                                    <div className='d-flex  border-bottom border-black fw-bold'>
-                                        <div className='w-25 p-1'>Total Amount Paid</div>
-                                        <div className='w-25 p-1'></div>
-                                        <div className='w-25 p-1'></div>
-                                        <div className='w-25 p-1 end_ri'>{formatAmount(result?.header?.maindistotal + (result?.header?.OldGoldAmount || 0))}</div>
-                                    </div>
-                                    <div className='d-flex  border-bottom border-black fw-bold'>
-                                        <div className='w-25 p-1'>Balance Amount</div>
-                                        <div className='w-25 p-1'></div>
-                                        <div className='w-25 p-1'></div>
-                                        <div className='w-25 p-1 end_ri'>{formatAmount(generalLedgerData?.BalAmt)}</div>
-                                    </div>
-                                    <div className='p-1'>
-                                        <div>
-                                            <div>For : {result?.header?.CompanyFullName}</div>
-                                            <div className='mt-5'>Authorised Signatory</div>
+                                        )}
+
+                                        {
+                                            result?.header?.mainarr?.map((e, ind) => {
+                                                return <div className='d-flex  border-bottom border-black' key={ind}>
+                                                    <div className='w-25 p-1'>{e?.name == "rtgs" ? "RTGS" : e?.name}</div>
+                                                    <div className='w-25 p-1'>{e?.docno}</div>
+                                                    <div className='w-25 p-1'></div>
+                                                    <div className='w-25 p-1 end_ri'>{formatAmount(e?.amount)}</div>
+                                                </div>
+                                            })
+                                        }
+                                        <div className='d-flex  border-bottom border-black fw-bold'>
+                                            <div className='w-25 p-1'>Total Amount Paid</div>
+                                            <div className='w-25 p-1'></div>
+                                            <div className='w-25 p-1'></div>
+                                            <div className='w-25 p-1 end_ri'>{formatAmount(result?.header?.maindistotal + (result?.header?.OldGoldAmount || 0))}</div>
                                         </div>
+                                        <div className='d-flex  border-bottom border-black fw-bold'>
+                                            <div className='w-25 p-1'>Balance Amount</div>
+                                            <div className='w-25 p-1'></div>
+                                            <div className='w-25 p-1'></div>
+                                            <div className='w-25 p-1 end_ri'>{formatAmount(generalLedgerData?.BalAmt)}</div>
+                                        </div>
+
                                     </div>
+                                    {/* Bank Details */}
+                                    <div className="border-start printJL border-bottom d-flex no_break">
+                                        <div className="col-12 p-2 ">
+                                            <p className="fw-bold">Bank Detail</p>
+                                            <p> <b>Bank name:</b> {result?.header?.bankname}</p>
+                                            <p style={{ wordBreak: "normal" }}>
+                                                <b> Branch:</b> {result?.header?.bankaddress}
+                                            </p>
+                                            <p><b>Account Name:</b> {result?.header?.accountname}</p>
+                                            <p><b>Account No:</b> {result?.header?.accountnumber}</p>
+                                            <p><b>RTGS NEFT IFSC:</b> {result?.header?.rtgs_neft_ifsc}</p>
+                                        </div>
+
+                                    </div>
+
+
                                 </div>
                                 <div className='w-50 border-start border-black fs_ri'>
                                     <div className='d-flex justify-content-between border-bottom border-black p-1'><div className=''>Total Value</div><div className=''>{formatAmount(result?.mainTotal?.total_amount)}</div></div>
@@ -551,19 +584,39 @@ const RetailInvoice = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     <div className='d-flex justify-content-between p-1 border-bottom border-black'><div className=''>Net Invoice Value</div><div className=''>{formatAmount((result?.mainTotal?.total_amount + (result?.allTaxesTotal * result?.header?.CurrencyExchRate) + result?.header?.AddLess))}</div></div>
                                     <div className='d-flex justify-content-between p-1 border-bottom border-black'><div className=''>Total Amount to be paid</div><div className=''>{formatAmount((result?.mainTotal?.total_amount + (result?.allTaxesTotal * result?.header?.CurrencyExchRate) + result?.header?.AddLess))}</div></div>
                                     <div className='d-flex justify-content-between p-1 border-bottom border-black'><div className='text-break'>Value In Words : {toWords.convert(+(result?.mainTotal?.total_amount + (result?.allTaxesTotal * result?.header?.CurrencyExchRate) + result?.header?.AddLess)?.toFixed(2))} Only</div></div>
-                                    <div style={{ marginTop: '8rem' }} className='p-1'>
+                                    {/* <div style={{ marginTop: '8rem' }} className='p-1'>
                                         <div>Customer Name : {result?.header?.CustName}</div>
                                         <div className='mt-5'>Customer Signature</div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div className='fw-bold border border-black p-1 border-top-0 pbia note_ri'>
                                 <div>NOTE: </div>
                                 <div dangerouslySetInnerHTML={{ __html: result?.header?.Declaration }}></div>
                             </div>
-                            <div className=' border border-black p-1 border-top-0 pbia note_ri'>
-                                <div> <b>TERMS INCLUDED:</b>
-                                    <span dangerouslySetInnerHTML={{ __html: result?.header?.SalesRepPolicyTermsDescription }}></span>
+
+
+                            {result?.header?.SalesRepPolicyTermsDescription != "" && (
+                                <div className=' border border-black p-1 border-top-0 pbia note_ri' style={{ display: "flex" }}>
+                                    <div style={{ width: "100%" }}> <b>TERMS INCLUDED:</b>
+                                        <span dangerouslySetInnerHTML={{ __html: result?.header?.SalesRepPolicyTermsDescription }}></span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className=' border border-black p-1 border-top-0 pbia note_ri' style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div className='p-1' >
+                                    <div>
+                                        <div>Customer Name : {result?.header?.CustName}</div>
+                                        <div className='mt-5'>Customer Signature</div>
+                                    </div>
+                                </div>
+
+                                <div className='p-1'>
+                                    <div>
+                                        <div>For : {result?.header?.CompanyFullName}</div>
+                                        <div className='mt-5'>Authorised Signatory</div>
+                                    </div>
                                 </div>
                             </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { apiCall, checkMsg, formatAmount, handleGlobalImgError, isObjectEmpty, handleImageError, } from '../../GlobalFunctions';
+import { apiCall, checkMsg, formatAmount, handleGlobalImgError, isObjectEmpty, handleImageError, NumberWithCommas } from '../../GlobalFunctions';
 import Loader from '../../components/Loader';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel';
 import { OrganizeDataPrint } from '../../GlobalFunctions/OrganizeDataPrint';
@@ -508,7 +508,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
 
     setTimeout(() => {
       const button = document.getElementById('test-table-xls-button');
-      // button.click();
+      button.click()
     }, 500);
   }
 
@@ -714,6 +714,32 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
       fontWeight: "bold",
     };
   }
+  const colWidths = [
+    30,   // Sr
+    100,   // image
+    170,  // Design
+    70,   // Dia Shape
+    40,   // Dia Pcs
+    50,   // Dia Wt
+    50,   // Dia Rate
+    70,   // Dia Amount
+    110,  // Met Quality
+    50,   // Met Gwt
+    50,   // Met Net
+    60,   // Met Loss
+    50,   // Met Rate
+    80,   // Met Amount
+    70,   // Stone Shape
+    40,   // Stone Pcs
+    50,   // Stone Wt
+    50,   // Stone Rate
+    70,   // Stone Amount
+    110,  // Labour Charges
+    50,   // Labour Rate
+    70,   // Labour Amount
+    80,   // Duty Amount
+    90,   // Total Amount
+  ];
 
 
 
@@ -735,19 +761,21 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                 <table
                   id="table-to-xls"
                 >
+
                   <colgroup>
-                    {Array.from({ length: 23 }).map((_, i) => (
-                      <col key={i} />
+                    {colWidths.map((w, i) => (
+                      <col key={i} width={w} style={{ width: `${w}px` }} />
                     ))}
                   </colgroup>
                   <tr>
-                    <td colSpan={23}>
+                    <td colSpan={24}>
                       <b>Invoice :  </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                       <span>{result?.header?.InvoiceNo}</span>
                     </td>
                   </tr>
                   <tr style={{ fontWeight: "bold" }}>
                     <th rowSpan={2} style={{ ...thStyle("center"), background: "#f5f5f5" }}>Sr</th>
+                    <th rowSpan={2} style={{ ...thStyle("center"), background: "#f5f5f5" }}>Image</th>
                     <th rowSpan={2} style={{ ...thStyle("center"), background: "#f5f5f5" }}>Design</th>
                     <th colSpan={5} style={{ ...thStyle("center", true), background: "#f5f5f5" }}>Diamond</th>
                     <th colSpan={6} style={{ ...thStyle("center", true), background: "#f5f5f5" }}>Metal</th>
@@ -789,7 +817,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         e?.GroupJob !== ""
                           ? result?.labour
                             ?.filter((el) => el?.GroupjobNo === e?.GroupJob)
-                            ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0
+                            ?.reduce((sum, item) => sum + (item.MakingCharge / (result?.header?.CurrencyExchRate || 1) || 0), 0) || 0
                           : 0;
 
                       const extraCharge =
@@ -806,7 +834,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           ? (e?.MaKingCharge_Unit || 0) *
                           ((e?.totals?.metal?.Wt || 0) -
                             (e?.totals?.metal?.IsNotPrimaryMetalWt || 0))
-                          : e?.MakingAmount);
+                          : e?.MakingAmount / (result?.header?.CurrencyExchRate || 1));
 
                       const finalAmount = extraCharge / (result?.header?.CurrencyExchRate || 1);
 
@@ -953,7 +981,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           const am = Number(e[disAmount])
                           const decimals = e[isAmountKey] === 1 ? 3 : 2;
                           const val = num.toFixed(decimals);
-                          return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                          return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${(val / result?.header?.CurrencyExchRate)?.toFixed(2) } @${label} Amount`;
                         })
                         .join(', ');
 
@@ -974,44 +1002,109 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
 
                               <td rowSpan={maxRows} style={{ ...tdStyle("center", true), borderLeft: "1px solid black", paddingTop: 4 }}>
                                 {i + 1}
+
                               </td>
                             )}
 
-                            {/* ── Design: rowSpan covers all detail rows, hidden on total row ── */}
                             {isFirstRow && (
+
+                              <td rowSpan={maxRows} style={{ ...tdStyle("center", true), borderLeft: "1px solid black", paddingTop: 4 }}>
+
+                                <div style={{ display: "flex", justifyContent: "center", marginLeft: "10px" }}>
+                                  <img
+                                    src={e?.DesignImage}
+                                    onError={(e) => handleImageError(e)}
+                                    alt="design"
+                                    className="designimg_pcls"
+                                    width={80}
+
+                                  />
+                                </div>
+
+                              </td>
+                            )}
+
+
+                            {/* ```javascriptreact
+ {isFirstRow && (
                               <td
                                 rowSpan={maxRows}
                                 style={{ ...tdStyle("left"), borderTop: "1px solid black", verticalAlign: "top", paddingTop: 4 }}
                               >
                                 <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}>
                                   <span>{e?.designno}</span>
-                                  <span style={{ msoSpacerun: "yes" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                  <span style={{ msoSpacerun: "yes" }}>&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                   <span>{e?.GroupJob !== "" ? e?.GroupJob : e?.SrJobno}</span>
+                                  <span>{e?.MetalColor}</span>
                                 </div>
-                                <div style={{ textAlign: "right" }}>{e?.MetalColor}</div>
+                                
                                 <div>
-                                  <img
-                                    src={e?.DesignImage}
-                                    alt="design"
-                                    width="70"
-                                    height="70"
-                                    style={{ objectFit: "contain" }}
-                                  />
+                                  
                                 </div>
                                 {e?.Categoryname !== "" && <div style={{ fontWeight: "bold" }}>{e?.Categoryname}</div>}
                                 {e?.CertificateNo !== "" && <div>Certificate#: <b>{e?.CertificateNo}</b></div>}
                                 {e?.HUID !== "" && <div>HUID: <b>{e?.HUID}</b></div>}
                                 {e?.PO !== "" && <div><b>PO: {e?.PO}</b></div>}
-                                {e?.lineid !== "" && <div>{e?.lineid}</div>}
+                                {e?.lineid !== "" && <div>line id: <b>{e?.lineid}</b></div>}
                                 {e?.Tunch !== "" && <div>Tunch: <b>{e?.Tunch?.toFixed(3)}</b></div>}
                                 {e?.Size !== "" && <div>Size: {e?.Size}</div>}
                                 {e?.grosswt !== "" && <div><b>{e?.grosswt?.toFixed(3)} gm</b> Gross</div>}
                               </td>
-                            )}
+                            )} */}
 
+
+                            {/* ── Design: rowSpan covers all detail rows, hidden on total row ── */}
+                            {isFirstRow && (
+                              <td
+                                rowSpan={maxRows}
+                                style={{
+                                  ...tdStyle("left"),
+                                  borderTop: "1px solid black",
+                                  verticalAlign: "top",
+                                  paddingTop: 2,
+                                  paddingBottom: 2,
+                                  fontSize: "11px",
+                                  lineHeight: "1.15",
+                                }}
+                              >
+                                <b>{e?.designno}</b>
+                                <span style={{ msoSpacerun: "yes" }}>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                <span>{e?.GroupJob !== "" ? e?.GroupJob : e?.SrJobno}</span>
+                                <span style={{ msoSpacerun: "yes" }}>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                <span>{e?.MetalColor}</span>
+                                <br />
+
+                                {e?.Categoryname !== "" && (
+                                  <>
+                                    {e?.Categoryname}
+                                    <br />
+                                  </>
+                                )}
+
+                                {[
+                                  e?.PO !== "" && `PO: ${e.PO}`,
+                                  e?.lineid && `Line: ${e.lineid}`,
+                                  e?.Tunch !== "" && `Tunch: ${e?.Tunch?.toFixed(3)}`,
+                                ].filter(Boolean).join("  |  ")}
+                                <br />
+
+                                {[
+                                  e?.CertificateNo && `Cert#: ${e.CertificateNo}`,
+                                  e?.HUID && `HUID: ${e.HUID}`,
+                                  e?.Size && `Size: ${e.Size}`,
+                                ].filter(Boolean).join("  |  ")}
+                                {(e?.CertificateNo || e?.HUID || e?.Size) && <br />}
+
+                                {e?.grosswt !== "" && (
+                                  <>
+                                    <b>{e?.grosswt?.toFixed(3)} gm</b> Gross
+                                  </>
+                                )}
+                              </td>
+                            )}
                             {/* ── Total row: blank colspan-2 replaces the rowSpanned Sr+Design ── */}
                             {isTotalRow && (
-                              <td colSpan={2} style={{ ...tdTotalStyle("center"), borderLeft: "1px solid black" }}>&nbsp;</td>
+                              <td colSpan={3} style={{ ...tdTotalStyle("center"), borderLeft: "1px solid black" }}>&nbsp;</td>
                             )}
 
                             {/* ── Diamond ── */}
@@ -1038,10 +1131,10 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle("right")}>{dCell?.wt ?? ""}</td>
                                 <td style={tdStyle("right")}>
                                   {dCell?.amount && dCell?.wt > 0
-                                    ? (dCell.amount / dCell.wt).toFixed(2)
+                                    ? ((dCell.amount / dCell.wt)  / result?.header?.CurrencyExchRate).toFixed(2)
                                     : ""}
                                 </td>
-                                <td style={tdStyle("right")}><b>{formatAmount(dCell?.amount) ?? ""}</b></td>
+                                <td style={tdStyle("right")}><b>{formatAmount(dCell?.amount / result?.header?.CurrencyExchRate) ?? ""}</b></td>
                               </>
                             )}
 
@@ -1072,7 +1165,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle("right")}>{mCell?.net ?? ""}</td>
                                 <td style={tdStyle()}>{mCell?.loss ?? ""}</td>
                                 <td style={tdStyle("right")}>{mCell?.rate}</td>
-                                <td style={tdStyle("right")}><b>{formatAmount(mCell?.amount) ?? ""}</b></td>
+                                <td style={tdStyle("right")}><b>{formatAmount(mCell?.amount / result?.header?.CurrencyExchRate) ?? ""}</b></td>
                               </>
                             )}
 
@@ -1105,8 +1198,9 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle("right")}>{sCell?.wt ?? ""}</td>
                                 <td style={tdStyle("right")}>
                                   {sCell?.amount && sCell?.wt > 0
-                                    ? (sCell.amount / sCell.wt).toFixed(2)
+                                    ? ((sCell.amount / sCell.wt)  / result?.header?.CurrencyExchRate).toFixed(2)
                                     : sCell?.shape ? "0" : ""}
+                                  
                                 </td>
                                 <td style={tdStyle("right")}><b>{sCell?.wt > 0 ? formatAmount(sCell?.amount) : ""}</b></td>
                               </>
@@ -1143,7 +1237,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                             {isTotalRow ? (
                               <td style={{ ...tdTotalStyle("right"), borderTop: "1px solid #ccc" }}>
                                 {formatAmount(
-                                  e?.UnitCost + e?.CustomDuty_Amount / result?.header?.CurrencyExchRate
+                                 ( e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
                                 )}
                               </td>
                             ) : isFirstRow ? (
@@ -1152,7 +1246,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 style={{ ...tdStyle("right"), borderTop: "1px solid black", verticalAlign: "top", paddingTop: 4 }}
                               >
                                 {formatAmount(
-                                  e?.UnitCost + e?.CustomDuty_Amount / result?.header?.CurrencyExchRate
+                                 ( e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
                                 )}
                               </td>
                             ) : null /* rowSpan from isFirstRow covers this row — no <td> needed */}
@@ -1163,16 +1257,24 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                       /* ── Discount Row ── */
                       const discountRow = e?.DiscountAmt > 0 ? (
                         <tr>
-                          <td className="discountCol" colSpan={2} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
-                          <td  className="discountCol"colSpan={4} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
-                          <td className="discountCol"colSpan={1} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
+                          <td className="discountCol" colSpan={3} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
+                          <td className="discountCol" colSpan={4} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
+                          <td className="discountCol" colSpan={1} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
                           <td className="discountCol" colSpan={11} style={{ ...tdStyle("right"), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>
-                            {discountDisplay}
+                            {e?.DiscountAmt > 0 && (
+                              <>
+                                Discount{" "}
+                                {discountDisplay || `${NumberWithCommas(e?.Discount / result?.header?.CurrencyExchRate, 2)} @ Total Amount`}
+                              </>
+                            )}
                           </td>
                           <td className="discountCol" colSpan={3} style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
-                          <td className="discountCol" style={{ ...tdStyle(), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>&nbsp;</td>
+                          <td className="discountCol" style={{ ...tdStyle("right"), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}> {formatAmount(e?.DiscountAmt / result?.header?.CurrencyExchRate, 2)}</td>
                           <td className="discountCol" style={{ ...tdStyle("right"), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>
-                            {formatAmount(e?.DiscountAmt)}
+                            {formatAmount(
+                              (result?.mainTotal?.TotalAmount) /
+                              result?.header?.CurrencyExchRate
+                            )}
                           </td>
                         </tr>
                       ) : null;
@@ -1185,11 +1287,12 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                   <tfoot>
                     <tr
                       style={{
-                        
+
                       }}
                     >
-                      <td style={{...tdStyle("center"),borderLeft:"1px solid black",borderTop:"1px solid black",borderBottom:"1px solid black",background:"#f5f5f5",fontWeight:"bold"}}>&nbsp;</td>
-                      <td style={{...tdStyle("center"),borderLeft:"1px solid black",borderTop:"1px solid black",borderBottom:"1px solid black",background:"#f5f5f5",fontWeight:"bold"}}> Total</td>
+                      <td style={{ ...tdStyle("center"), borderLeft: "1px solid black", borderTop: "1px solid black", borderBottom: "1px solid black", background: "#f5f5f5", fontWeight: "bold" }}>&nbsp;</td>
+                      <td style={{ ...tdStyle("center"), borderLeft: "1px solid black", borderTop: "1px solid black", borderBottom: "1px solid black", background: "#f5f5f5", fontWeight: "bold" }}>&nbsp;</td>
+                      <td style={{ ...tdStyle("center"), borderLeft: "1px solid black", borderTop: "1px solid black", borderBottom: "1px solid black", background: "#f5f5f5", fontWeight: "bold" }}> Total</td>
                       <td className="totalstyle" style={tdStyle()}>&nbsp;</td>
                       <td className="totalstyle" style={tdStyle("right")}>{result?.mainTotal?.diamonds?.Pcs}</td>
                       <td className="totalstyle" style={tdStyle("right")}>{result?.mainTotal?.diamonds?.Wt?.toFixed(3)}</td>
@@ -1200,7 +1303,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         )}
                       </td>
 
-                      
+
                       <td className="totalstyle" style={tdStyle()}>&nbsp;</td>
                       <td className="totalstyle" style={tdStyle("right")}>{result?.mainTotal?.grosswt?.toFixed(3)}</td>
                       <td className="totalstyle" style={tdStyle("right")}>
@@ -1218,7 +1321,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         )}
                       </td>
 
-                      
+
                       <td className="totalstyle" style={tdStyle()}>&nbsp;</td>
                       <td className="totalstyle" style={tdStyle("right")}>
                         {Number(result?.mainTotal?.colorstone?.Pcs) || 0 + Number(result?.mainTotal?.misc?.IsHSCODE_0_pcs) || 0}
@@ -1273,8 +1376,8 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                     {/* ── Remarks + tax summary ── */}
                     <tr>
                       <td
-                        colSpan={20}
-                        style={{ padding: "4px 6px", verticalAlign: "top", fontSize: "inherit" }}
+                        colSpan={21}
+                        style={{ padding: "4px 6px", verticalAlign: "top", fontSize: "inherit", border: "1px solid black" }}
                       >
                         {result?.header?.PrintRemark && (
                           <>
@@ -1284,7 +1387,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         )}
                       </td>
 
-                      <td colSpan={3} style={{ padding: "4px 6px", verticalAlign: "top" }}>
+                      <td colSpan={3} style={{ padding: "4px 6px", verticalAlign: "top", border: "1px solid black" }}>
                         {result?.mainTotal?.DiscountAmt !== 0 && (
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span>Total Discount</span>

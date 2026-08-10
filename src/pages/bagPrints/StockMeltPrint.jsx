@@ -38,7 +38,7 @@ function StockMeltPrint() {
         version: queryParams.version,
         url: queryParams.apiurl,
         spno: queryParams.spno,
-        sv: queryParams.report_sv,
+        report_sv: queryParams.report_sv,
         StockBarcodeList: queryParams.StockBarcodeList,
         encwhere1: queryParams.encwhere1,
         encwhere2: queryParams.encwhere2,

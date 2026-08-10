@@ -29,6 +29,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const [notGoldMetalTotal, setNotGoldMetalTotal] = useState(0);
   const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
   const [secondarySize, setSecondarySize] = useState(false);
+  const [header, setHeader] = useState(true);
   const [size, setSize] = useState(true);
   const [checkBoxNew, setCheckBoxNew] = useState("Single Stone");
   const [diamondDetails, setDiamondDetails] = useState([]);
@@ -521,6 +522,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       setSecondarySize(true);
     }
   };
+
+  const handleHeader = (e) => {
+    if (header) setHeader(false);
+    else {
+      setHeader(true);
+    }
+  };
+
   const handleAllSize = (e) => {
     if (size) setSize(false);
     else {
@@ -638,6 +647,19 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   Show Secondary Size
                 </label>
               </div>
+
+              <div className="px-2">
+                <input
+                  type="checkbox"
+                  onChange={handleHeader}
+                  value={header}
+                  checked={header}
+                  id="size"
+                />
+                <label htmlFor="size" className="user-select-none mx-1">
+                  Header
+                </label>
+              </div>
               <div>
                 <Button />
               </div>
@@ -649,7 +671,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             </div>
 
             {/* comapny header */}
-            <div className="px-1 spbrWord com_fs_pcl3 mainHeadWD">
+            {header && <div className="px-1 spbrWord com_fs_pcl3 mainHeadWD">
               <div className="justify-content-start spbrWord fs_14_pcls">
                 <div className="fs_16_pcls fw-bold py-1 spbrWord">
                   {result?.header?.CompanyFullName}
@@ -684,7 +706,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 </div>
               )}
             </div>
-
+            }
             {/* customer header */}
             <div className="d-flex  mt-1 brall_pcls brall_pcls spbrWord">
               <div
@@ -844,10 +866,10 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
               {/* table data */}
               {result?.resultArray?.map((e, i) => {
-                    const mergedMetals = mergeMetals(e?.metal);
-                    const mergedFindings = mergeFindings(e?.finding);
-                {}
-                 
+                const mergedMetals = mergeMetals(e?.metal);
+                const mergedFindings = mergeFindings(e?.finding);
+                { }
+
                 return (
                   <div
                     className="d-flex tbody_pcls bbottom_pcls tb_fs_pcls pbia_pcl3 border-top"
@@ -971,7 +993,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   ? (
                                     el?.Amount /
                                     result?.header?.CurrencyExchRate /
-                                      (el?.isRateOnPcs ==1 ? el?.Pcs:  el?.Wt)
+                                    (el?.isRateOnPcs == 1 ? el?.Pcs : el?.Wt)
                                   )?.toFixed(2)
                                   : ""}
                               </div>
@@ -1131,7 +1153,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           const finalFindingWt =
                             (e?.totals?.finding?.Wt || 0) -
                             nonPrimaryTotalWt;
-                           
+
 
 
                           const metalRate =
@@ -1167,7 +1189,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     justifyContent: "flex-end",
                                   }}
                                 >
-                                  {formatAmount(metalRate , 2)}
+                                  {formatAmount(metalRate, 2)}
                                   {/* {rateAmount ? formatAmount(el?.Rate) : ""} */}
                                 </div>
 
@@ -1184,7 +1206,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                       el?.Rate * finalFindingWt
                                     )
                                     : ""} */}
-                                  {formatAmount(el?.Wt * metalRate , 2)}
+                                  {formatAmount(el?.Wt * metalRate, 2)}
                                 </div>
                               </div>
                             </div>
@@ -1249,11 +1271,11 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               result?.header?.CurrencyExchRate
                             )
                             : ""} */}
-                              {rateAmount
+                          {rateAmount
                             ? e?.totals?.metal?.Amount !== 0 &&
                             formatAmount(
                               (e?.totals?.metal?.Amount + e?.totals?.finding?.Amount) /
-                              result?.header?.CurrencyExchRate,2
+                              result?.header?.CurrencyExchRate, 2
                             )
                             : ""}
                         </div>
@@ -1375,9 +1397,9 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               {rateAmount ? "Labour" : ""}
                             </div>
                             <div className="lcol1_pcls end_pcls pdr_pcls">
-                             
+
                               {rateAmount
-                                ? e?.MakingChargeDiscount !== 0 ? `${fixedValues(e?.MakingChargeDiscount, 2)} ${e?.MakingChargeOnid==4 ? "":"%"}` : `${formatAmount(e?.MaKingCharge_Unit)} ${e?.MakingChargeOnid==4 ? "":"%"}`
+                                ? e?.MakingChargeDiscount !== 0 ? `${fixedValues(e?.MakingChargeDiscount, 2)} %` : `${formatAmount(e?.MaKingCharge_Unit)} `
                                 : ""}
                             </div>
                             <div className="lcol1_pcls end_pcls pdr_pcls">

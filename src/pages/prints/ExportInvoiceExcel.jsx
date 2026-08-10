@@ -348,7 +348,10 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
             const otherMaterials = Array.from(shapeMap.values()).map((x) => ({ ...x, Rate: x.Wt ? x.Rate / x.Wt : 0 }));
             item.otherMaterials = otherMaterials;
 
-            const materials = allMaterials.map((x) => x.MaterialTypeName).filter((x) => x && x.trim() !== "");
+            // const materials = allMaterials.map((x) => x.MaterialTypeName).filter((x) => x && x.trim() !== "");
+            const materials = allMaterials
+              .map((x) => x.MaterialTypeName || x.MasterManagement_DiamondStoneTypeName)
+              .filter((x) => x && x.trim() !== "");
             const uniqueMaterials = [...new Set(materials)].sort();
 
             const key = [purity, uniqueMaterials.join(","), secondaryMetalQualities.join(",")].join("_");
@@ -670,14 +673,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                             </tr>
                         </tbody>
 
-
-                        {/* ══════════════════════════════════════════════════════
-                            MAIN TABLE — NEW STRUCTURE (image reference)
-                            Columns (12 colspan base, split as 2|4|2|1|1|2):
-                              HSN CODE | Description | TOTAL WT in Gms | QTY | RATE | AMOUNT US $
-                        ══════════════════════════════════════════════════════ */}
-
-                        {/* "One package :" summary row — mirrors image top block */}
+ 
                         <tbody>
                             <tr>
                                 {/* Left: "One package :" label */}

@@ -513,20 +513,52 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
     const grandTotal = calculateGrandTotal(MergedData, result?.header?.CurrencyExchRate);
 
-    // ─── styles ──────────────────────────────────────────────────────────────
-    const th = { border: "1px solid #000", padding: "4px 6px", textAlign: "center", fontWeight: "bold", fontSize: "11px" };
-    const td = { border: "1px solid #000", padding: "3px 5px", textAlign: "right", fontSize: "11px" };
-    const tdCenter = { border: "1px solid #000", padding: "3px 5px", textAlign: "center", fontSize: "11px" };
-    const tdLeft = { border: "1px solid #000", padding: "3px 5px", textAlign: "left", fontSize: "11px" };
-    const sectionHeaderTd = { border: "1px solid #000", padding: "4px 6px", textAlign: "left", fontWeight: "bold", fontSize: "11px" };
-    const totalRowTd = { border: "1px solid #000", padding: "4px 6px", textAlign: "right", fontWeight: "bold", fontSize: "11px" };
-    const totalRowTdCenter = { border: "1px solid #000", padding: "4px 6px", textAlign: "center", fontWeight: "bold", fontSize: "11px" };
-    const grandTotalTd = { border: "1px solid #000", padding: "4px 6px", textAlign: "right", fontWeight: "bold", backgroundColor: "#e6e6e6", fontSize: "11px" };
+    function mergeByCategoryAndPurity(data) {
+        function isPlainObject(val) {
+          return val !== null && typeof val === "object" && !Array.isArray(val);
+        }
+      
+        function mergeValues(a, b) {
+          if (Array.isArray(a) && Array.isArray(b)) {
+            return a.concat(b);
+          }
+          if (typeof a === "number" && typeof b === "number") {
+            return a + b;
+          }
+          if (isPlainObject(a) && isPlainObject(b)) {
+            const out = { ...a };
+            for (const key of Object.keys(b)) {
+              out[key] = key in out ? mergeValues(out[key], b[key]) : b[key];
+            }
+            return out;
+          }
+          if (a === b) return a;
+          const arrA = Array.isArray(a) ? a : [a];
+          const arrB = Array.isArray(b) ? b : [b];
+          return [...arrA, ...arrB];
+        }
+      
+        const groups = new Map();
+      
+        for (const record of data) {
+          const key = `${record.Categoryname}||${record.MetalPurity}`;
+          if (!groups.has(key)) {
+            groups.set(key, { ...record });
+          } else {
+            const acc = groups.get(key);
+            const merged = { ...acc };
+            for (const k of Object.keys(record)) {
+              merged[k] = k in merged ? mergeValues(merged[k], record[k]) : record[k];
+            }
+            groups.set(key, merged);
+          }
+        }
+      
+        return Array.from(groups.values());
+      }
 
-    // vertical-align middle for merged cells
-    const tdMerged = (extra = {}) => ({ border: "1px solid #000", padding: "3px 5px", fontSize: "11px", verticalAlign: "middle", ...extra });
-
-    let srCounter = 0;
+ 
+ 
 
     if (result) {
         setTimeout(() => {
@@ -541,6 +573,8 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
     const getWastageGms = (e) => e?.Wastage || 0;
 
     const Border = "1px solid #000"
+
+
 
 
     return (
@@ -685,6 +719,8 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                             </tr>
 
                         </tbody>
+
+                         {/* main atble  */}
                         <colgroup>
                             <col style={{ width: "13%" }} />
                             <col style={{ width: "6%" }} />
@@ -719,7 +755,10 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
                         <tbody>
                             {MergedData.map((group, gi) => {
-                                const { items, total, DisplayName: displayName } = group;
+                                const {   total, DisplayName: displayName } = group;
+
+
+                                const items= mergeByCategoryAndPurity(group.items);
 
                                 return items.map((item, ii) => (
                                     <tr key={`${group.id ?? gi}-${item.id ?? ii}`}>
@@ -754,7 +793,8 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                                 </td>
 
                                                 <td style={{ border: Border }} rowSpan={items.length} className="amount-cell">
-                                                    {total.TotalAmount?.toFixed(2)}
+                                                    {/* {total.TotalAmount?.toFixed(2)} */}
+                                                    {item.MetalAmount?.toFixed(2)}
                                                 </td>
                                             </>
                                         )}
@@ -767,7 +807,8 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 <td>TOTAL</td>
                                 <td></td>
                                 <td></td>
-                                <td colSpan={5}></td>
+                                <td colSpan={4}></td>
+                                <td>{grandTotal?.metalAmount?.toFixed(2)}</td>
                             </tr>
                         </tbody>
 

@@ -42,7 +42,7 @@ function UserSalesReport() {
           version: queryParams.version,
           url: queryParams.apiurl,
           spno: queryParams.spno,
-          sv: queryParams.report_sv,
+          report_sv: queryParams.report_sv,
           version: queryParams.version,
           StockBarcodeList: queryParams.StockBarcodeList,
           encwhere1: queryParams.encwhere1,

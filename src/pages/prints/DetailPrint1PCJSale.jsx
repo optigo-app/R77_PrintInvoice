@@ -617,7 +617,8 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                             <div className="col-6">
                                 {isImageWorking && (json0Data?.PrintLogo !== "" &&
                                     <img src={json0Data?.PrintLogo} alt=""
-                                        className='w-25 h-auto ms-auto d-block object-fit-contain'
+                                        className='h-auto ms-auto d-block object-fit-contain w-55'
+                                        style={{width:"55%"}}
                                         onError={handleImageErrors} height={120} width={150} />)}
                             </div>
                         </div>

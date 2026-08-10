@@ -658,7 +658,7 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
 
                                                         {(activeType === "B2B" || activeType === "B2C") && (
                                                             <>
-                                                                <div className="td col-stone" style={{ flexDirection: "column" }} >
+                                                                <div className={`td col-stone col-stone-font`} style={{ flexDirection: "column" }} >
                                                                     {totalDiamonds?.totalWt > 0 && (
                                                                         <div className="wordBreak">{totalDiamonds?.materialName}  </div>
 

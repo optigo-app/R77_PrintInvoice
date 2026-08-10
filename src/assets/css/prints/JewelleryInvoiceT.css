@@ -73,12 +73,13 @@
 .j-inv-col-code    { width: 11.3%; }  
 .j-inv-col-hsn     { width: 9%;  }  
 .j-inv-col-desc    { width: 23.8%;  }   
-.j-inv-col-qty     { width: 5.37%;  }  
-.j-inv-col-rate    { width: 13.40%;  }  
+.j-inv-col-qty     { width: 4.37%;  }  
+.j-inv-col-rate    { width: 10.40%;  }  
+.j-inv-col-mrp    { width: 9%;  }  
 .j-inv-col-disc    { width: 8.06%;  }  
 .j-inv-col-gst     { width: 5.37%;  }  
 .j-inv-col-gst-amt { width: 10.40%;  }  
-.j-inv-col-net     { width: 15.15%; }  
+.j-inv-col-net     { width: 10.15%; }  
 
 .j-inv-col-sr-taxamt      { width: 5.37%;  }  
 .j-inv-col-code-taxamt    { width: 10.75%; }  

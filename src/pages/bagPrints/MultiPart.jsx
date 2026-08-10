@@ -27,6 +27,7 @@ const MultiPart = ({ queries, headers }) => {
     const resultString = GetUniquejob(queryParams?.str_srjobno);
     const [data, setData] = useState([]);
     const [title, setTitle] = useState('');
+       const [remarks, setRemarks] = useState(true);
 
     const [diaFlag, setDiaFlag] = useState(false);
       
@@ -256,6 +257,10 @@ const MultiPart = ({ queries, headers }) => {
     //     }, 0);
     //   }
 
+    const handleChangeRemarks = (e) => {
+        remarks ? setRemarks(false) : setRemarks(true);
+    };
+
   
     
   return (
@@ -270,7 +275,31 @@ const MultiPart = ({ queries, headers }) => {
                             <div className='multipart_head' style={{fontFamily:'Helvetica, Verdana, sans-serif'}}>Multi Part Bagging Process For &nbsp;</div>
                             <div className='multipart_head text-center number-box border border_color_head ' style={{minWidth:'100px'}}>{data?.length}</div>
                             <div className='multipart_head'>&nbsp;{data?.length > 1 ? 'Jobs' : 'Job'}</div>
+
+                            <div className="form-check pe-3" style={{ display: "flex", alignItems: "center", gap: "5px" ,marginLeft:'1rem' }} >
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id='remarks'
+                                            checked={remarks}
+                                            onChange={handleChangeRemarks}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <label
+                                            className="form-check-label pt-1"
+                                            htmlFor="remarks"
+                                            style={{ cursor: "pointer", textSelection: "none" }}
+                                        >
+                                           Remarks
+                                        </label>
+                                    </div> 
                         </div>
+
+                      
+
+                    <div>
+                   
+                    </div>
                         <div className='d-flex  justify-content-around align-items-center py-2 flex-wrap border bg_color_container' style={{marginTop:'3%', minHeight:'30rem', width:'95%', paddingLeft:'1%', paddingRight:'1%'}}>
                             <div style={{margin:'1rem', boxSizing:'border-box'}} className='bg-white text-black mx-0'>
                                 <Box className="border rounded box_css_mlt d-flex flex-column border_color_head justify-content-between align-items-center m-0">
@@ -363,9 +392,14 @@ const MultiPart = ({ queries, headers }) => {
                                     <QRCodeGenerator text={e?.data?.rd.serialjobno +" "+ (e?.data?.rd?.metal_color_casted === undefined ? '' : e?.data?.rd?.metal_color_casted)} />{ diaFlag && <span className='fsjbsbg'>{e?.data?.rd?.diamondQuality?.join(",")}</span>}
                                 </div>
                             </div>
-                            <div className='text-break ins_multipart fw-bolder'>
+
+                            {remarks &&(
+                                <div className='text-break ins_multipart fw-bolder'>
                                 {e?.data?.rd?.officeuse.slice(0, 30)} {e?.data?.rd?.ProductInstruction}
                             </div>
+
+                            )}
+                            
                             {/* <div className='text-break ins_multipart fw-bolder'>{e?.data?.rd?.officeuse}</div> */}
                         </div>
                     //   <React.Fragment key={index}>

@@ -2,15 +2,23 @@
 .print_header{
     display: none;
 }
-
+ 
 @media print{
+    
      .filter{
         display: none !important;
      }
      .print_header{
         display: block !important;
     }
-    .line-height1{
-        line-height: 1.2;
-    }
+    /* .line-height1{
+        line-height: 1.13;
+    }*/
+    .line-height2{
+        line-height: 1.7;
+    } 
 }
+
+@page:first {
+    margin-bottom: 160px;
+ }

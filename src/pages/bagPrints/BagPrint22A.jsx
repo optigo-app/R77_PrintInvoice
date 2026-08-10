@@ -1,27 +1,29 @@
 import React from 'react';
-import "../../assets/css/bagprint/bagprint22.css";
+import "../../assets/css/bagprint/bagprint22A.css";
 import queryString from 'query-string';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GetData } from '../../GlobalFunctions/GetData';
+import { handleImageError } from '../../GlobalFunctions/HandleImageError';
 import { handlePrint } from '../../GlobalFunctions/HandlePrint';
 import BarcodeGenerator from '../../components/BarcodeGenerator';
+import BarcodeGenratorStcok from "../../components/BarcodeGenratorStcok";
 import Loader from '../../components/Loader';
 import { organizeData } from '../../GlobalFunctions/OrganizeBagPrintData';
 import { GetChunkData } from './../../GlobalFunctions/GetChunkData';
 import { GetUniquejob } from '../../GlobalFunctions/GetUniqueJob';
+import { checkInstruction } from '../../GlobalFunctions';
+import QRCodeGenerator from "../../components/QRCodeGenerator";
 
 
 export default function DiamondColourCodeForm({ queries, headers }) {
     const [data, setData] = useState([]);
-    console.log("TCL: DiamondColourCodeForm -> data", data)
     const location = useLocation();
     const queryParams = queryString.parse(location?.search);
     const resultString = GetUniquejob(queryParams?.str_srjobno);
     const [rd2Data, setRd2Data] = useState([]);
     const chunkSize17 = 11;
-
     useEffect(() => {
         if (Object.keys(queryParams)?.length !== 0) {
             atob(queryParams?.imagepath);
@@ -38,6 +40,8 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                     headers: headers,
                 };
                 const allDatas = await GetData(objs);
+
+                console.log("TCL: fetchData -> allDatas ", allDatas)
                 setRd2Data(allDatas?.rd2 || []);
                 let datas = organizeData(allDatas?.rd, allDatas?.rd1);
                 console.log(datas);
@@ -131,14 +135,17 @@ export default function DiamondColourCodeForm({ queries, headers }) {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    useEffect(() => {
+        if (data?.length !== 0) {
+            setTimeout(() => {
+                window.print();
+            }, 5000);
+        }
+    }, [data?.length]);
 
-    // useEffect(() => {
-    //     if (data?.length !== 0) {
-    //         setTimeout(() => {
-    //             window.print();
-    //         }, 5000);
-    //     }
-    // }, [data?.length]);
+
+
+    console.log("TCL: data", data)
 
     const uniqueQualities = [
         ...new Set(
@@ -150,6 +157,8 @@ export default function DiamondColourCodeForm({ queries, headers }) {
         )
     ];
 
+    console.log(uniqueQualities);
+
     const colorMap = {
         "NATURAL": "#215c98",
         "SINGLE CUT": "#47d359",
@@ -157,10 +166,13 @@ export default function DiamondColourCodeForm({ queries, headers }) {
         "HPHT": "#3c7e1f"
     };
 
+
     function getJobWiseMetalData(jobno, list = rd2Data) {
         return list.find(item => item.serialjobno === jobno) || null;
     }
 
+
+    console.log("TCL: DiamondColourCodeForm -> data", data)
 
 
     return (
@@ -187,28 +199,25 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                     console.log("TCL: DiamondColourCodeForm -> e", e)
                                     const metalColor = e?.data?.rd?.MetalType?.split("-")
 
-                                    const colorCodeString = e?.data?.rd?.MetalColorCo || ""; // e.g., "Yellow", "Y-W", "White-Rose", "R_W"
+                                    const colorCodeString = e?.data?.rd?.MetalColorCo || "";
 
-                                    // Split by '-' or '_' and remove empty strings
-                                    // const activeColors = colorCodeString.split(/[-_]/).filter(Boolean);
                                     const activeColors = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.MetalColor?.split(/[-_]/).filter(Boolean);
-                                    // const boxText = e?.data?.rd?.MetalType?.split(" ")[1];
-                                    const boxText = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.Metal_Type_Color?.split(" ")[1] || "";
 
-                                    // Helper function to match the background color regardless of full word or shorthand letter
+                                    const boxText = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.Metal_Type_Color?.split(" ")[1]
+
                                     const getBgColor = (code) => {
                                         const cleanCode = code.trim().toUpperCase();
 
-                                        if (cleanCode.startsWith("Y")) return "#ffff00"; // Yellow
-                                        if (cleanCode.startsWith("W")) return "#ffffff"; // White
-                                        if (cleanCode.startsWith("R")) return "#b86b7b"; // Rose
+                                        if (cleanCode.startsWith("Y")) return "#ffff00";
+                                        if (cleanCode.startsWith("W")) return "#ffffff";
+                                        if (cleanCode.startsWith("R")) return "#b86b7b";
 
                                         return 'white'; // Fallback gray
                                     };
 
                                     const jobWiseMetalData = getJobWiseMetalData(e?.data?.rd?.serialjobno);
 
-                                   
+                                    // ---------- split diamond rows into chunks of 21 ----------
                                     const totalRowsWanted = 21;
                                     const allActualData = (e?.data?.rd1 || []).filter(
                                         (item) => item.MasterManagement_DiamondStoneTypeid !== 0
@@ -226,19 +235,16 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                         const dummyRows = Array.from({ length: dummyCount });
 
                                         return (
-                                            <div className="dcf-wrapper" key={cardKey}>
+                                            <div style={{ width: '50%' }} className="dcf-wrapper" key={cardKey}>
+
                                                 {/* Title bar */}
-                                                <div className="pcf-row">
-                                                    {/* <div className="pcf-title-bar">Colour Code For Priority</div> */}
+                                                <div className="dcf-row">
                                                     <div className="dcf-row" style={{ display: 'flex', position: 'relative', height: '16px' }}>
-                                                        {/* The partitioned background segments */}
+
                                                         {uniqueMaterialTypes
-
                                                             .filter(type => type && colorMap.hasOwnProperty(type.trim().toUpperCase()))
-
                                                             .map((type, index) => {
                                                                 const upperType = type.trim().toUpperCase();
-
                                                                 return (
                                                                     <div
                                                                         key={index}
@@ -250,14 +256,12 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                                             paddingTop: "2px"
                                                                         }}
                                                                     >
-
                                                                         {type}
                                                                     </div>
                                                                 );
                                                             })
                                                         }
 
-                                                        {/* The centered title overlay */}
                                                         <div className="dcf-title-bar" style={{
                                                             position: 'absolute',
                                                             width: '100%',
@@ -266,9 +270,8 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                             justifyContent: 'center',
                                                             alignItems: 'center',
                                                             color: 'white',
-                                                            pointerEvents: 'none' // Ensures the text doesn't interfere with mouse clicks
+                                                            pointerEvents: 'none'
                                                         }}>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -333,21 +336,17 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="dcf-cell dcf-col-material"></div>
                                                     <div className="dcf-cell dcf-col-rmtype"></div>
                                                     <div className="dcf-cell dcf-col-rmshape"></div>
-                                                    <div className="dcf-cell dcf-col-rmqty"></div>
-                                                    <div className="dcf-cell dcf-col-sizegroup"></div>
-                                                    <div className="dcf-cell dcf-col-rmsize"></div>
-                                                    <div className="dcf-cell dcf-header-cell" style={{ flex: "0 0  13.1%" }}>Actual</div>
+
+                                                    <div className="dcf-cell dcf-header-cell" style={{ flex: "0 0  13%" }}>Actual</div>
                                                     <div className="dcf-cell dcf-header-cell" style={{ flex: "0 0 13%" }}>Issue</div>
                                                 </div>
 
                                                 {/* Table header row 2 (column names) */}
-                                                <div className="dcf-row" style={{ height: "15px" }}>
-                                                    <div className="dcf-cell dcf-col-material dcf-header-cell">Material</div>
-                                                    <div className="dcf-cell dcf-col-rmtype dcf-header-cell"> Type</div>
-                                                    <div className="dcf-cell dcf-col-rmshape dcf-header-cell"> Shape</div>
-                                                    <div className="dcf-cell dcf-col-rmqty dcf-header-cell"> Qty-Col.</div>
-                                                    <div className="dcf-cell dcf-col-sizegroup dcf-header-cell">Size Group</div>
-                                                    <div className="dcf-cell dcf-col-rmsize dcf-header-cell"> Size</div>
+                                                <div className="dcf-row" style={{ height: "13px" }}>
+                                                    <div className="dcf-cell dcf-col-material dcf-header-cell lineHeight1">Material</div>
+                                                    <div className="dcf-cell dcf-col-rmtype dcf-header-cell lineHeight1"> Type</div>
+                                                    <div className="dcf-cell dcf-col-rmshape dcf-header-cell lineHeight1"> Material Details</div>
+
                                                     <div className="dcf-cell dcf-col-pcs dcf-header-cell">Pcs</div>
                                                     <div className="dcf-cell dcf-col-wt dcf-header-cell">Wt.</div>
                                                     <div className="dcf-cell dcf-col-pcs dcf-header-cell">Pcs</div>
@@ -357,7 +356,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                 {/* Actual data rows for this chunk */}
                                                 {chunkRows.map((item, index) => (
                                                     <div className="dcf-row dcf-actual-issue-row" key={`actual-${cardKey}-${index}`} style={{ height: "16px" }}>
-                                                        <div className="dcf-cell dcf-col-material lineHeight1 " style={{ fontWeight: "400" }}>
+                                                        <div className="dcf-cell dcf-col-material lineHeight1  " style={{ fontWeight: "400" }}>
                                                             {
                                                                 item?.MasterManagement_DiamondStoneTypeid == 3
                                                                     ? "Dia."
@@ -373,14 +372,25 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div
                                                             className="dcf-cell dcf-col-rmtype lineHeight1"
                                                             style={{ fontWeight: "400" }}
-
                                                         >
                                                             {item?.MaterialTypeName}
                                                         </div>
-                                                        <div className="dcf-cell dcf-col-rmshape dcf-green-text lineHeight1" style={{ fontWeight: "400", }}>{item?.Shapecode}</div>
-                                                        <div style={{ fontWeight: "400" }} className="dcf-cell dcf-col-rmqty dcf-green-text lineHeight1">{item?.QualityCode} - {item?.ColorCode}</div>
-                                                        <div style={{ fontWeight: "400" }} className="dcf-cell dcf-col-sizegroup dcf-green-text lineHeight1">{item?.GroupName}</div>
-                                                        <div style={{ fontWeight: "400" }} className="dcf-cell dcf-col-rmsize dcf-blue-text lineHeight1">{item?.Sizename}</div>
+                                                        <div className="dcf-cell dcf-col-rmshape dcf-green-text lineHeight1" style={{ fontWeight: "400" }}>
+                                                            {
+                                                                item?.MasterManagement_DiamondStoneTypeid == 5 ?
+                                                                    item?.ConcatedFullShapeQualityColorName
+                                                                    :
+                                                                    [
+                                                                        item?.Shapecode,
+                                                                        item?.QualityCode && `${item.QualityCode}${item?.ColorCode ? ` - ${item.ColorCode}` : ""}`,
+                                                                        item?.GroupName,
+                                                                        item?.Sizename
+                                                                    ]
+                                                                        .filter(Boolean)
+                                                                        .join(" | ")
+                                                            }
+                                                        </div>
+
                                                         <div className="dcf-cell dcf-col-pcs lineHeight1" style={{ fontWeight: "400" }}>{item?.ActualPcs}</div>
                                                         <div className="dcf-cell dcf-col-wt lineHeight1" style={{ fontWeight: "400" }}>{item?.ActualWeight?.toFixed(2)}</div>
                                                         <div className="dcf-cell dcf-col-pcs lineHeight1" style={{ fontWeight: "400" }}> </div>
@@ -394,9 +404,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="dcf-cell dcf-col-material">&nbsp;</div>
                                                         <div className="dcf-cell dcf-col-rmtype">&nbsp;</div>
                                                         <div className="dcf-cell dcf-col-rmshape">&nbsp;</div>
-                                                        <div className="dcf-cell dcf-col-rmqty">&nbsp;</div>
-                                                        <div className="dcf-cell dcf-col-sizegroup">&nbsp;</div>
-                                                        <div className="dcf-cell dcf-col-rmsize">&nbsp;</div>
+
                                                         <div className="dcf-cell dcf-col-pcs">&nbsp;</div>
                                                         <div className="dcf-cell dcf-col-wt">&nbsp;</div>
                                                         <div className="dcf-cell dcf-col-pcs">&nbsp;</div>
@@ -405,35 +413,36 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                 ))}
 
                                                 {/* Instruction row */}
-                                                <div className="dcf-row dcf-instruction-box" style={{ borderBottom: "none", lineHeight: "1.2" }}>
-                                                    <div className="dcf-instruction-label"><span>Instruction : </span>
-
+                                                <div className="dcf-row dcf-instruction-box" style={{ padding: "4px 6px", lineHeight: "1.2" }}>
+                                                    <div className="dcf-instruction-label" style={{ padding: '0px' }}>
+                                                        <span style={{ fontWeight: "bold" }}>Instruction : </span>
                                                         <span
-
-                                                            className=''
-                                                            style={{ fontSize: "8px", lineHeight: "9px" }}
                                                             dangerouslySetInnerHTML={{
                                                                 __html:
-                                                                    e?.data?.rd?.ProductInstructionfull?.length > 530
-                                                                        ? `${e.data.rd.ProductInstructionfull.slice(0, 530)}...`
-                                                                        : e?.data?.rd?.ProductInstructionfull ||
-                                                                        e?.data?.rd?.QuoteRemark ||
-                                                                        "",
+                                                                    e?.data?.rd?.ProductInstructionfull?.length > 300
+                                                                        ? `${e.data.rd.ProductInstructionfull.slice(0, 300)}...`
+                                                                        : e?.data?.rd?.ProductInstructionfull
+                                                                            ||
+                                                                            e?.data?.rd?.QuoteRemark ||
+                                                                            "",
                                                             }}
                                                         />
                                                     </div>
-
                                                 </div>
+
                                             </div>
                                         );
                                     };
 
-                                    // ---------- reusable pcf-page/pcf-wrapper card (your ORIGINAL markup, unchanged, real data) ----------
+                                    // ---------- reusable pcf-wrapper card (your ORIGINAL markup, unchanged, now real data) ----------
                                     const renderPcfWrapper = (cardKey) => (
-                                        <div className="pcf-page" key={cardKey}>
+                                        <div style={{ width: '50%' }} className="pcf-page" key={cardKey}>
                                             <div className="pcf-wrapper">
-                                                <div className="dcf-row">
+
+                                                {/* Title bar */}
+                                                <div className="pcf-row">
                                                     <div className="dcf-row" style={{ display: 'flex', position: 'relative', height: '16px' }}>
+
                                                         <div
                                                             style={{
                                                                 flex: 1,
@@ -447,8 +456,6 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                             {e?.data?.rd?.prioritycode}
                                                         </div>
 
-
-                                                        {/* The centered title overlay */}
                                                         <div className="dcf-title-bar" style={{
                                                             position: 'absolute',
                                                             width: '100%',
@@ -457,9 +464,8 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                             justifyContent: 'center',
                                                             alignItems: 'center',
                                                             color: 'white',
-                                                            pointerEvents: 'none' // Ensures the text doesn't interfere with mouse clicks
+                                                            pointerEvents: 'none'
                                                         }}>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -471,15 +477,15 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="pcf-header-left">
                                                         <div className="pcf-info-row">
                                                             <div className="pcf-info-label">Qty- {e?.data?.rd?.IsSplits_Quotation_Quantity} </div>
-                                                            <div className="pcf-info-value-red" style={{ fontSize: "12px", lineHeight: "1", color: "red" }}>{e?.data?.rd?.serialjobno}</div>
-                                                            <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center", fontWeight: "bold" }}> Design Code. </div>
+                                                            <div className="pcf-info-value-red" style={{ fontSize: "12px", color: "red" }}>{e?.data?.rd?.serialjobno}</div>
+                                                            <div className="pcf-info-label2" style={{ flex: " 0 0 40%", borderRight: "none", justifyContent: "center" }}> Design Code</div>
                                                         </div>
 
                                                         <div className="pcf-info-row">
                                                             <div className="pcf-info-label">Order Date</div>
                                                             <div className="pcf-info-value"> {e?.data?.rd?.OrderDate}</div>
-                                                            <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center" }}>{e?.data?.rd?.Designcode}</div>
 
+                                                            <div className="pcf-info-value2" style={{ flex: " 0 0 40%", borderRight: "none", justifyContent: "center" }}> {e?.data?.rd?.Designcode}</div>
                                                         </div>
 
                                                         <div className="pcf-info-row">
@@ -507,11 +513,6 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                             <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Category </div>
                                                             <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}>{e?.data?.rd?.category}</div>
                                                         </div>
-
-                                                        {/* <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Design Master Size </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}>{e?.data?.rd?.DefaultSize}</div>
-                                                        </div> */}
 
                                                         <div className="pcf-info-row">
                                                             <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Order Size </div>
@@ -546,7 +547,6 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         </div>
                                                         <div className="pcf-image-box">
                                                             <img
-
                                                                 src={
                                                                     e?.data?.rd?.DesignImage !== ''
                                                                         ? e?.data?.rd?.DesignImage
@@ -735,45 +735,48 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="pcf-cell pcf-col-wrkr"></div>
                                                     <div className="pcf-cell pcf-col-inwt"></div>
                                                     <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"><b>Final Wt.</b></div>
+                                                    <div className="pcf-cell pcf-col-scrap" style={{ fontWeight: "bold" }}> Final WT.</div>
                                                     <div className="pcf-cell pcf-col-dust"></div>
                                                     <div className="pcf-cell pcf-col-qcsign"></div>
                                                 </div>
+
                                                 {/* Instruction */}
-                                                <div className="dcf-row" style={{ borderBottom: "none", lineHeight: "1.2" }}>
-                                                    <div className="dcf-instruction-label dcf-instruction-box"> <span>Instruction : </span>
-
+                                                <div className="dcf-row dcf-instruction-box" style={{ padding: "4px 6px", lineHeight: "1.2" }}>
+                                                    <div className="dcf-instruction-label" style={{ padding: '0px' }}>
+                                                        <span style={{ fontWeight: "bold" }}>Instruction : </span>
                                                         <span
-
-                                                            style={{ fontSize: "8px", lineHeight: "9px" }}
                                                             dangerouslySetInnerHTML={{
                                                                 __html:
-                                                                    e?.data?.rd?.ProductInstructionfull?.length > 530
-                                                                        ? `${e.data.rd.ProductInstructionfull.slice(0, 530)}...`
-                                                                        : e?.data?.rd?.ProductInstructionfull ||
-                                                                        e?.data?.rd?.QuoteRemark ||
-                                                                        "",
+                                                                    e?.data?.rd?.ProductInstructionfull?.length > 300
+                                                                        ? `${e.data.rd.ProductInstructionfull.slice(0, 300)}...`
+                                                                        : e?.data?.rd?.ProductInstructionfull
+                                                                            ||
+                                                                            e?.data?.rd?.QuoteRemark ||
+                                                                            "",
                                                             }}
                                                         />
                                                     </div>
-
                                                 </div>
+
                                             </div>
                                         </div>
                                     );
-
-                                    // ---------- ALL dcf-wrapper cards first, pcf-page LAST, 2 per bagprint22 row ----------
+ 
                                     const allCards = [
                                         ...rowChunks.map((chunk, idx) => renderDcfWrapper(chunk, `${i}-dcf-${idx}`)),
                                         renderPcfWrapper(`${i}-pcf`),
                                     ];
 
+                                    
                                     const cardRows = [];
                                     for (let p = 0; p < allCards.length; p += 2) {
                                         cardRows.push(
                                             <div className='bagprint22' key={`row-${i}-${p}`}>
                                                 {allCards[p]}
-                                                {allCards[p + 1] ? allCards[p + 1] : <div className="dcf-wrapper" style={{ visibility: 'hidden' }}></div>}
+                                                {allCards[p + 1]
+                                                    ? allCards[p + 1]
+                                                    : <div style={{ width: '50%' }}></div>
+                                                }
                                             </div>
                                         );
                                     }
@@ -793,4 +796,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
 
         </>
     )
+
+
+
 }

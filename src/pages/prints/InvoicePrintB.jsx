@@ -18,6 +18,7 @@ import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
 import Loader from "../../components/Loader";
 import { cloneDeep } from "lodash";
 import { MetalShapeNameWiseArr } from "../../GlobalFunctions/MetalShapeNameWiseArr";
+import { Spa } from "@mui/icons-material";
 function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
 
     const [result, setResult] = useState(null);
@@ -835,7 +836,12 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
 
                                             <div className='tblrow'  >
                                                 <div className='srcol colpad border_right' > {i + 1}</div>
-                                                <div className='stycol colpad border_right' > {e?.designno} <br />{e?.GroupJob ? e?.GroupJob : e?.SrJobno}</div>
+                                                <div className='stycol colpad border_right' > {e?.designno} <br />{e?.GroupJob ? e?.GroupJob : e?.SrJobno} <br /> 
+                                                 {
+                                                     e?.lineid !== "" && 
+                                                     <>line id: <br /> {e?.lineid}</>
+                                                 }
+                                                  </div>
                                                 <div className='imgcol colpad border_right' >
                                                     <img
                                                         src={e?.DesignImage}
@@ -864,7 +870,7 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
 
                                         <div className='qtycol colpad border_right' > {totalQty}</div>
                                         <div className='tagcol colpad border_right' style={{ justifyContent: "flex-end" }} >  {formatAmount((result?.mainTotal?.total_unitcost / result?.header?.CurrencyExchRate))}</div>
-                                        <div className='discol colpad border_right' style={{ justifyContent: "flex-end" }}>  {formatAmount((result?.mainTotal?.total_discount / result?.header?.CurrencyExchRate))} </div>
+                                        <div className='discol colpad border_right' style={{ justifyContent: "flex-end" }}>  {formatAmount((result?.mainTotal?.total_discountAmt / result?.header?.CurrencyExchRate))} </div>
                                         <div className='tlcol colpad border_right' style={{ justifyContent: "flex-end" }}>  {formatAmount((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))}</div>
                                     </div>
 
@@ -1001,7 +1007,8 @@ function InvoicePrintB({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                     <div style={{ border: "1px solid #dbdbdb", borderTop: "none", display: "flex" }}>
                                         <div style={{ width: "50%", borderRight: "1px solid #dbdbdb" }}>
                                             <div style={{ padding: "5px", fontWeight: "bold", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}>Bank Details</div>
-                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_bankname : result?.header?.bankname}</span></div>
+                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_accountname : result?.header?.accountname}</span></div>
+                                            <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Bank Name:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_bankname : result?.header?.bankname}</span></div>
                                             <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Account Number:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_accountno : result?.header?.accountnumber}</span></div>
                                             <div style={{ padding: "5px", borderBottom: "1px solid #dbdbdb", textAlign: "center" }}> <b>Routing Number:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_routingno : result?.header?.rtgs_neft_ifsc}</span></div>
                                             <div style={{ padding: "5px", textAlign: "center" }}> <b>Zelle ID.:</b> <span> {isMultipleCOmpany === 1 ? result?.header?.MltC_zelleid : result?.header?.bankaddress}</span></div>

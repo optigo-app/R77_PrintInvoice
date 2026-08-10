@@ -316,85 +316,256 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
     };
 
     // ── mergeByPurityAndMaterial (unchanged) ──────────────────────────────────
+
     const mergeByPurityAndMaterial = (data) => {
         const map = new Map();
+
         data?.forEach((item) => {
+
             const purity = item.MetalPurity;
             const MetalType = item.MetalType;
 
+
             const secondaryMetalQualities = [
-                ...new Set((item?.metal || [])?.filter((m) => Number(m?.IsPrimaryMetal) === 0)?.map((m) => m?.QualityName)?.filter((x) => x && x.trim() !== "")),
-            ].sort();
-            const secondaryMetalShapes = [
-                ...new Set((item?.metal || [])?.filter((m) => Number(m?.IsPrimaryMetal) === 0)?.map((m) => m?.ShapeName)?.filter((x) => x && x.trim() !== "")),
+                ...new Set(
+                    (item?.metal || [])
+                        ?.filter((m) => Number(m?.IsPrimaryMetal) === 0)
+                        ?.map((m) => m?.QualityName)
+                        ?.filter((x) => x && x.trim() !== "")
+                ),
             ].sort();
 
-            const allMaterials = [...(item.diamonds || []), ...(item.colorstone || []), ...(item.misc || [])];
+            const secondaryMetalShapes = [
+                ...new Set(
+                    (item?.metal || [])
+                        ?.filter((m) => Number(m?.IsPrimaryMetal) === 0)
+                        ?.map((m) => m?.ShapeName)
+                        ?.filter((x) => x && x.trim() !== "")
+                ),
+            ].sort();
+
+            const allMaterials = [
+                ...(item?.diamonds || []),
+                ...(item?.colorstone || []),
+                ...(item?.misc || []),
+            ];
+
             const shapeMap = new Map();
+
             allMaterials.forEach((mat) => {
-                const shape = mat?.ShapeName || "UNKNOWN";
-                const materialType = mat?.MaterialTypeName || "UNKNOWN";
-                const key = mat?.MasterManagement_DiamondStoneTypeid == 1 ? `${shape}_${materialType}` : `${shape}`;
+                const stoneType = mat?.MasterManagement_DiamondStoneTypeName || "";
+                const shape = mat?.ShapeName || "";
+                const materialType = mat?.MaterialTypeName || "";
+
+                const key = `${stoneType}||${shape}||${materialType}`;
+
                 if (!shapeMap.has(key)) {
-                    shapeMap.set(key, { MasterManagement_DiamondStoneTypeName: mat?.MasterManagement_DiamondStoneTypeName || "UNKNOWN", MaterialTypeName: materialType, ShapeName: shape, Pcs: 0, Wt: 0, Amount: 0, Rate: 0 });
+                    shapeMap.set(key, {
+                        MasterManagement_DiamondStoneTypeName: stoneType,
+                        ShapeName: shape,
+                        MaterialTypeName: materialType,
+                        Pcs: 0,
+                        Wt: 0,
+                        Amount: 0,
+                        Rate: 0,
+                    });
                 }
+
                 const group = shapeMap.get(key);
-                group.Pcs += mat?.Pcs || 0; group.Wt += mat?.Wt || 0; group.Amount += mat?.Amount || 0;
-                if (mat?.Wt) group.Rate += (mat?.Rate || 0) * mat.Wt;
+
+                group.Pcs += mat?.Pcs || 0;
+                group.Wt += mat?.Wt || 0;
+                group.Amount += mat?.Amount || 0;
+
+                if (mat?.Wt) {
+                    group.Rate += (mat?.Rate || 0) * mat.Wt;
+                }
             });
-            const otherMaterials = Array.from(shapeMap.values()).map((x) => ({ ...x, Rate: x.Wt ? x.Rate / x.Wt : 0 }));
+
+            const otherMaterials = Array.from(shapeMap.values()).map((x) => ({
+                ...x,
+                Rate: x.Wt ? x.Rate / x.Wt : 0,
+            }));
+
             item.otherMaterials = otherMaterials;
 
-            const materials = allMaterials.map((x) => x.MaterialTypeName).filter((x) => x && x.trim() !== "");
+            const materials = allMaterials
+                .map((x) => x.MaterialTypeName || x.MasterManagement_DiamondStoneTypeName)
+                .filter((x) => x && x.trim() !== "");
+
             const uniqueMaterials = [...new Set(materials)].sort();
 
-            const key = [purity, uniqueMaterials.join(","), secondaryMetalQualities.join(",")].join("_");
+            const key = [
+                purity,
+                uniqueMaterials.join(","),
+                secondaryMetalQualities.join(","),
+            ].join("_");
 
             if (!map.has(key)) {
                 map.set(key, {
-                    MetalPurity: purity, PrimaryMetalPurity: purity,
-                    SecondaryMetalQualities: secondaryMetalQualities, SecondaryMetalShapes: secondaryMetalShapes,
+                    MetalPurity: purity,
+                    PrimaryMetalPurity: purity,
+                    SecondaryMetalQualities: secondaryMetalQualities,
+                    SecondaryMetalShapes: secondaryMetalShapes, // optional for debug/future use
                     MaterialTypes: uniqueMaterials,
+
+
                     DisplayName: `${secondaryMetalQualities?.length > 0
-                        ? `${purity} ${MetalType} , ${secondaryMetalQualities.join(" ")}${secondaryMetalShapes?.length ? ` ${secondaryMetalShapes.join(", ")}` : ""}`
-                        : `${purity} ${MetalType}`} ${uniqueMaterials.length > 0 ? " JEWELLERY STUDDED WITH " + uniqueMaterials.join(", ") : "PLAIN JEWELLERY"}`,
+                        ? `${purity} ${MetalType} , ${secondaryMetalQualities.join(" ")}${secondaryMetalShapes?.length
+                            ? ` ${secondaryMetalShapes.join(", ")}`
+                            : ""
+                        }`
+                        : `${purity} ${MetalType}`
+                        } ${uniqueMaterials.length > 0 ? " JEWELLERY STUDDED WITH " + uniqueMaterials.join(", ") : "PLAIN JEWELLERY"}`,
+
                     items: [],
-                    total: { grosswt: 0, NetWt: 0, LossWt: 0, Quantity: 0, totalWt: 0, metalAmount: 0, diaCsPcs: 0, diaCsWt: 0, diaCsAmount: 0, findingWt: 0, findingAmount: 0, TotalAmount: 0, totalRMValue: 0, totalValueAddition: 0, perOfVA: 0 },
+
+                    total: {
+                        grosswt: 0,
+                        NetWt: 0,
+                        LossWt: 0,
+                        Quantity: 0,
+                        totalWt: 0,
+                        metalAmount: 0,
+                        diaCsPcs: 0,
+                        diaCsWt: 0,
+                        diaCsAmount: 0,
+                        findingWt: 0,
+                        findingAmount: 0,
+                        TotalAmount: 0,
+                        totalRMValue: 0,
+                        totalValueAddition: 0,
+                        perOfVA: 0,
+                    },
                 });
             }
 
             const group = map.get(key);
             group.items.push(item);
-            group.total.grosswt += item?.grosswt || 0; group.total.NetWt += item?.NetWt || 0;
-            group.total.LossWt += item?.LossWt || 0; group.total.Quantity += item?.Quantity || 0;
+
+            // ======================================================
+            //   TOTALS (UNCHANGED)
+            // ======================================================
+            group.total.grosswt += item?.grosswt || 0;
+            group.total.NetWt += item?.NetWt || 0;
+            group.total.LossWt += item?.LossWt || 0;
+            group.total.Quantity += item?.Quantity || 0;
+
             group.total.totalWt += (item?.NetWt || 0) + (item?.LossWt || 0);
+
             const metalAmount = item?.totals?.metal?.Amount || 0;
-            group.total.metalAmount += metalAmount;
-            const diaPcs = item?.totals?.diamonds?.Pcs ?? item?.diamonds?.reduce((s, d) => s + (d.Pcs || 0), 0) ?? 0;
-            const csPcs = item?.totals?.colorstone?.Pcs ?? item?.colorstone?.reduce((s, c) => s + (c.Pcs || 0), 0) ?? 0;
-            const miscPcs = item?.totals?.misc?.Pcs ?? item?.misc?.reduce((s, c) => s + (c.Pcs || 0), 0) ?? 0;
-            const diaWt = item?.totals?.diamonds?.Wt ?? item?.diamonds?.reduce((s, d) => s + (d.Wt || 0), 0) ?? 0;
-            const csWt = item?.totals?.colorstone?.Wt ?? item?.colorstone?.reduce((s, c) => s + (c.Wt || 0), 0) ?? 0;
-            const miscWt = item?.totals?.misc?.Wt ?? item?.misc?.reduce((s, c) => s + (c.Wt || 0), 0) ?? 0;
+            const findingAmount = item?.totals?.finding?.Amount || 0;
+            group.total.metalAmount += metalAmount + findingAmount;
+
+
+            const diaPcs =
+                item?.totals?.diamonds?.Pcs ??
+                item?.diamonds?.reduce((s, d) => s + (d.Pcs || 0), 0) ??
+                0;
+
+            const csPcs =
+                item?.totals?.colorstone?.Pcs ??
+                item?.colorstone?.reduce((s, c) => s + (c.Pcs || 0), 0) ??
+                0;
+
+            const miscPcs =
+                item?.totals?.misc?.Pcs ??
+                item?.misc?.reduce((s, c) => s + (c.Pcs || 0), 0) ??
+                0;
+
+            const diaWt =
+                item?.totals?.diamonds?.Wt ??
+                item?.diamonds?.reduce((s, d) => s + (d.Wt || 0), 0) ??
+                0;
+
+            const csWt =
+                item?.totals?.colorstone?.Wt ??
+                item?.colorstone?.reduce((s, c) => s + (c.Wt || 0), 0) ??
+                0;
+
+            const miscWt =
+                item?.totals?.misc?.Wt ??
+                item?.misc?.reduce((s, c) => s + (c.Wt || 0), 0) ??
+                0;
+
             const diaAmt = item?.totals?.diamonds?.Amount || 0;
             const csAmt = item?.totals?.colorstone?.Amount || 0;
             const miscAmt = item?.totals?.misc?.Amount || 0;
-            group.total.diaCsPcs += diaPcs + csPcs + miscPcs; group.total.diaCsWt += diaWt + csWt + miscWt;
+
+
+
+
+            group.total.diaCsPcs += diaPcs + csPcs + miscPcs;
+            group.total.diaCsWt += diaWt + csWt + miscWt;
             group.total.diaCsAmount += diaAmt + csAmt + miscAmt;
-            group.total.findingWt += item?.totals?.finding?.Wt || 0; group.total.findingAmount += item?.totals?.finding?.Amount || 0;
+
+            group.total.findingWt += item?.totals?.finding?.Wt || 0;
+            group.total.findingAmount += item?.totals?.finding?.Amount || 0;
+
             group.total.TotalAmount += item?.TotalAmount || 0;
-            group.total.totalRMValue += diaAmt + csAmt + miscAmt + metalAmount;
-            const valueAdd = (item?.OtherCharges || 0) + (item?.MakingAmount || 0) + (item?.TotalDiamondHandling || 0);
+
+            group.total.totalRMValue += diaAmt + csAmt + miscAmt + metalAmount + findingAmount;
+
+            const valueAdd =
+                (item?.OtherCharges || 0) +
+                (item?.MakingAmount || 0) +
+                (item?.TotalDiamondHandling || 0);
+
             group.total.totalValueAddition += valueAdd;
         });
 
+        // ======================================================
+        //   % OF VA
+        // ======================================================
         map.forEach((group) => {
-            group.total.perOfVA = group.total.metalAmount > 0 ? (group.total.totalValueAddition * 100) / group.total.metalAmount : 0;
+            group.total.perOfVA =
+                group.total.metalAmount > 0
+                    ? (group.total.totalValueAddition * 100) /
+                    group.total.metalAmount
+                    : 0;
         });
 
-        return Array.from(map.values());
-    };
+        const mergearr = Array.from(map.values())
 
+
+
+        const metalPriority = { GOLD: 1, PLATINUM: 2, SILVER: 3 };
+
+        mergearr.sort((a, b) => {
+            const parseInfo = (item) => {
+                const parts = (item.DisplayName || "").trim().split(/\s+/);
+                const purityStr = parts[0] || "";
+                const metalStr = (parts[1] || "").toUpperCase();
+
+                // Assign rank based on metal priority
+                const metalRank = metalPriority[metalStr] ?? 99;
+
+                // Extract numeric value from purity string (e.g., "14K" -> 14, "950" -> 950)
+                const numericPurity = parseFloat(purityStr.replace(/[^0-9.]/g, "")) || 0;
+
+                return { metalRank, numericPurity, purityStr };
+            };
+
+            const infoA = parseInfo(a);
+            const infoB = parseInfo(b);
+
+            // 1. Sort by Metal Type Priority (GOLD -> PLATINUM -> SILVER)
+            if (infoA.metalRank !== infoB.metalRank) {
+                return infoA.metalRank - infoB.metalRank;
+            }
+
+            // 2. Sort by Purity (Ascending order: e.g., 14K -> 18K -> 22K)
+            if (infoA.numericPurity !== infoB.numericPurity) {
+                return infoA.numericPurity - infoB.numericPurity;
+            }
+
+            return infoA.purityStr.localeCompare(infoB.purityStr);
+        });
+
+        return mergearr;
+
+
+    };
     // ── NEW HELPER: get diamond rows grouped by MaterialTypeName ─────────────
     /**
      * Returns an array of { label, shapeName, pcs, wt } rows — one per distinct
@@ -445,13 +616,19 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
         const matMap = new Map();
         allStones.forEach((stone) => {
-            const matName = stone?.MaterialTypeName?.trim() || "";
+            // const matName = stone?.MaterialTypeName?.trim() || "";
+            // const shapeName = stone?.ShapeName || "";
+            // const key = matName; // group key stays the same — by materialTypeName
+
+            const stoneType = stone?.MasterManagement_DiamondStoneTypeName || "";
             const shapeName = stone?.ShapeName || "";
-            const key = matName; // group key stays the same — by materialTypeName
+            const materialType = stone?.MaterialTypeName || "";
+
+            const key = `${stoneType}||${shapeName}||${materialType}`;
 
             if (!matMap.has(key)) {
                 matMap.set(key, {
-                    materialTypeName: matName,
+                    materialTypeName: materialType,
                     shapes: [],          // collect all unique shapes here
                     QualityName: stone?.QualityName || "",
                     Colorname: stone?.Colorname || "",
@@ -527,7 +704,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
     if (result) {
         setTimeout(() => {
             const button = document.getElementById('test-table-xls-button');
-              button.click();
+            button.click();
         }, 500);
     }
 
@@ -552,19 +729,19 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Header info rows ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={10} style={{ textAlign: "center", fontWeight: "bold", fontSize: "14px", padding: "6px" }}>
+                                <td colSpan={14} style={{ textAlign: "center", fontWeight: "bold", fontSize: "14px", padding: "6px" }}>
                                     PACKING LIST
                                 </td>
                             </tr>
                             <tr>
                                 <td colSpan={4} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>Invoice No. &amp; Date :</td>
-                                <td colSpan={3} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.InvoiceNo}</td>
-                                <td colSpan={3} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.EntryDate}</td>
+                                <td colSpan={4} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.InvoiceNo}</td>
+                                <td colSpan={6} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.EntryDate}</td>
                             </tr>
                             <tr>
-                                <td colSpan={5} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
+                                <td colSpan={7} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
                                     <div><b>To :</b>
-                                    <div className="fslhJL">
+                                        <div className="fslhJL">
                                             <b className="JL13" style={{ fontSize: "14px" }}>
                                                 {result?.header?.Customercode}
                                             </b>
@@ -605,18 +782,18 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                             {result?.header?.aadharno !== "" &&
                                                 `| Aadhar-${result?.header?.aadharno}`}
                                         </div>
-                                        {result?.header?.Cust_CST_STATE_No &&(
+                                        {result?.header?.Cust_CST_STATE_No && (
 
-                                        <div className="fslhJL">
-                                            {result?.header?.Cust_CST_STATE}-
-                                            {result?.header?.Cust_CST_STATE_No}
-                                        </div>
+                                            <div className="fslhJL">
+                                                {result?.header?.Cust_CST_STATE}-
+                                                {result?.header?.Cust_CST_STATE_No}
+                                            </div>
                                         )}
 
 
                                     </div>
                                 </td>
-                                <td colSpan={5} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
+                                <td colSpan={7} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
                                     <div><b>EXPORTER</b></div>
                                     <div>{result?.header?.companyname}</div>
                                     <div>{result?.header?.CompanyAddress}</div>
@@ -634,13 +811,20 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 <th style={th}>SR</th>
                                 <th style={th}>ITEM</th>
                                 <th style={th}>JOB</th>
+                                <th style={th}>Lineid</th>
                                 <th style={th}>QTY.</th>
-                                <th style={th}>DIAMOND TYPE</th>
-                                <th style={th}>DIAMOND PCS</th>
-                                <th style={th}>DIA. WT IN CT</th>
-                                <th style={th}>GOLD / SILVER PURITY</th>
                                 <th style={th}>NET GOLD / SILVER WT IN GMS</th>
+                                <th style={th}>GOLD / SILVER PURITY</th>
                                 <th style={th}>TOTAL GROSS WT.</th>
+                                <th style={th}>DIAMOND TYPE</th>
+                                <th style={th}>DIA. WT IN CT</th>
+                                <th style={th}>DIAMOND PCS</th>
+                                <th style={th}> DIA</th>
+                                <th style={th}> CS</th>
+                                <th style={th}> MISC</th>
+
+
+
                             </tr>
                         </thead>
 
@@ -650,7 +834,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 // ── section header ──
                                 const sectionHeaderRow = (
                                     <tr key={`section-${groupIndex}`}>
-                                        <td colSpan={10} style={sectionHeaderTd}>{group?.DisplayName}</td>
+                                        <td colSpan={14} style={sectionHeaderTd}>{group?.DisplayName}</td>
                                     </tr>
                                 );
 
@@ -658,6 +842,8 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 const itemRows = group.items.map((e, i) => {
                                     srCounter += 1;
                                     const currentSr = srCounter;
+
+                                    console.log("TCL: calculateGrandTotal -> eeeeeeeeeeeeeeeeee", e)
 
                                     const diaRows = getDiamondRowsByMaterial(e);  // [{materialTypeName, shapes[], pcs, wt}, ...]
                                     const metalRows = getMetalRowsByPurity(e);       // [{purity, wt}, ...]
@@ -691,9 +877,24 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                                         <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "center" })}>{currentSr}</td>
                                                         <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "left" })}>{itemLabel}</td>
                                                         <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "left" })}>{jobLabel}</td>
+                                                        <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "left" })}>{e?.lineid}</td>
                                                         <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "right" })}>{e?.Quantity}</td>
                                                     </>
                                                 )}
+
+                                                <td style={{ ...td }}>
+                                                    {mRow?.wt ? formatAmount(mRow.wt, 3) : ""}
+                                                </td>
+                                                <td style={tdCenter}>
+                                                    {mRow?.purity || ""}
+                                                </td>
+                                                {isFirst && (
+                                                    <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "right" })}>
+                                                        {formatAmount(e?.grosswt, 3)}
+                                                    </td>
+                                                )}
+
+
 
                                                 {/* ── DIAMOND TYPE ── */}
                                                 <td style={{ ...tdCenter, textAlign: "left" }}>
@@ -704,37 +905,61 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                                         : ""}
                                                 </td>
 
+                                                <td style={td}>
+                                                    {dRow?.wt ? formatAmount(dRow.wt, 3) : ""}
+                                                </td>
+
                                                 {/* ── DIAMOND PCS ── */}
                                                 <td style={{ ...td, textAlign: "right" }}>
                                                     {dRow?.pcs || ""}
                                                 </td>
 
-                                                {/* ── DIA WT IN CT ── */}
-                                                <td style={td}>
-                                                    {dRow?.wt ? formatAmount(dRow.wt, 3) : ""}
-                                                </td>
 
-                                                {/* ── GOLD / SILVER PURITY ── */}
-                                                <td style={tdCenter}>
-                                                    {mRow?.purity || ""}
-                                                </td>
-
-                                                {/* ── NET GOLD / SILVER WT IN GMS ── */}
-                                                <td style={{ ...td }}>
-                                                    {mRow?.wt ? formatAmount(mRow.wt, 3) : ""}
-                                                </td>
-
-                                                {/* ── TOTAL GROSS WT — only on first sub-row, spans all ── */}
                                                 {isFirst && (
-                                                    <td rowSpan={totalSubRows} style={tdMerged({ textAlign: "right" })}>
-                                                        {formatAmount(e?.grosswt, 3)}
-                                                    </td>
+                                                    <>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            {e?.totals?.diamonds?.Pcs || e?.totals?.diamonds?.Wt
+                                                                ? `'${e?.totals?.diamonds?.Pcs || 0}/${e?.totals?.diamonds?.Wt || 0}`
+                                                                : ""}
+                                                        </td>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            {e?.totals?.colorstone?.Pcs || e?.totals?.colorstone?.Wt
+                                                                ? `'${e?.totals?.colorstone?.Pcs || 0}/${e?.totals?.colorstone?.Wt || 0}`
+                                                                : ""}
+                                                        </td>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            {e?.totals?.misc?.Pcs || e?.totals?.misc?.Wt
+                                                                ? `'${e?.totals?.misc?.Pcs || 0}/${e?.totals?.misc?.Wt || 0}`
+                                                                : ""}
+                                                        </td>
+
+                                                    </>
                                                 )}
+
+
+
+
+
+
+
+
+
+
 
                                             </tr>
                                         );
                                     });
                                 });
+
 
                                 // ── group total row ──
                                 const groupDiaTotalPcs = group.items.reduce((acc, e) =>
@@ -746,14 +971,17 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
                                 const totalRow = (
                                     <tr key={`total-${groupIndex}`}>
-                                        <td colSpan={3} style={totalRowTdCenter}>TOTAL</td>
+                                        <td colSpan={4} style={totalRowTdCenter}>TOTAL</td>
                                         <td style={totalRowTd}>{group?.total?.Quantity}</td>
-                                        <td style={totalRowTd}></td>
-                                        <td style={totalRowTd}>{groupDiaTotalPcs || ""}</td>
-                                        <td style={totalRowTd}>{groupDiaTotalWt ? formatAmount(groupDiaTotalWt, 3) : ""}</td>
-                                        <td style={totalRowTd}></td>
                                         <td style={totalRowTd}>{groupMetalTotalWt ? formatAmount(groupMetalTotalWt, 3) : ""}</td>
+                                        <td style={totalRowTd}></td>
                                         <td style={totalRowTd}>{formatAmount(group?.total?.grosswt, 3)}</td>
+                                        <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}>{groupDiaTotalWt ? formatAmount(groupDiaTotalWt, 3) : ""}</td>
+                                        <td style={totalRowTd}>{groupDiaTotalPcs || ""}</td>
+                                        <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}></td>
                                     </tr>
                                 );
 
@@ -780,15 +1008,20 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
                                 return (
                                     <tr>
-                                        <td colSpan={3} style={{ ...grandTotalTd, textAlign: "center" }}>TOTAL</td>
+                                        <td colSpan={4} style={{ ...grandTotalTd, textAlign: "center" }}>TOTAL</td>
                                         <td style={grandTotalTd}>{grandTotal.Quantity}</td>
-                                        <td style={grandTotalTd}></td>
-                                        <td style={grandTotalTd}>{grandDiaTotalPcs || ""}</td>
-                                        <td style={grandTotalTd}>{grandDiaTotalWt ? formatAmount(grandDiaTotalWt, 3) : ""}</td>
-                                        <td style={grandTotalTd}></td>
-                                        <td style={grandTotalTd}>{grandMetalTotalWt ? formatAmount(grandMetalTotalWt, 3) : ""}</td>
                                         <td style={grandTotalTd}>{formatAmount(grandTotal.grosswt, 3)}</td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}> {grandMetalTotalWt ? formatAmount(grandMetalTotalWt, 3) : ""}</td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}>{grandDiaTotalWt ? formatAmount(grandDiaTotalWt, 3) : ""}</td>
+                                        <td style={grandTotalTd}>{grandDiaTotalPcs || ""}</td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}></td>
                                     </tr>
+
+
                                 );
                             })()}
                         </tbody>
@@ -796,7 +1029,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Remark ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={10} style={{ padding: "6px", fontSize: "11px" }}>
+                                <td colSpan={11} style={{ padding: "6px", fontSize: "11px" }}>
                                     Note: {result?.header?.Remark || ""}
                                 </td>
                             </tr>
@@ -805,20 +1038,20 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Footer ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={10} style={{ padding: "6px", textAlign: "center", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={11} style={{ padding: "6px", textAlign: "center", fontWeight: "bold", fontSize: "20px" }}>
                                     {result?.header?.InvoiceNo || ""}
                                 </td>
                             </tr>
                             <tr>
-                                <td colSpan={10} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={11} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
                                     FOR {result?.header?.CompanyFullName || ""}
                                 </td>
                             </tr>
                             <tr style={{ height: "80px" }}>
-                                <td colSpan={10}></td>
+                                <td colSpan={11}></td>
                             </tr>
                             <tr>
-                                <td colSpan={10} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={11} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
                                     AUTHORISED/PROPRIETOR
                                 </td>
                             </tr>

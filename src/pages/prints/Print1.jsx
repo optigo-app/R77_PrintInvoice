@@ -281,7 +281,7 @@ const Print1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                     <p>TOTAL</p>
                                                 </div>
                                                 <div className='padding_right_qp1 text_end_qp1'>
-                                                    <p>{formatAmount((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))}</p>
+                                                    <p>{formatAmount(((result?.mainTotal?.total_amount+result?.header?.AddLess) / result?.header?.CurrencyExchRate))}</p>
                                                 </div>
                                             </div>
                                         </div>

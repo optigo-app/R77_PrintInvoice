@@ -103,20 +103,20 @@ const JewelleryTaxSummary = ({ token, invoiceNo, printName, urls, evn, ApiVer })
 
 
 
-    
+
     let diaWt = 0;
     let labGrownWt = 0;
-    
+
     (result?.resultArray || []).forEach(job => {
-      (job?.diamonds || []).forEach(d => {
-        const type = (d?.MaterialTypeName || "").toLowerCase();
-        const wt = d?.Wt || 0;
-        if (["labgrown"].includes(type)) {
-          labGrownWt += wt;
-        } else {
-          diaWt += wt;
-        }
-      });
+        (job?.diamonds || []).forEach(d => {
+            const type = (d?.MaterialTypeName || "").toLowerCase();
+            const wt = d?.Wt || 0;
+            if (["labgrown"].includes(type)) {
+                labGrownWt += wt;
+            } else {
+                diaWt += wt;
+            }
+        });
     });
 
     return (
@@ -142,7 +142,7 @@ const JewelleryTaxSummary = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                         </div>
                                         <Button />
                                     </div>
-                                    <div className='d-flex justify-content-between align-items-center p-1'>
+                                    {/* <div className='d-flex justify-content-between align-items-center p-1'>
                                         <div className='fs_jts'>
                                             <div className='fs2_jts fw-bold'>{result?.header?.CompanyFullName}</div>
                                             <div>{result?.header?.CompanyAddress}</div>
@@ -159,7 +159,43 @@ const JewelleryTaxSummary = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                                     style={{ minHeight: '75px', minWidth: '200px', maxWidth: '210px', maxHeight: '75px' }}
                                                     onError={handleImageErrors} height={120} width={150} />)}
                                         </div>
-                                    </div>
+                                    </div> */}
+                                    {result?.header?.IsBranchWiseAddress === 1 ? (
+                                        <div className='d-flex justify-content-between align-items-center p-1'>
+                                            <div>
+                                                <div
+                                                    className="fs_jts"
+                                                    dangerouslySetInnerHTML={{ __html: result?.header?.Branch_Address }}
+                                                ></div>
+                                            </div>
+                                            <div>
+                                                {isImageWorking && (result?.header?.PrintLogo !== "" &&
+                                                    <img src={result?.header?.PrintLogo} alt=""
+                                                        className='w-100 h-auto my-0 mx-auto d-block object-fit-contain'
+                                                        style={{ minHeight: '75px', minWidth: '200px', maxWidth: '210px', maxHeight: '75px' }}
+                                                        onError={handleImageErrors} height={120} width={150} />)}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className='d-flex justify-content-between align-items-center p-1'>
+                                            <div className='fs_jts'>
+                                                <div className='fs2_jts fw-bold'>{result?.header?.CompanyFullName}</div>
+                                                <div>{result?.header?.CompanyAddress}</div>
+                                                <div>{result?.header?.CompanyAddress2}</div>
+                                                <div>{result?.header?.CompanyCity}-{result?.header?.CompanyPinCode}, {result?.header?.CompanyState}({result?.header?.CompanyCountry})</div>
+                                                <div>T {result?.header?.CompanyTellNo}</div>
+                                                <div>{result?.header?.CompanyEmail} | {result?.header?.CompanyWebsite}</div>
+                                                <div>{result?.header?.Company_VAT_GST_No} | {result?.header?.Company_CST_STATE}-{result?.header?.Company_CST_STATE_No} | PAN-{result?.header?.Com_pannumber}</div>
+                                            </div>
+                                            <div>
+                                                {isImageWorking && (result?.header?.PrintLogo !== "" &&
+                                                    <img src={result?.header?.PrintLogo} alt=""
+                                                        className='w-100 h-auto my-0 mx-auto d-block object-fit-contain'
+                                                        style={{ minHeight: '75px', minWidth: '200px', maxWidth: '210px', maxHeight: '75px' }}
+                                                        onError={handleImageErrors} height={120} width={150} />)}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className='border p-2 d-flex justify-content-between align-items-center'>
                                         <div className='fs_jts'>
                                             <div>To,</div>

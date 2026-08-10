@@ -716,6 +716,7 @@ const JewelleryInvoiceT1 = ({
                                         <div className={`j-inv-cell ${taxamt ? 'j-inv-col-hsn-taxamt' : 'j-inv-col-hsn'} j-inv-border-r`}>HSN </div>
                                         <div className={`j-inv-cell ${taxamt ? 'j-inv-col-desc-taxamt' : 'j-inv-col-desc'} j-inv-border-r`}>Description of Goods</div>
                                         <div className={`j-inv-cell ${taxamt ? 'j-inv-col-qty-taxamt' : 'j-inv-col-qty'} j-inv-border-r`}>Qty</div>
+                                        <div className={`j-inv-cell ${taxamt ? 'j-inv-col-mrp-taxamt' : 'j-inv-col-mrp'} j-inv-border-r`}>MRP</div>
                                         <div className={`j-inv-cell ${taxamt ? 'j-inv-col-rate-taxamt' : 'j-inv-col-rate'} j-inv-border-r`}>Rate</div>
                                         {
                                             disamt && (
@@ -753,6 +754,7 @@ const JewelleryInvoiceT1 = ({
                                                         {e.MasterManagement_producttypename} <br /> {e.SrJobno}
                                                     </div>
                                                     <div className={`j-inv-cell ${taxamt ? 'j-inv-col-qty-taxamt' : 'j-inv-col-qty'} j-inv-border-r`}>{e.BulkPurchaseQTY ? e.BulkPurchaseQTY : e?.Quantity}</div>
+                                                    <div className={`j-inv-cell ${taxamt ? 'j-inv-col-mrp-taxamt' : 'j-inv-col-mrp'} j-inv-border-r`}>{ fixedValues(e.NewMRP, 2)}</div>
                                                     <div className={`j-inv-cell ${taxamt ? 'j-inv-col-rate-taxamt' : 'j-inv-col-rate'} j-inv-border-r`}>{`${taxamt ? fixedValues(e.UnitCost, 2) : fixedValues(e.TotalAmount, 2)}`}</div>
                                                     {
                                                         disamt && (
@@ -782,6 +784,7 @@ const JewelleryInvoiceT1 = ({
                                                 <div className={`j-inv-cell ${taxamt ? 'j-inv-col-hsn-taxamt' : 'j-inv-col-hsn'} j-inv-border-r`}></div>
                                                 <div className={`j-inv-cell ${taxamt ? 'j-inv-col-desc-taxamt' : 'j-inv-col-desc'} j-inv-border-r`}></div>
                                                 <div className={`j-inv-cell ${taxamt ? 'j-inv-col-qty-taxamt' : 'j-inv-col-qty'} j-inv-border-r`}></div>
+                                                <div className={`j-inv-cell ${taxamt ? 'j-inv-col-mrp-taxamt' : 'j-inv-col-mrp'} j-inv-border-r`}></div>
                                                 <div className={`j-inv-cell ${taxamt ? 'j-inv-col-rate-taxamt' : 'j-inv-col-rate'} j-inv-border-r`}></div>
                                                 {
                                                     disamt && (

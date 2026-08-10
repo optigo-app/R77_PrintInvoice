@@ -1,0 +1,458 @@
+* {
+    word-break: break-all;
+    box-sizing: border-box;
+    line-height: 100%;
+}
+
+.containerJL {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: Calibri;
+}
+
+.fsJL {
+    font-size: 12px;
+    line-height: 120%;
+}
+
+.headlineJL {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    
+    width: 100%;
+    
+    height: 35px;
+    background-color: #939292;
+    color: white;
+    font-size: 30px !important;
+    line-height: 120%;
+    font-family: calibri;
+    padding-left: 10px;
+}
+
+.headJL {
+    
+    height: 118px;
+    
+    width: 100%;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.headJLContent {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    line-height: 120%;
+    font-size: 12px;
+    /* height: 118px; */
+    line-height: 15px;
+    padding-top: 4px;
+    padding-left: 4px;
+}
+.headJLImg{
+    width: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* .fslhJL {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 20px !important;
+    font-size: 12px;
+    line-height: 120%;
+} */
+
+#JLImg {
+    height: 105px;
+    width: 130px;
+}
+
+.dynamicHeadJLmain {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    border: 1px solid #DDDDDD;
+    /* min-height: 115px; */
+}
+
+.dynamicHeadJL1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 33.33%;
+    line-height: 18px;
+    border-right: 1px solid #DDDDDD;
+    padding-top: 10px; 
+}
+
+.dynamicHeadJL2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 33.33%;
+    line-height: 18px;
+    border-right: 1px solid #DDDDDD;
+    padding-top: 10px; 
+
+}
+
+.dynamicHeadJL2D {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 33.33%;
+    line-height: 18px;
+    border-right: 1px solid #DDDDDD;
+    padding-top: 10px; 
+}
+
+.dynamicHeadJL2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 33.33%;
+    line-height: 18px;
+    border-right: 1px solid #DDDDDD;
+    padding-top: 10px; 
+
+}
+
+.dynamicHeadJL3 {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 295pt;
+    line-height: 18px;
+    padding-top: 10px; 
+
+    
+}
+
+.dynamicHeadJL3D {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-left: 8px;
+    width: 295pt;
+    min-height: 80pt;
+    height: 100%;
+    line-height: 18px;
+    padding-top: 10px; 
+
+}
+
+.JL13 {
+    font-size: 13px;
+    line-height: 120%;
+}
+.jip_26{
+    height: 26px !important;
+    padding-top: 4px !important;
+}
+.billnoJL {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.JLbillnow {
+    width: 55pt;
+}
+
+/* .fslhJL {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 15px !important;
+    font-size: 12px;
+    line-height: 120%;
+} */
+
+.billno3pdlJL {
+    padding-left: 20px;
+}
+
+.tableJL {
+    margin-top: 4px;
+    width: 100%;
+}
+
+.theadJL {
+    height: 70px;
+    width: 100%;
+    border-top: 1px solid #DDDDDD;
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.trowJL {
+    width: 100%;
+    min-height: 40px;
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+
+.tc1JL {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 5%;
+    border-right: 1px solid #DDDDDD;
+}
+
+.tc2JL {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 15%;
+    border-right: 1px solid #DDDDDD;
+    padding-left: 2px;
+}
+
+.tc3JL {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 20%;
+    border-right: 1px solid #DDDDDD;
+}
+
+.tc4JL {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 20%;
+    border-right: 1px solid #DDDDDD;
+}
+
+.tc5JL {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 20%;
+    border-right: 1px solid #DDDDDD;
+}
+
+.tc6JL {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 7%;
+    border-right: 1px solid #DDDDDD;
+    padding-right: 2px;
+}
+
+.tc7JL {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 7%;
+    border-right: 1px solid #DDDDDD;
+    padding-right: 2px;
+}
+
+.tc8JL {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 7%;
+    border-right: 1px solid #DDDDDD;
+    padding-right: 2px;
+}
+
+.tc3JL1 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.tc4JL1 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.tc4JL2 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50%;
+}
+
+.tc5JL1 {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.tc5JL2 {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50%;
+}
+
+.brrJL {
+    border-right: 1px solid #DDDDDD;
+}
+
+.totalrowJL {
+    height: 40px;
+    width: 100%;
+    border-top: 1px solid #DDDDDD;
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footerJL {
+    width: 100%;
+    border-left: 1px solid #DDDDDD;
+    border-bottom: 1px solid #DDDDDD;
+}
+
+.footerTotJL {
+    width: 23%;
+    
+}
+
+.inWordsJL {
+    width: 77%;
+    padding: 3px;
+}
+
+.brrJL {
+    border-right: 1px solid #DDDDDD;
+}
+
+.brJL {
+    border-bottom: 1px solid #DDDDDD;
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+}
+
+.grandTotalJL {
+    height: 50px;
+
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+}
+
+.noteJL {
+    min-height: 25px;
+    border-bottom: 1px solid #DDDDDD;
+    border-left: 1px solid #DDDDDD;
+    border-right: 1px solid #DDDDDD;
+    width: 100%;
+    padding-bottom: 1rem !important;
+}
+
+.printJL{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.fs_jip{
+    font-size: 12px !important;
+    line-height: 14px !important;
+}
+.noteJL.fw-bold.p-1.no_break span {
+    line-height: 170%;
+}
+.tot_jip{
+    font-size: 15px;
+}
+
+.w_20_jrtic{
+    width: 20%;
+}
+.w_40_jrtic{
+    width: 40%;
+}
+
+.declarationWrapper div span{
+    white-space: normal;
+    word-break: normal !important;        /* Do NOT break words */
+    overflow-wrap: break-word !important; /* Wrap only if needed */
+}
+@media print {
+  
+    .trowJL {
+        page-break-inside: avoid;
+    }
+    .printJL{
+        page-break-inside: avoid;
+    }
+        .print_sec_sum4 {
+            display: none !important;
+          }
+          .btnpcl{
+            display: none !important;
+          }
+          .jip_26{
+            height: 20px !important;
+            padding-top: 2px !important;
+        }
+        .fs_jip{
+            font-size: 9px !important;
+            line-height: 11px !important;
+        }
+        .tot_jip{
+            font-size: 12px;
+        }
+
+        
+    .w_20_jrtic{
+        width: 40% !important;
+    }
+    .w_40_jrtic{
+        width: 40% !important; 
+    }
+}
