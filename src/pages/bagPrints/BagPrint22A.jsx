@@ -205,6 +205,8 @@ export default function DiamondColourCodeForm({ queries, headers }) {
 
                                     const boxText = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.Metal_Type_Color?.split(" ")[1]
 
+                                    const MultimetalColor = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.MetalColor || "";
+
                                     const getBgColor = (code) => {
                                         const cleanCode = code.trim().toUpperCase();
 
@@ -531,13 +533,14 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         </div>
                                                         <div className="pcf-info-row">
                                                             <div className="pcf-info-label" style={{ height: "14px", flex: "0 0 50%", fontSize: "10px", color: "red", lineHeight: "1" }}>{e?.data?.rd?.lineid} </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> </div>
+                                                            {/* <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" ,lineHeight: "1"}}> {e?.data?.rd?.MetalColorCo}</div> */}
+                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" ,lineHeight: "1"}}> {MultimetalColor}</div>
                                                         </div>
                                                     </div>
 
                                                     {/* RIGHT: barcode / image / karat boxes */}
                                                     <div className="pcf-header-right">
-                                                        <div className="pcf-barcode-row barcode_img">
+                                                        <div className="pcf-barcode-row pcf-barcode_img">
                                                             {e?.data?.rd?.serialjobno !==
                                                                 (null || "" || undefined) && (
                                                                     <BarcodeGenerator

@@ -45,5 +45,6 @@ export const bagPrintConditions = [
   { printName: "bagprint17s", componentName: "BagPrint17S" },
   { printName: "stockmeltprint", componentName: "StockMeltPrint" },
   { printName: "stockmeltexcel", componentName: "StockMeltExcel" },
+  { printName: "matpur_tag", componentName: "MatPurTag" },
  
 ];

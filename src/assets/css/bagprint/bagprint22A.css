@@ -62,15 +62,15 @@
 
 /* ---- Header info rows ---- */
 .dcf-label {
-  flex: 0 0 25%;
+  flex: 0 0 17%;
   font-weight: bold;
   background: #fff;
 }
 .dcf-value {
-  flex: 0 0 25%;
+  flex: 0 0 35%;
 }
 .dcf-value-red {
-  flex: 0 0 25%;
+  flex: 0 0 35%;
   
   font-weight: bold;
 }
@@ -135,8 +135,17 @@
   object-fit: cover;
   height: 6mm !important;
   transform: translate(0px) rotate(0deg) !important;
-  width: 20mm !important;
+  width: 38mm !important;
 }
+
+.pcf-barcode_img img{
+object-fit: cover;
+height: 6mm !important;
+transform: translate(0px) rotate(0deg) !important;
+width: 25mm !important;
+}
+
+
 
 
 
@@ -280,7 +289,7 @@
 }
 
 .pcf-info-label {
-  flex: 0 0 30%;
+  flex: 0 0 21%;
   font-weight: bold;
   padding: 2px;
   border-right: 1px solid #000;
@@ -288,14 +297,14 @@
   align-items: center;
 }
 .pcf-info-value {
-  flex: 0 0 30%;
+  flex: 0 0 42%;
   padding: 2px;
   border-right: 1px solid #000;
   display: flex;
   align-items: center;
 }
 .pcf-info-value-red {
-  flex: 0 0 30%;
+  flex: 0 0 42%;
   padding: 2px;
   border-right: 1px solid #000;
   display: flex;
@@ -468,10 +477,5 @@
   margin-top: 0px;
  }
 
-  .pcf-image-box img{
-      height: 70px !important;
-  }
-  .pcf-instruction-box{
-      height: 46.5px !important;
-  }
+ 
 }

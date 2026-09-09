@@ -824,20 +824,54 @@ const JewelleryTaxInvoiceSale = ({
               // }, {});
               // {console.log("data", data)}
 
+        
+              // const groupedMaterials = (e?.materials || []).reduce((acc, ele) => {
+                
+
+                
+              //   if (ele?.IsCenterStone === 1) {
+              //     acc[`center-stone-${ele?.StockBarcode}`] = { ...ele };
+              //     return acc;
+              //   }
+              //   const materialType =
+              //     ele?.MaterialTypeName === "LabGrown" ? "LabGrown" : "OTHER";
+              //   const isDiamond = ele?.MasterManagement_DiamondStoneTypeid === 1;
+
+              //   const key = isDiamond
+              //     ? `${materialType}-${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`
+              //     : `${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`;
+
+              //   if (acc[key]) {
+              //     acc[key].Pcs += ele?.Pcs || 0;
+              //     acc[key].Wt += ele?.Wt || 0;
+              //   } else {
+              //     acc[key] = {
+              //       ...ele,
+              //       Pcs: ele?.Pcs || 0,
+              //       Wt: ele?.Wt || 0,
+              //     };
+              //   }
+
+              //   return acc;
+              // }, {});
+              // const mergedMaterials = Object.values(groupedMaterials);
 
               const groupedMaterials = (e?.materials || []).reduce((acc, ele) => {
-                if (ele?.IsCenterStone === 1) {
-                  acc[`center-stone-${ele?.StockBarcode}`] = { ...ele };
-                  return acc;
-                }
                 const materialType =
                   ele?.MaterialTypeName === "LabGrown" ? "LabGrown" : "OTHER";
+              
                 const isDiamond = ele?.MasterManagement_DiamondStoneTypeid === 1;
-
-                const key = isDiamond
-                  ? `${materialType}-${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`
-                  : `${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`;
-
+              
+                let key;
+              
+                if (ele?.IsCenterStone === 1) {
+                  key = `center-stone-${ele?.StockBarcode}`;
+                } else {
+                  key = isDiamond
+                    ? `${materialType}-${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`
+                    : `${ele?.Shape_Code}-${ele?.Color_Code}-${ele?.Quality_Code}-${ele?.IsSolGem}`;
+                }
+              
                 if (acc[key]) {
                   acc[key].Pcs += ele?.Pcs || 0;
                   acc[key].Wt += ele?.Wt || 0;
@@ -848,10 +882,14 @@ const JewelleryTaxInvoiceSale = ({
                     Wt: ele?.Wt || 0,
                   };
                 }
-
+              
                 return acc;
               }, {});
+              
               const mergedMaterials = Object.values(groupedMaterials);
+
+              
+              console.log("TCL: groupedMaterials ->mergedMaterials ", mergedMaterials)
 
 
               return (

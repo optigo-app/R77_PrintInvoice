@@ -32,7 +32,9 @@ function MemoMaterialIssue({
     const [extraTaxAmont, setExtraTaxAmount] = useState();
     const [headFlag, setHeadFlag] = useState(true);
     const [isImageWorking, setIsImageWorking] = useState(true);
-
+    const [showBagNo, setShowBagNo] = useState(true);
+    const [showAmountRate, setShowAmountRate] = useState(true);
+    const [showDiaQualityColor, setShowDiaQualityColor] = useState(true);
 
     useEffect(() => {
         const sendData = async () => {
@@ -51,14 +53,12 @@ function MemoMaterialIssue({
                         let address =
                             data?.Data?.MaterialBill_Json[0]?.Printlable?.split("\r\n");
                         setCustAddress(address);
-                        console.log("data", data);
 
                         setJson0Data(data?.Data?.MaterialBill_Json[0]);
                         const sortedItems = [...(data?.Data?.MaterialBill_Json1 || [])].sort(
                             (a, b) => parseFloat(a?.ItemId || 0) - parseFloat(b?.ItemId || 0)
                         );
 
-                        console.log("TCL: sendData -> sortedItems", sortedItems)
                         setFinalD(sortedItems);
                         setTaxAmount(data?.Data?.MaterialBill_Json2[0]);
                         setExtraTaxAmount(data?.Data?.MaterialBill_Json3);
@@ -70,9 +70,7 @@ function MemoMaterialIssue({
                     }
                 } else {
                     setLoader(false);
-                    // setMsg(data?.Message);
                     const err = checkMsg(data?.Message);
-                    console.log(data?.Message);
                     setMsg(err);
                 }
             } catch (error) {
@@ -81,9 +79,6 @@ function MemoMaterialIssue({
         };
         sendData();
     }, []);
-
-    console.log("TCL: finalD", finalD)
-
 
     const totalMiscWeight = (Array.isArray(finalD) ? finalD : []).reduce((sum, item) => {
         const weight = parseFloat(item?.Weight);
@@ -109,11 +104,9 @@ function MemoMaterialIssue({
             const weight = parseFloat(item?.Weight) || 0;
             const pureWeight = parseFloat(item?.PureWeight) || 0;
 
-            // Total weight
             acc.totalWeight += weight;
             acc.totalPureWeight += pureWeight;
 
-            // Shape-wise aggregation
             if (!acc.shapeWise[shape]) {
                 acc.shapeWise[shape] = {
                     shape,
@@ -133,13 +126,13 @@ function MemoMaterialIssue({
             shapeWise: {},
         }
     );
+
     const handleImageErrors = () => {
         setIsImageWorking(false);
     };
 
     const toProperCase = (str) =>
         str?.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-
 
     const metalAndMiscWeight = totalMetalWeight + totalMiscWeight;
 
@@ -151,7 +144,6 @@ function MemoMaterialIssue({
         return sum;
     }, 0);
 
-    console.log("TCL: remainingWeight", remainingWeight, metalAndMiscWeight, totalMetalWeight)
     const WeightDiaCS = (Array.isArray(finalD) ? finalD : []).reduce((sum, item) => {
         const weight = parseFloat(item?.Weight);
         if (item?.ItemName == 'DIAMOND' || item?.ItemName == 'COLOR STONE') {
@@ -159,7 +151,6 @@ function MemoMaterialIssue({
         }
         return sum;
     }, 0);
-
 
     const totalPieces = (Array.isArray(finalD) ? finalD : []).reduce((sum, item) => {
         const pieces = parseFloat(item?.pieces);
@@ -171,13 +162,10 @@ function MemoMaterialIssue({
         return sum + (isNaN(Amount) ? 0 : Amount);
     }, 0);
 
-    console.log("TCL: totalAmount", totalAmount)
     const totalEtraTaxAmount = (Array.isArray(extraTaxAmont) ? extraTaxAmont : []).reduce((sum, item) => {
         const amount = parseFloat(item?.totaltaxAmount);
-
         return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-
 
     const groupedData = React.useMemo(() => {
         if (!Array.isArray(finalD)) return [];
@@ -211,9 +199,6 @@ function MemoMaterialIssue({
         );
     }, [finalD]);
 
-
-    console.log("TCL: groupedData", groupedData)
-
     const getItemDisplay = (e) => {
         switch (e?.ItemName) {
             case "FINDING":
@@ -226,8 +211,6 @@ function MemoMaterialIssue({
                 return "";
         }
     };
-
-
 
     const customOrder = [3, 4, 1, 5, 2, 7];
 
@@ -260,11 +243,40 @@ function MemoMaterialIssue({
         }, {})
     ).sort((a, b) => customOrder.indexOf(a.ItemId) - customOrder.indexOf(b.ItemId));
 
-    console.log(MergeData);
+    /* ---------------------------------------------------------------- */
+    /* Column width helper (for the "else" table: ItemId not 1 or 5)      */
+    /*                                                                      */
+    /* Base widths shift based on the "Bag no." and "Amount/rate" toggles.  */
+    /* For DIAMOND rows (ItemId === 3) specifically, when                   */
+    /* `showDiaQualityColor` is false, the Quality and Color columns are     */
+    /* hidden and their width is folded into the Shape column instead.      */
+    /* ---------------------------------------------------------------- */
+    const getOtherColWidths = (itemId) => {
+        let widths;
 
+        if (showBagNo && showAmountRate) {
+            widths = { srNo: 4, bagNo: 11, shape: 15, quality: 13, color: 15, size: 10, pcs: 5, ctw: 7, rate: 10, amount: 10 };
+        } else if (!showBagNo && showAmountRate) {
+            widths = { srNo: 4, bagNo: 0, shape: 20, quality: 13, color: 15, size: 10, pcs: 8, ctw: 10, rate: 10, amount: 10 };
+        } else if (showBagNo && !showAmountRate) {
+            widths = { srNo: 4, bagNo: 11, shape: 15, quality: 13, color: 15, size: 10, pcs: 16, ctw: 16, rate: 0, amount: 0 };
+        } else {
+            widths = { srNo: 4, bagNo: 0, shape: 20, quality: 13, color: 15, size: 10, pcs: 20, ctw: 20, rate: 0, amount: 0 };
+        }
 
+        const hideQualityColor = itemId === 3 && !showDiaQualityColor;
+        if (hideQualityColor) {
+            widths.shape += widths.quality + widths.color;
+            widths.quality = 0;
+            widths.color = 0;
+        }
 
+        return Object.fromEntries(Object.entries(widths).map(([k, v]) => [k, `${v}%`]));
+    };
 
+    // Sum a set of width keys (as numbers) from a widths object -> "xx%"
+    const sumWidths = (widths, keys) =>
+        `${keys.reduce((sum, k) => sum + parseFloat(widths[k] || 0), 0)}%`;
 
     return (
         <>
@@ -272,7 +284,7 @@ function MemoMaterialIssue({
                 <Loader />
             ) : msg === "" ? (
                 <div className='containerMemo'>
-                    <div className='print_btn' style={{ display: "flex", justifyContent: "center", margin: "20px 0px" }}>
+                    <div className='print_btn' style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", margin: "20px 0px" }}>
                         <div className="prnt_btn">
                             <input
                                 type="button"
@@ -281,6 +293,30 @@ function MemoMaterialIssue({
                                 onClick={(e) => handlePrint(e)}
                             />
                         </div>
+                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                checked={showDiaQualityColor}
+                                onChange={(e) => setShowDiaQualityColor(e.target.checked)}
+                            />
+                            Dia-Quality-Color
+                        </label>
+                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                checked={showBagNo}
+                                onChange={(e) => setShowBagNo(e.target.checked)}
+                            />
+                            Bag no.
+                        </label>
+                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                checked={showAmountRate}
+                                onChange={(e) => setShowAmountRate(e.target.checked)}
+                            />
+                            Amount/rate.
+                        </label>
                     </div>
 
                     {/* heading */}
@@ -377,149 +413,194 @@ function MemoMaterialIssue({
 
                     {/* table  */}
 
-                    {MergeData?.length > 0 && MergeData.map((e, index) => (
-                        <div style={{ border: "1px solid #C2C2C2", width: "100%", borderCollapse: "collapse", marginTop: "7px" }}>
+                    {MergeData?.length > 0 && MergeData.map((e, index) => {
+                        const isMetalOrFinding = e.ItemId === 1 || e.ItemId === 5;
+                        const colWidths = getOtherColWidths(e.ItemId);
+                        // Quality/Color columns are hidden only for DIAMOND when the toggle is off
+                        const showQualityColorCols = !(e.ItemId === 3 && !showDiaQualityColor);
+                        const totalLabelWidth = isMetalOrFinding
+                            ? "60%"
+                            : sumWidths(colWidths, ['srNo', 'bagNo', 'shape', 'quality', 'color', 'size']);
 
-                            {/* Title Row */}
-                            <div style={{ display: "flex", borderBottom: "1px solid #C2C2C2" }}>
-                                <div style={{ padding: "10px", fontWeight: "bold", width: "100%", color: "#6F6F6F", fontSize: "20px" }}>
-                                    {e.ItemName
-                                        ?.toLowerCase()
-                                        .split(" ")
-                                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                        .join(" ")
-                                    }
+                        return (
+                            <div key={e.ItemId} style={{ border: "1px solid #C2C2C2", width: "100%", borderCollapse: "collapse", marginTop: "7px" }}>
+
+                                {/* Title Row */}
+                                <div style={{ display: "flex", borderBottom: "1px solid #C2C2C2" }}>
+                                    <div style={{ padding: "3px 10px", fontWeight: "bold", width: "100%", color: "#6F6F6F", fontSize: "20px" }}>
+                                        {e.ItemName
+                                            ?.toLowerCase()
+                                            .split(" ")
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(" ")
+                                        }
+                                    </div>
                                 </div>
-                            </div>
 
+                                {/* Header Row */}
+                                {isMetalOrFinding ? (
+                                    <div style={{ display: "flex", backgroundColor: "#DFDFDF", fontWeight: "bold", borderBottom: "1px solid #C2C2C2" }} className='font-print'>
+                                        <div style={{ width: "4%", padding: "5px", borderRight: "1px solid #C2C2C2" }}> Sr.</div>
+                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>  {e.ItemId === 5 ? "Shape" : "Item"}</div>
+                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Quality" : "Type"}</div>
+                                        <div style={{ width: "14%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Color</div>
+                                        <div style={{ width: "12%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Size" : "HSN#"}</div>
+                                        <div style={{ width: showAmountRate ? "10%" : "20%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Gms." : "gm."}</div>
+                                        <div style={{ width: showAmountRate ? "10%" : "20%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}> Pure Wt.</div>
 
-                            {(e.ItemId === 1 || e.ItemId === 5) ? (
-
-                                <div style={{ display: "flex", backgroundColor: "#DFDFDF", fontWeight: "bold", borderBottom: "1px solid #C2C2C2", fontSize: "13px" }} >
-
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>  {e.ItemId === 5 ? "Shape" : "Item"}</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Quality" : "Type"}</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Color</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Size" : "HSN#"}</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 5 ? "Gms." : "gm."}</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}> Pure Wt.</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Rate</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>Amount</div>
-                                </div>
-                            ) : (
-                                <div
-                                    style={{
-                                        display: "flex", backgroundColor: "#DFDFDF", fontWeight: "bold", borderBottom: "1px solid #C2C2C2", fontSize: "13px"
-                                    }}
-                                >
-
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Shape</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Quality</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Color</div>
-                                    <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>Size</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Pcs</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 3 || e.ItemId === 4 ? "Ctw" : "Gms"}</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Rate</div>
-                                    <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>Amount</div>
-                                </div>
-                            )}
-
-
-                            {/* Data Row */}
-                            {e.items?.length > 0 && e.items.map((item, idx) => (
-
-                                (e.ItemId === 1 || e.ItemId === 5) ? (
-                                    <div style={{ display: "flex", borderBottom: "1px solid #C2C2C2", fontSize: "13px" }}>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.shape} {item?.LotNo && (`(${item?.LotNo})`)}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {e.ItemId === 5 ? item?.FindingType : item?.purity}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.color}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {e.ItemId === 5 ? item?.FindingAccessories : item?.HSN_No}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.Weight.toFixed(3)}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.PureWeight.toFixed(3)}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.Rate.toFixed(2)}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>
-                                            {item?.Amount.toFixed(2)}
-                                        </div>
+                                        {showAmountRate && (
+                                            <>
+                                                <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Rate</div>
+                                                <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>Amount</div>
+                                            </>
+                                        )}
                                     </div>
                                 ) : (
-                                    <div style={{ display: "flex", borderBottom: "1px solid #C2C2C2", fontSize: "13px" }}>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.shape} {item?.LotNo && (`(${item?.LotNo})`)}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.quality}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.color}
-                                        </div>
-                                        <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.size}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.pieces}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.Weight.toFixed(3)}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
-                                            {item?.Rate.toFixed(2)}
-                                        </div>
-                                        <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>
-                                            {item?.Amount.toFixed(2)}
-                                        </div>
+                                    <div style={{ display: "flex", backgroundColor: "#DFDFDF", fontWeight: "bold", borderBottom: "1px solid #C2C2C2" }} className='font-print'>
+                                        <div style={{ width: colWidths.srNo, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Sr.</div>
+                                        {showBagNo && (
+                                            <div style={{ width: colWidths.bagNo, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Bag no.</div>
+                                        )}
+                                        <div style={{ width: colWidths.shape, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Shape</div>
+                                        {showQualityColorCols && (
+                                            <>
+                                                <div style={{ width: colWidths.quality, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Quality</div>
+                                                <div style={{ width: colWidths.color, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Color</div>
+                                            </>
+                                        )}
+                                        <div style={{ width: colWidths.size, padding: "5px", borderRight: "1px solid #C2C2C2" }}>Size</div>
+                                        <div style={{ width: colWidths.pcs, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Pcs</div>
+                                        <div style={{ width: colWidths.ctw, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>{e.ItemId === 3 || e.ItemId === 4 ? "Ctw" : "Gms"}</div>
+                                        {showAmountRate && (
+                                            <>
+                                                <div style={{ width: colWidths.rate, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>Rate</div>
+                                                <div style={{ width: colWidths.amount, padding: "5px", textAlign: "right" }}>Amount</div>
+                                            </>
+                                        )}
                                     </div>
-                                )
+                                )}
 
-                            ))}
+                                {/* Data Rows */}
+                                {e.items?.length > 0 && e.items.map((item, idx) => (
+                                    isMetalOrFinding ? (
+                                        <div key={idx} style={{ display: "flex", borderBottom: "1px solid #C2C2C2" }} className='font-print'>
+                                            <div style={{ width: "4%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {idx + 1}
+                                            </div>
+                                            <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.shape} {item?.LotNo && (`(${item?.LotNo})`)}
+                                            </div>
+                                            <div style={{ width: "15%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {e.ItemId === 5 ? item?.FindingType : item?.purity}
+                                            </div>
+                                            <div style={{ width: "14%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.color}
+                                            </div>
+                                            <div style={{ width: "12%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {e.ItemId === 5 ? item?.FindingAccessories : item?.HSN_No}
+                                            </div>
+                                            <div style={{ width: showAmountRate ? "10%" : "20%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.Weight.toFixed(3)}
+                                            </div>
+                                            <div style={{ width: showAmountRate ? "10%" : "20%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.PureWeight.toFixed(3)}
+                                            </div>
+                                            {showAmountRate && (
+                                                <>
+                                                    <div style={{ width: "10%", padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                        {item?.Rate.toFixed(2)}
+                                                    </div>
+                                                    <div style={{ width: "10%", padding: "5px", textAlign: "right" }}>
+                                                        {item?.Amount.toFixed(2)}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div key={idx} style={{ display: "flex", borderBottom: "1px solid #C2C2C2" }} className='font-print'>
+                                            <div style={{ width: colWidths.srNo, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {idx + 1}
+                                            </div>
+                                            {showBagNo && (
+                                                <div style={{ width: colWidths.bagNo, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                    {item?.IsSolGem == "1" ? item?.RfBag : ""}
+                                                </div>
+                                            )}
+                                            <div style={{ width: colWidths.shape, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.IsSolGem == "1" ? item?.ItemId == 3 ? "S: " : "G: " : ""}  {item?.shape} {item?.LotNo && (`(${item?.LotNo})`)}
+                                                {item?.IsSolGem == "1" &&
+                                                    <>
+                                                        <div>{item?.labcode} {item?.labcode && item?.certno && <span> - </span>}
+                                                        </div>
+                                                        <div>{item?.certno}</div>
+                                                    </>
+                                                }
+                                            </div>
+                                            {showQualityColorCols && (
+                                                <>
+                                                    <div style={{ width: colWidths.quality, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                        {item?.quality}
+                                                    </div>
+                                                    <div style={{ width: colWidths.color, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                        {item?.color}
+                                                    </div>
+                                                </>
+                                            )}
+                                            <div style={{ width: colWidths.size, padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.size}
+                                            </div>
+                                            <div style={{ width: colWidths.pcs, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.pieces}
+                                            </div>
+                                            <div style={{ width: colWidths.ctw, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                {item?.Weight.toFixed(3)}
+                                            </div>
+                                            {showAmountRate && (
+                                                <>
+                                                    <div style={{ width: colWidths.rate, padding: "5px", textAlign: "right", borderRight: "1px solid #C2C2C2" }}>
+                                                        {item?.Rate.toFixed(2)}
+                                                    </div>
+                                                    <div style={{ width: colWidths.amount, padding: "5px", textAlign: "right" }}>
+                                                        {item?.Amount.toFixed(2)}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )
+                                ))}
 
+                                {/* Total Row */}
+                                <div style={{ display: "flex" }} className='font-print'>
+                                    <div style={{ width: totalLabelWidth, padding: "5px", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
+                                        Total
+                                    </div>
+                                    <div style={{ width: isMetalOrFinding ? (showAmountRate ? "10%" : "20%") : colWidths.pcs, padding: "5px", textAlign: "right", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
+                                        {isMetalOrFinding ? e?.total?.totalCtw?.toFixed(3) : e?.total?.totalpcs}
+                                    </div>
+                                    <div style={{ width: isMetalOrFinding ? (showAmountRate ? "10%" : "20%") : colWidths.ctw, padding: "5px", textAlign: "right", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
+                                        {isMetalOrFinding ? e?.total?.totalPureWt?.toFixed(3) : e?.total?.totalCtw?.toFixed(3)}
+                                    </div>
 
-                            {/* Total Row */} {console.log("eeee", e)}
-                            <div style={{ display: "flex", fontSize: "13px" }}>
-                                <div style={{ width: "60%", padding: "5px", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
-                                    Total
+                                    {showAmountRate && (
+                                        <>
+                                            <div style={{ width: "10%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
+                                            </div>
+                                            <div style={{ width: "10%", padding: "5px", textAlign: "right", fontWeight: "bold" }}>
+                                                {e?.total?.totalAmount.toFixed(2)}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                                <div style={{ width: "10%", padding: "5px", textAlign: "right", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
-                                    {e?.ItemId == 5 || e?.ItemId == 1 ? e?.total?.totalCtw?.toFixed(3) : e?.total?.totalpcs}
-                                </div>
-                                <div style={{ width: "10%", padding: "5px", textAlign: "right", fontWeight: "bold", borderRight: "1px solid #C2C2C2" }}>
 
-                                    {e?.ItemId == 5 || e?.ItemId == 1 ? e?.total?.totalPureWt?.toFixed(3) : e?.total?.totalCtw?.toFixed(3)}
-                                </div>
-
-                                <div style={{ width: "10%", padding: "5px", borderRight: "1px solid #C2C2C2" }}>
-
-                                </div>
-                                <div style={{ width: "10%", padding: "5px", textAlign: "right", fontWeight: "bold" }}>
-                                    {e?.total?.totalAmount.toFixed(2)}
-                                </div>
                             </div>
-
-                        </div>
-
-                    ))}
-
+                        );
+                    })}
 
                     <div
                         style={{
                             border: "1px solid #C2C2C2",
                             marginTop: "8px",
-
                             height: "100px",
-
                         }}
                     >
                         <div style={{ display: "flex", height: "100%" }}>
@@ -528,7 +609,6 @@ function MemoMaterialIssue({
                                 id="bottom1"
                                 style={{
                                     width: "50%",
-
                                     borderRight: "1px solid #C2C2C2",
                                     display: "flex",
                                     alignItems: "flex-end",
@@ -543,7 +623,6 @@ function MemoMaterialIssue({
                                 id="bottom2"
                                 style={{
                                     width: "50%",
-
                                     display: "flex",
                                     alignItems: "flex-end",
                                     justifyContent: "center",

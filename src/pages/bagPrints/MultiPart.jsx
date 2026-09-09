@@ -28,6 +28,7 @@ const MultiPart = ({ queries, headers }) => {
     const [data, setData] = useState([]);
     const [title, setTitle] = useState('');
        const [remarks, setRemarks] = useState(true);
+       const [lineidflag, setLineidflag] = useState(false);
 
     const [diaFlag, setDiaFlag] = useState(false);
       
@@ -261,7 +262,12 @@ const MultiPart = ({ queries, headers }) => {
         remarks ? setRemarks(false) : setRemarks(true);
     };
 
+     const handleChangeLineidflag = (e) => {
+        lineidflag ? setLineidflag(false) : setLineidflag(true);
+    };
+
   
+  console.log("TCL: MultiPart -> filterData",filterData )
     
   return (
     <div className='bg_color_mlt pb-5 mb-5'>
@@ -291,6 +297,24 @@ const MultiPart = ({ queries, headers }) => {
                                             style={{ cursor: "pointer", textSelection: "none" }}
                                         >
                                            Remarks
+                                        </label>
+                                    </div> 
+
+                                    <div className="form-check pe-3" style={{ display: "flex", alignItems: "center", gap: "5px" ,marginLeft:'1rem' }} >
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id='lineidflag'
+                                            checked={lineidflag}
+                                            onChange={handleChangeLineidflag}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <label
+                                            className="form-check-label pt-1"
+                                            htmlFor="lineidflag"
+                                            style={{ cursor: "pointer", textSelection: "none" }}
+                                        >
+                                           Line ID
                                         </label>
                                     </div> 
                         </div>
@@ -390,6 +414,7 @@ const MultiPart = ({ queries, headers }) => {
                                 )}   {/* first changes in FetchDatas,js additional */}
                                 <div className='d-flex justify-content-start align-items-center'>
                                     <QRCodeGenerator text={e?.data?.rd.serialjobno +" "+ (e?.data?.rd?.metal_color_casted === undefined ? '' : e?.data?.rd?.metal_color_casted)} />{ diaFlag && <span className='fsjbsbg'>{e?.data?.rd?.diamondQuality?.join(",")}</span>}
+                                   {lineidflag && <div className=''>{e?.data?.rd?.lineid}</div>}
                                 </div>
                             </div>
 

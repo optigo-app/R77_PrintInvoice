@@ -14,7 +14,7 @@ import Loader from "../../components/Loader";
 import { cloneDeep } from "lodash";
 import { OrganizeInvoicePrintData } from "../../GlobalFunctions/OrganizeInvoicePrintData";
 
-const ItemWisePrintP = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
+const ItemWisePrintD = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     const [loader, setLoader] = useState(true);
     const [json0Data, setjson0Data] = useState({});
     const [msg, setMsg] = useState("");
@@ -914,8 +914,9 @@ const ItemWisePrintP = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Opening Closing Balance */}
+                           
+                       { (atob(evn)?.trim()?.toLowerCase() === 'sale') &&(
+                        
                         <div
                             className={`fw-bold w-100 no_break d-flex itemWisePrintFont_11 d-flex flex-column`}
                         >
@@ -971,6 +972,9 @@ const ItemWisePrintP = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             </div>
 
                         </div>
+
+                       )}
+                        
                     </div>
                 </div>
             ) : (
@@ -982,4 +986,4 @@ const ItemWisePrintP = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     );
 };
 
-export default ItemWisePrintP;
+export default ItemWisePrintD;

@@ -13,9 +13,13 @@ const Print2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     const [summary, setsummary_details] = useState([]);
     const [removeclass, setremoveclass] = useState(null);
     const [WithAMT, setWithAMT] = useState(true);
+    const [netwtflg, setNetwtflg] = useState(true);
 
     const checkWithAMT = () => {
         setWithAMT(prevState => !prevState);
+    };
+    const checkNetwtflg = () => {
+        setNetwtflg(prevState => !prevState);
     };
 
     useEffect(() => {
@@ -129,20 +133,36 @@ const Print2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 <div className='d_flex_qp1 flex_direction_colum_qp1 main_qp1'>
                     <div className='d_flex_qp1 print_btn_qp1 mb-4 no-print  w-100 d-flex justify-content-end align-items-center'>
                         {IsEventQuote ?
+                            <>
                             <div className="mx-3 d-flex align-items-center">
                                 <input
                                     type="checkbox"
-                                    checked={WithAMT}
-                                    onChange={checkWithAMT}
-                                    id="withAMT"
+                                    checked={netwtflg}
+                                    onChange={checkNetwtflg}
+                                    id="netwtflg"
                                 />
                                 <label
-                                    htmlFor="withAMT"
+                                    htmlFor="netwtflg"
                                     className="mx-2 user-select-none"
                                 >
-                                    With Amount 
+                                    Net Wt
                                 </label>
                             </div>
+                            <div className="mx-3 d-flex align-items-center">
+                            <input
+                                type="checkbox"
+                                checked={WithAMT}
+                                onChange={checkWithAMT}
+                                id="withAMT"
+                            />
+                            <label
+                                htmlFor="withAMT"
+                                className="mx-2 user-select-none"
+                            >
+                                With Amount 
+                            </label>
+                        </div>
+                            </>
                             : ""
                         }
                         <div className='printbtn2_qp1 print_btn_qp1 br_btn2_smp' onClick={handlePrintwithprice}>Print</div>
@@ -228,7 +248,7 @@ const Print2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
                                                 {/* Weight */}
                                                 <div className='d-flex justify-content-center fs_print2q align-items-center border-bottom border-black fw-bold'>
-                                                    Gwt : {res?.grosswt?.toFixed(2)} | Nwt : {(res?.NetWt + res?.LossWt)?.toFixed(2)}
+                                                    Gwt : {res?.grosswt?.toFixed(2)} {netwtflg? `| Nwt : ${(res?.NetWt + res?.LossWt)?.toFixed(2)}`  :""} 
                                                 </div>
 
                                                 {/* Diamond / Stone */}

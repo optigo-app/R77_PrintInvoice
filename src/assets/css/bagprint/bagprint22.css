@@ -483,7 +483,7 @@
      but do NOT force a break after every box */
 
   .pcf-image-box img {
-    height: 70px !important;
+    height: 110px !important;
   }
 
   .pcf-instruction-box {

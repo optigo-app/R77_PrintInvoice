@@ -18,6 +18,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
   const [msg, setMsg] = useState("");
   const [loader, setLoader] = useState(true);
   const [isImageWorking, setIsImageWorking] = useState(true);
+  const [json2data, setJson2data] = useState([]);
 
   const handleImageErrors = () => {
     setIsImageWorking(false);
@@ -61,6 +62,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
       copydata?.BillPrint_Json1,
       copydata?.BillPrint_Json2
     );
+    setJson2data(data?.BillPrint_Json2)
     let diaObj = {
       ShapeName: "OTHERS",
       wtWt: 0,
@@ -633,7 +635,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
   const mergeDiadetails = (dataArray) => {
     if (!dataArray || !Array.isArray(dataArray)) return [];
     const mergedMap = dataArray.reduce((acc, current) => {
-      const key = current.ShapeName?.toLowerCase() || "unknown";
+      const key = current.ShapeName?.toLowerCase() || "";
       if (!acc[key]) {
         acc[key] = { ...current };
       } else {
@@ -654,7 +656,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
   const mergeByShapeName = (stoneList) => {
     return Object.values(
       (stoneList ?? []).reduce((acc, current) => {
-        const shapeKey = current?.ShapeName?.toLowerCase() || "unknown";
+        const shapeKey = current?.ShapeName?.toLowerCase() || "";
         if (!acc[shapeKey]) {
           acc[shapeKey] = { ...current };
         } else {
@@ -740,6 +742,12 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
     80,   // Duty Amount
     90,   // Total Amount
   ];
+
+  const SolCertNo = (json2data || [])
+  .filter(x => x?.MasterManagement_DiamondStoneTypeid === 1)
+  .map(x => x?.certno)
+  .filter(Boolean)
+  .join(",");
 
 
 
@@ -840,18 +848,27 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
 
                       const mergedDiamonds = Object.values(
                         (e?.diamonds || []).reduce((acc, current) => {
-                          const shapeKey = current?.ShapeName?.toLowerCase() || "unknown";
-                          if (!acc[shapeKey]) {
-                            acc[shapeKey] = { ...current };
+                          const shapeName = current?.ShapeName?.toLowerCase() || "";
+                          const isSolGem = String(current?.IsSolGem ?? "0");
+                          const typename = String(current?.MaterialTypeName || "");
+                          let key = `${shapeName}_${isSolGem}`;
+                          if (typename !== "") {
+                            key += `_${typename}`;
+                          }
+                      
+                          if (!acc[key]) {
+                            acc[key] = { ...current };
                           } else {
-                            acc[shapeKey].Pcs += current.Pcs || 0;
-                            acc[shapeKey].Wt += current.Wt || 0;
-                            acc[shapeKey].Amount += current.Amount || 0;
-                            acc[shapeKey].Rate += current.Rate || 0;
-                            if (acc[shapeKey].SizeName !== current.SizeName) {
-                              acc[shapeKey].SizeName = "Mixed";
+                            acc[key].Pcs += current.Pcs || 0;
+                            acc[key].Wt += current.Wt || 0;
+                            acc[key].Amount += current.Amount || 0;
+                            acc[key].Rate += current.Rate || 0;
+                      
+                            if (acc[key].SizeName !== current.SizeName) {
+                              acc[key].SizeName = "Mixed";
                             }
                           }
+                      
                           return acc;
                         }, {})
                       ).sort((a, b) => {
@@ -966,7 +983,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         if (idx >= dRows.length) return null;
                         const el = dRows[idx];
                         return {
-                          shape: `${el?.IsSolGem === 1 ? "S: " : ""}${el?.ShapeName}`,
+                          shape: `${el?.IsSolGem === 1 ? "S: " : ""} ${el?.MaterialTypeName}  ${el?.ShapeName}`,
                           pcs: el?.Pcs,
                           wt: el?.Wt?.toFixed(3),
                           rate: formatAmount(el?.Rate),
@@ -1090,6 +1107,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
 
                                 {[
                                   e?.CertificateNo && `Cert#: ${e.CertificateNo}`,
+                                  SolCertNo !== "" && `Sol.Cert#: ${SolCertNo}`,
                                   e?.HUID && `HUID: ${e.HUID}`,
                                   e?.Size && `Size: ${e.Size}`,
                                 ].filter(Boolean).join("  |  ")}

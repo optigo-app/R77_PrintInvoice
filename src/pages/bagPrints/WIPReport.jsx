@@ -27,7 +27,7 @@ import { borderTop } from "@mui/system";
 
 export default function WIPReport({ queries, headers }) {
 
-     
+    console.log("TCL: WIPReport -> queries", queries)
     const [data, setData] = useState([]);
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
@@ -45,7 +45,13 @@ export default function WIPReport({ queries, headers }) {
         const fetchData = async () => {
             try {
 
-                const allDatas = await GetWipData(queries);
+                const body={
+                    "con": "{\"id\": \"\", \"mode\": \"WIPprint\", \"appuserid\": \""+queries?.appuserid+"\"}",
+                    "p": "{\"wip_id\": \""+queries?.wip_id+"\"}",
+                    "f": "DynamicReport ( get sp list )"
+                  }
+
+                const allDatas = await GetWipData(queries,body);
 
 
                 setData(allDatas?.Data?.rd1 || []);

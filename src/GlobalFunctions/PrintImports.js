@@ -225,6 +225,7 @@ export const SaleReturn = [
   { printName: 'packing list 7d group', etpType: 'print', componentName: 'PackingList7DGroup' },
   { printName: 'tax invoice 5 S', etpType: 'print', componentName: 'TaxInvoice5S' },  // amish .........
   { printName: 'retail invoice print s', etpType: 'print', componentName: 'RetailInvoicePrintS' },
+  { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
   
 ]
 
@@ -391,6 +392,7 @@ export const EstimatePrints = [
   { printName: 'packing list 7d group', etpType: 'print', componentName: 'PackingList7DGroup' },
   { printName: 'detail print s', etpType: 'print', componentName: 'DetailPrintS' },
   { printName: 'retail invoice print s', etpType: 'print', componentName: 'RetailInvoicePrintS' },
+  { printName: 'jewellery tax summary', etpType: 'print', componentName: 'JewelleryTaxSummary' },
 ]
 
 export const HallMarkPrints = [
@@ -523,6 +525,7 @@ export const fgPurchase = [
   { printName: 'packing list 7d group', etpType: 'print', componentName: 'PackingList7DGroup' },
   { printName: 'packing list 3 B', etpType: 'print', componentName: 'PackingList3B' },
   { printName: 'detail print 7', etpType: 'print', componentName: 'DetailPrint7' },
+  { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
 ];
 
 // export const fgPurchaseReturn = [

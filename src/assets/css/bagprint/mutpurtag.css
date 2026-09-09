@@ -1,0 +1,159 @@
+/* ── Diamond Stock Label Styles ───────────────────────────── */
+
+.ds-label-container {
+    width: 35mm;
+    height: 65mm;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+ 
+  }
+  
+  .ds-top-wrapper {
+    position: relative;
+  }
+  
+  .ds-header {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0 6px;
+  }
+  
+  .ds-divider {
+    height: 1px;
+    background: #000;
+    margin-bottom: 4px;
+  }
+  
+  .ds-content-row {
+    display: flex;
+  }
+  
+  .ds-left-text {
+    flex: 1;
+    font-size: 9px;
+    padding: 0 6px;
+  }
+  
+  .ds-row {
+    display: flex;
+    margin-bottom: 2px;
+  }
+  
+  .ds-label {
+    width: 30px;
+  }
+  
+  .ds-label-wide {
+    width: 32px;
+  }
+  
+  .ds-colon {
+    width: 8px;
+    text-align: center;
+  }
+  
+  .ds-value {
+    flex: 1;
+    font-weight: bold;
+  }
+  
+  .ds-value-wrap {
+    flex: 1;
+    font-weight: bold;
+    word-break: break-word;
+  }
+  
+  .ds-barcode-wrapper {
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .ds-barcode-wrapper.ds-qr-active {
+    width: 25px;
+    position: absolute;
+    right: 6px;
+    top: 30px;
+  }
+  
+  .ds-barcode-inner {
+    margin-right: 0px;
+  }
+  
+  .ds-barcode-style {
+    transform: rotate(90deg);
+    width: 120px;
+  }
+  
+  .ds-footer {
+    text-align: center;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+  
+  .ds-print-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px;
+    align-items: center;
+  }
+  
+  .ds-qr-toggle {
+    margin-right: 10px;
+  }
+  
+  .ds-labels-wrap {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+ /* ── Print Media Queries ───────────────────────────── */
+@media print {
+    /* 1. Disable Flexbox on the parent container so page breaks work */
+    .ds-labels-wrap {
+      display: block !important;
+    }
+  
+    /* 2. Configure page breaking on child items */
+    .ds-label-container {
+      display: block !important;
+      float: none !important;
+     
+  
+      /* Force a page break after each label */
+      break-after: page !important;
+      page-break-after: always !important;
+  
+      /* Prevent breaking inside a single label */
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+  
+      /* Remove margins that could push items onto extra pages */
+      margin: 0 auto !important;
+    }
+  
+    /* 3. Prevent extra trailing blank page */
+    .ds-label-container:last-child {
+      break-after: auto !important;
+      page-break-after: auto !important;
+    }
+  
+    /* 4. Hide print control buttons during printing */
+    .ds-print-bar,
+    .printbtn {
+      display: none !important;
+    }
+  
+    /* 5. (Optional) Set paper size match your label dimensions */
+    @page {
+      /* size: 35mm 65mm; */
+       padding-top: 30px;
+    }
+  }

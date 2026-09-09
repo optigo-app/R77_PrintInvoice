@@ -257,9 +257,10 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             pointers: {},
             solitaires: {},
             totalDiamondCtw: 0,
+            totalDIaPcs: 0,
         };
-        
-   
+
+
 
         diamonds
             .filter(d =>
@@ -267,53 +268,54 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 d.IsCenterStone !== 1
             )
             .forEach(d => {
-             
+
                 const p = Number(d.pointer || 0);
                 const shape = d.ShapeName || "OTHER";
                 const wt = Number(d.Wt || 0);
                 const pcs = Number(d.Pcs || 0);
 
                 out.totalDiamondCtw += wt;
+                out.totalDIaPcs += pcs;
 
-                    
-                  
+
+
 
                 if (p >= 0.0001 && p <= 0.1000) {  // 0.0001 - 0.1000   
                     if (!out.small[shape]) out.small[shape] = { pcs: 0, ctw: 0 };
-                    if (!out.stars[shape]) out.stars[shape] = { wt: 0,pcs:0 };
+                    if (!out.stars[shape]) out.stars[shape] = { wt: 0, pcs: 0 };
                     out.small[shape].pcs += pcs;
                     out.small[shape].ctw += wt;
                     out.stars[shape].wt += wt;
                     out.stars[shape].pcs += pcs;
-                   
+
                 }
                 else if (p >= 0.1001 && p <= 0.9999) {  //0.1001- 0.9999
                     if (!out.pointers[shape]) out.pointers[shape] = { pcs: 0, ctw: 0 };
                     out.pointers[shape].pcs += pcs;
                     out.pointers[shape].ctw += wt;
-                }else if (p >= 1.000) { 
+                } else if (p >= 1.000) {
                     if (!out.solitaires[shape]) out.solitaires[shape] = { pcs: 0, ctw: 0 };
                     out.solitaires[shape].pcs += pcs;
-                    out.solitaires[shape].ctw += wt;    
+                    out.solitaires[shape].ctw += wt;
                 }
             });
 
-            
-            console.log("TCL: getDiamondCriteriaWise out-> ", out)
-            console.log("TCL: getDiamondCriteriaWise p-> ", diamonds)
 
-            
-            
-     
+        console.log("TCL: getDiamondCriteriaWise out-> ", out)
+        console.log("TCL: getDiamondCriteriaWise p-> ", diamonds)
+
+
+
+
         return out;
-        
+
     };
 
     const getColorstoneCriteriaWise = (colorstone = []) => {
-      const out={
-        small: {},
-      }
-       
+        const out = {
+            small: {},
+        }
+
         colorstone
             .filter(d =>
                 d.MasterManagement_DiamondStoneTypeid === 2 &&
@@ -324,16 +326,44 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 const shape = d.QualityName || "OTHER";
                 const wt = Number(d.Wt || 0);
                 const pcs = Number(d.Pcs || 0);
- 
-                    if (!out.small[color+'/'+shape]) out.small[color+'/'+shape] = { pcs: 0, ctw: 0 };
-                  
-                    out.small[color+'/'+shape].pcs += pcs;
-                    out.small[color+'/'+shape].ctw += wt;
-                
+
+                if (!out.small[color + '/' + shape]) out.small[color + '/' + shape] = { pcs: 0, ctw: 0 };
+
+                out.small[color + '/' + shape].pcs += pcs;
+                out.small[color + '/' + shape].ctw += wt;
+
             });
 
-        
+
         return out;
+    };
+
+    // Groups a design's diamonds by ShapeName (same filter as getDiamondCriteriaWise's
+    // totals) so SHAPE / Quantity / Ctw can be rendered one row per shape instead of
+    // a single combined row.
+    const getDiamondShapeWise = (diamonds = []) => {
+        const map = {};
+        const order = [];
+
+        diamonds
+            .filter(d =>
+                d.MasterManagement_DiamondStoneTypeid === 1 &&
+                d.IsCenterStone !== 1
+            )
+            .forEach(d => {
+                const shape = d.ShapeName || "OTHER";
+                const wt = Number(d.Wt || 0);
+                const pcs = Number(d.Pcs || 0);
+
+                if (!map[shape]) {
+                    map[shape] = { shape, pcs: 0, ctw: 0 };
+                    order.push(shape);
+                }
+                map[shape].pcs += pcs;
+                map[shape].ctw += wt;
+            });
+
+        return order.map(s => map[s]);
     };
 
     console.log("result", result);
@@ -342,7 +372,7 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             {loader ? <Loader /> : msg === "" ?
                 <> <ReactHTMLTableToExcel
                     id="test-table-xls-button"
-                    className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5 d-none"
+                    className="download-table-xls-button btn btn-success text-black bg-success px-2 py-1 fs-5"
                     table="table-to-xls"
                     filename={`Memo_HRD_${result?.header?.InvoiceNo}_${Date.now()}`}
                     sheet="tablexls"
@@ -457,11 +487,9 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>SHAPE</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Diamond Quantity (Numbers) As Per Shape</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Total Diamond cts weight</th>
-                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Stars & Meeles cts weight</th>
-                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Pointers  cts weight</th>
-                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Solitaires  cts weight</th>
+
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Total</th>
-                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Gemstone / Color Stones (Type)</th>
+                                <th width={150} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Gemstone / Color Stones (Type)</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>HRD COLOR</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>HRD CLARITY</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>HRD SYMM</th>
@@ -469,142 +497,159 @@ const MemoHRDExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>INSCRIPTION ON JEWEL</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>COMMENT/REMARK/REJECT</th>
                                 <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Graders</th>
+                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Stars & Meeles cts weight</th>
+                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Pointers  cts weight</th>
+                                <th width={100} style={{ ...brRight, ...brBotm, ...fntSize1, }}>Solitaires  cts weight</th>
                             </tr>
-  
+
                             {result?.resultArray?.map((e, i) => {
                                 const dia = getDiamondCriteriaWise(e?.diamonds || []);
                                 const cst = getColorstoneCriteriaWise(e?.colorstone || []);
-                                
-                                 
+                                const diaShapeWise = getDiamondShapeWise(e?.diamonds || []);
+
                                 const shapeText = Object.keys(dia.small).join(", ") || "-";
-                                // const qtyText = Object.values(dia.small)
-                                //     .reduce((a, b) => a + b.pcs, 0);
                                 const qtyText = Object.values(dia.small);
-                                // const starts = Object.values(dia.stars);
 
                                 const starts = Object.entries(dia?.stars ?? {}).map(([key, { pcs = 0, wt = 0 }]) =>
                                     `${key} ${pcs}/${wt.toFixed(2)}`
-                                  );
-                                 
-                                 
-                                 
+                                );
+
                                 const pointers = Object.entries(dia.pointers)
                                     .map(([key, value]) => `${key} ${value.pcs}/${value.ctw.toFixed(2)}`)
-                                     ;
+                                    ;
 
                                 const solitaires = Object.entries(dia.solitaires)
                                     .map(([key, value]) => `${key} ${value.pcs}/${value.ctw.toFixed(2)}`)
-                                     ;
+                                    ;
 
                                 const cstShow = Object.entries(cst.small)
                                     .map(([key, value]) => `${key} ${value.pcs}/${value.ctw.toFixed(2)}`)
-                                     ;
+                                    ;
 
                                 const totalDiamondCtw = dia.totalDiamondCtw.toFixed(2);
-
-
+                                const totalDIaPcs = dia.totalDIaPcs || 0;
 
                                 const smallCtw = Object.values(dia.small)
                                     .reduce((a, b) => a + b.ctw, 0)
                                     .toFixed(2);
 
-                                return <tr key={i} style={{verticalAlign:"top"}}>
-                                    <td height={25} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtCen }}>
-                                        {i + 1}
-                                    </td>
+                                // SHAPE/Qty/Ctw rows and Gemstone rows vary independently in length —
+                                // the design's block needs enough <tr>s for whichever is longer.
+                                const shapeRowCount = diaShapeWise.length;
+                                const cstRowCount = cstShow.length;
+                                const totalRowCount = Math.max(shapeRowCount, cstRowCount, 1);
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                return Array.from({ length: totalRowCount }).map((_, rowIdx) => {
+                                    const shapeRow = diaShapeWise[rowIdx];
+                                    const cstRow = cstShow[rowIdx];
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        <div>{`\u00A0 ${e?.SrJobno}`}</div>
-                                    </td>
+                                    if (rowIdx === 0) {
+                                        return (
+                                            <tr key={`${i}-${rowIdx}`} style={{ verticalAlign: "top" }}>
+                                                <td rowSpan={totalRowCount} height={25} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtCen }}>
+                                                    {i + 1}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        <div>{e?.designno}</div>
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        <div>{e?.Categoryname}</div>
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    <div>{`\u00A0 ${e?.SrJobno}`}</div>
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        <div>{fixedValues(e?.grosswt, 3)}</div>
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    <div>{e?.designno}</div>
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        <div>{e?.MetalTypePurity} {e?.MetalColor}</div>
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    <div>{e?.Categoryname}</div>
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    <div>{fixedValues(e?.grosswt, 3)}</div>
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        {/* {shapeText.split(', ').map((s, i) => <div  key={i}>{s}</div>)} */}
-                                        {/* {[
-                                                ...new Set(
-                                                    e?.diamonds
-                                                        .filter(d => d.ShapeName && d.IsCenterStone !== 1)
-                                                        .map(d => d.ShapeName)
-                                                )
-                                            ].join(', ')} */}
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    <div>{e?.MetalTypePurity} {e?.MetalColor}</div>
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        {/* {qtyText || "-"} */}
-                                        {/* {
-                                            qtyText.map((item, ind) => (<div style={{...txtAtEnd}} key={ind}>{item.pcs}</div>))
-                                        } */}
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    </td>
+                                                <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    {shapeRow?.shape || ""}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtEnd }}>
-                                        {totalDiamondCtw}
-                                    </td>
+                                                <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    {shapeRow ? shapeRow.pcs : (shapeRowCount === 0 ? totalDIaPcs : "")}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                        {
-                                            starts.map((item, ind) => (<div style={{...txtAtEnd}}  key={ind} >{item}</div>))
-                                        }
-                                    </td>
+                                                <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    {shapeRow ? shapeRow.ctw.toFixed(2) : (shapeRowCount === 0 ? totalDiamondCtw : "")}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                          
-                                         {
-                                            pointers.map((item, ind) => (<div style={{...txtAtEnd}}  key={ind} >{item}</div>))
-                                        }
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtEnd }}>
+                                                    {totalDiamondCtw}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                       
-                                        {
-                                            solitaires.map((item, ind) => (<div style={{...txtAtEnd}}  key={ind} >{item}</div>))
-                                        }
-                                    </td>
+                                                <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    {cstRow || ""}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                         
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
-                                    {
-                                            cstShow.map((item, ind) => (<div style={{...txtAtEnd}}  key={ind} >{item}</div>))
-                                        }
-                                    
-                                    </td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                    {/* {
+                                                        starts.map((item, ind) => (<div style={{ ...txtAtEnd }} key={ind} >{item}</div>))
+                                                    } */}
+                                                </td>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
 
-                                    <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}></td>
-                                </tr>
+                                                    {/* {
+                                                        pointers.map((item, ind) => (<div style={{ ...txtAtEnd }} key={ind} >{item}</div>))
+                                                    } */}
+                                                </td>
+
+                                                <td rowSpan={totalRowCount} style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+{/* 
+                                                    {
+                                                        solitaires.map((item, ind) => (<div style={{ ...txtAtEnd }} key={ind} >{item}</div>))
+                                                    } */}
+                                                </td>
+                                            </tr>
+                                        );
+                                    }
+
+                                    // Extra rows: only SHAPE / Qty / Ctw (from diaShapeWise) and
+                                    // Gemstone (from cstShow) render here — every other column is
+                                    // already spanned down from rowIdx 0 above.
+                                    return (
+                                        <tr key={`${i}-${rowIdx}`} style={{ verticalAlign: "top" }}>
+                                            <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                {shapeRow?.shape || ""}
+                                            </td>
+                                            <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                {shapeRow ? shapeRow.pcs : ""}
+                                            </td>
+                                            <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                {shapeRow ? shapeRow.ctw.toFixed(2) : ""}
+                                            </td>
+                                            <td style={{ ...brRight, ...brBotm, ...fntSize2, ...txtAtSta }}>
+                                                {cstRow || ""}
+                                            </td>
+                                        </tr>
+                                    );
+                                });
                             })}
                         </tbody>
                     </table>

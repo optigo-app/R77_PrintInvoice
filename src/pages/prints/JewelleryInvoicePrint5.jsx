@@ -563,8 +563,8 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                         <div className="table-body">
                                             {result?.resultArray?.map((row, index) => {
 
-
-                                                console.log("TCL:row?.diamonds ", row?.diamonds)
+                                                
+                                                console.log("TCL:row ", row)
 
                                                 const totalDiamonds = row?.diamonds.reduce(
                                                     (acc, item) => {
@@ -653,8 +653,13 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                                             <div className="td col-wt">{row?.NetWt?.toFixed(3)}</div>
                                                         )}
                                                         {activeType === "B2B" && (
-                                                            <div className="td col-amt" style={{ justifyContent: "flex-end" }}> {decimalflag? row?.MetalAmount?.toFixed(2): Math.round(row?.MetalAmount )}</div>
-                                                        )}
+                                                            <div className="td col-amt" style={{ justifyContent: "flex-end" }}>
+                                                            {decimalflag
+                                                              ? (Number(row?.MetalAmount || 0) + Number(row?.totals?.finding?.Amount || 0)).toFixed(2)
+                                                              : Math.round(
+                                                                  Number(row?.MetalAmount || 0) + Number(row?.totals?.finding?.Amount || 0)
+                                                                )}
+                                                          </div>          )}
 
                                                         {(activeType === "B2B" || activeType === "B2C") && (
                                                             <>
@@ -765,12 +770,24 @@ const JewelleryInvoicePrint5 = ({ token, invoiceNo, printName, urls, evn, ApiVer
                                                         <div className="td col-wt">{result?.mainTotal?.metal?.Wt?.toFixed(3)} </div>
                                                     )}
                                                     {activeType === "B2B" && (
-                                                        <div className="td col-amt" style={{ justifyContent: "flex-end" }}> 
-                                                            {decimalflag?  formatAmount(
-                                                                result?.mainTotal?.metal?.Amount /  result?.header?.CurrencyExchRate,
-                                                                2
-                                                            ): NumberWithCommas(Math.round( result?.mainTotal?.metal?.Amount /  result?.header?.CurrencyExchRate, ))}
-                                                            </div>
+                                                        <div className="td col-amt" style={{ justifyContent: "flex-end" }}>
+                                                        {decimalflag
+                                                          ? formatAmount(
+                                                              (
+                                                                Number(result?.mainTotal?.metal?.Amount || 0) +
+                                                                Number(result?.mainTotal?.finding?.Amount || 0)
+                                                              ) / Number(result?.header?.CurrencyExchRate || 1),
+                                                              2
+                                                            )
+                                                          : NumberWithCommas(
+                                                              Math.round(
+                                                                (
+                                                                  Number(result?.mainTotal?.metal?.Amount || 0) +
+                                                                  Number(result?.mainTotal?.finding?.Amount || 0)
+                                                                ) / Number(result?.header?.CurrencyExchRate || 1)
+                                                              )
+                                                            )}
+                                                      </div>
                                                     )}
 
                                                     {(activeType === "B2B" || activeType === "B2C") && (

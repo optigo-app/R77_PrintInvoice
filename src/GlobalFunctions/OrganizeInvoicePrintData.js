@@ -31,6 +31,7 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
         MetalWeight:0,
         MetalDiaWt:0,
         MetalAmount:0,
+        total_purenetwt: 0,
         MakingAmount:0,
         MaKingCharge_Unit:0,
         LossWt:0,
@@ -298,6 +299,7 @@ export const OrganizeInvoicePrintData = (headerJson, JobwiseJson, materialJson) 
         mainTotal.OtherCharges += j1?.OtherCharges;
         mainTotal.PackageWt += j1?.PackageWt;
         mainTotal.PriorityCharges += j1?.PriorityCharges;
+        mainTotal.total_purenetwt += j1?.PureNetWt;
         mainTotal.PureNetWt += j1?.PureNetWt;
         mainTotal.Quantity += j1?.Quantity;
         mainTotal.TotalAmount += j1?.TotalAmount;
