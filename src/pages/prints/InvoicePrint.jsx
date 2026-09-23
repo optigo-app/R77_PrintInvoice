@@ -465,6 +465,10 @@ const InvoicePrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             <p className="pb-1 ps-4 invp_830_fs">{json0?.customerregion}</p>
             <p className="pb-1 ps-4 invp_830_fs">{json0?.customercity}{json0?.customerpincode}</p>
             <p className="pb-1 ps-4 invp_830_fs">STATE NAME : {json0?.customerstate}</p>
+            {json0?.aadharno &&(
+
+            <p className="pb-1 ps-4 invp_830_fs">Aadhar No : {json0?.aadharno}</p>
+            )}
           </div>
           <div className="col-3"></div>
           <div className="col-4 d-flex justify-content-center align-items-start flex-column">

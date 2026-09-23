@@ -9,6 +9,8 @@ import {
   handleImageError,
   isObjectEmpty,
   NumberWithCommas,
+  mergeMetals,
+  mergeFindings,
 } from "../../GlobalFunctions";
 import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
 import cloneDeep from "lodash/cloneDeep";
@@ -304,6 +306,54 @@ const DesignsetPackinglist = ({
       setDiaQlty(true);
     }
   };
+
+  const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
+    let remainingFindings = [...findings];
+
+    const updatedMetals = metals.map((metal) => {
+      if (metal.IsPrimaryMetal !== 1) return metal;
+
+      // findings that match this primary metal on Quality + Size + Rate
+      const matched = remainingFindings.filter(
+        (f) =>
+          f?.QualityName === metal?.QualityName &&
+          f?.SizeName === metal?.SizeName &&
+          f?.Rate === metal?.Rate &&
+          f?.Supplier === metal?.Supplier
+      );
+
+      if (matched.length === 0) return metal;
+
+      // remove the matched findings from the pool so they aren't reused
+      // by another primary metal row and won't appear in the final findings list
+      remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
+
+      const totals = matched.reduce(
+        (acc, f) => ({
+          Pcs: acc.Pcs + (f.Pcs || 0),
+          Wt: acc.Wt + (f.Wt || 0),
+          FineWt: acc.FineWt + (f.FineWt || 0),
+          Amount: acc.Amount + (f.Amount || 0),
+          RMwt: acc.RMwt + (f.RMwt || 0),
+          Weight: acc.Weight + (f.Weight || 0),
+        }),
+        { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
+      );
+
+      return {
+        ...metal,
+        Pcs: (metal.Pcs || 0) + totals.Pcs,
+        Wt: (metal.Wt || 0) + totals.Wt,
+        FineWt: (metal.FineWt || 0) + totals.FineWt,
+        Amount: (metal.Amount || 0) + totals.Amount,
+        RMwt: (metal.RMwt || 0) + totals.RMwt,
+        Weight: (metal.Weight || 0) + totals.Weight,
+      };
+    });
+
+    return { findings: remainingFindings, metals: updatedMetals };
+  };
+
 
 
   return (
@@ -630,6 +680,10 @@ const DesignsetPackinglist = ({
 
                       {/* <tbody> */}
                       {result?.resultArray?.map((e, i) => {
+                        const mergedMetals = mergeMetals(e?.metal);
+                        const mergedFindings = mergeFindings(e?.finding);
+                        const { findings: finalFindings, metals: finalMetals } =
+                          mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals);
                         return (
                           <tr key={i}>
                             {/* <td> */}
@@ -843,58 +897,68 @@ const DesignsetPackinglist = ({
                                     <>
                                       <div className="w-100 d-flex flex-column justify-content-between h-100">
                                         <div className="w-100">
-                                          <div className="w-100 d-flex h-50" style={{ borderBottom: "1px solid #989898" }}>
-                                            {/* Col 1: Metal + Finding names */}
-                                            <div className="dcolsthpcl h-100 fspcl" style={{ width: "22%" }}>
-                                              {e?.metal?.map((ele, i) => (
-                                                <div className="leftpcl fspcl text-break pt-1 ps-1" key={`m-${i}`}>
+                                          <div className="w-100 d-flex flex-column" style={{ borderBottom: "1px solid #989898" }}>
+
+                                            {/* Loop 1: Metal */}
+                                            {finalMetals?.map((ele, i) => (
+                                              <div className="w-100 d-flex h-50" key={`metal-row-${i}`}>
+                                                {/* Col 1: Metal Name */}
+                                                <div className="dcolsthpcl h-100 fspcl leftpcl fspcl text-break pt-1 ps-1" style={{ width: "22%" }}>
                                                   {ele?.ShapeName + " " + ele?.QualityName}
                                                 </div>
-                                              ))}
-                                              {e?.finding?.map((ele, i) => (
-                                                <div className="leftpcl fspcl text-break pt-1 ps-1" key={`f-${i}`}>
-                                                  f:{ele?.ShapeName} {ele?.QualityName}
+
+                                                {/* Col 2: Gross Wt */}
+                                                <div className="dcolsthpcl h-100 fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "18%" }}>
+                                                  { ele?.IsPrimaryMetal==1? e?.grosswt?.toFixed(3): ""}
                                                 </div>
-                                              ))}
-                                            </div>
 
-                                            {/* Col 2: Gross Wt */}
-                                            <div className="dcolsthpcl h-100 fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "18%" }}>
-                                              {e?.grosswt?.toFixed(3)}
-                                            </div>
+                                                {/* Col 3: Net Wt */}
+                                                <div className="dcolsthpcl end_pcl_new end_p_pcl_new_2_pcl_2_pcl" style={{ width: "18%" }}>
+                                                  {netWtflag && <>{( ele?.Weight)?.toFixed(3)}</>}
+                                                </div>
 
-                                            {/* Col 3: Net Wt */}
-                                            <div className="dcolsthpcl end_pcl_new end_p_pcl_new fspcl p_2_pcl" style={{ width: "18%" }}>
-                                              {netWtflag && <>{(e?.totals?.metal?.IsPrimaryMetal - e?.totals?.finding?.Wt)?.toFixed(3)}</>}
-                                            </div>
-
-                                            {/* Col 4: Rate */}
-                                            <div className="dcolsthpcl fspcl p_2_pcl" style={{ width: "20%" }}>
-                                              {e?.metal?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl" key={`mr-${i}`}>
+                                                {/* Col 4: Rate */}
+                                                <div className="dcolsthpcl fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "20%" }}>
                                                   {ele?.Rate?.toFixed(2)}
                                                 </div>
-                                              ))}
-                                              {e?.finding?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl" key={`fr-${i}`}>
-                                                  { ele?.Rate?.toFixed(2)}
-                                                </div>
-                                              ))}
-                                            </div>
 
-                                            {/* Col 5: Amount */}
-                                            <div className="dcolsthpcl fspcl" style={{ borderRight: "0px", width: "22%" }}>
-                                              {e?.metal?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl p_2_pcl" key={`ma-${i}`}>
+                                                {/* Col 5: Amount */}
+                                                <div className="dcolsthpcl fspcl end_pcl_new end_p_pcl_new p_2_pcl" style={{ borderRight: "0px", width: "22%" }}>
                                                   {formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
                                                 </div>
-                                              ))}
-                                              {e?.finding?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl p_2_pcl" key={`fa-${i}`}>
+                                              </div>
+                                            ))}
+
+                                            {/* Loop 2: Finding */}
+                                            {finalFindings?.map((ele, i) => (
+                                              <div className="w-100 d-flex h-50" key={`finding-row-${i}`}>
+                                                {/* Col 1: Finding Name */}
+                                                <div className="dcolsthpcl h-100 fspcl leftpcl fspcl text-break pt-1 ps-1" style={{ width: "22%" }}>
+                                                  f:{ele?.ShapeName} {ele?.QualityName}
+                                                </div>
+
+                                                {/* Col 2: Gross Wt */}
+                                                <div className="dcolsthpcl h-100 fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "18%" }}>
+                                                 
+                                                </div>
+
+                                                {/* Col 3: Net Wt */}
+                                                <div className="dcolsthpcl end_pcl_new end_p_pcl_new fspcl p_2_pcl" style={{ width: "18%" }}>
+                                                  {netWtflag && <>{(e?.totals?.metal?.IsPrimaryMetal - e?.totals?.finding?.Wt)?.toFixed(3)}</>}
+                                                </div>
+
+                                                {/* Col 4: Rate */}
+                                                <div className="dcolsthpcl fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "20%" }}>
+                                                  {ele?.Rate?.toFixed(2)}
+                                                </div>
+
+                                                {/* Col 5: Amount */}
+                                                <div className="dcolsthpcl fspcl end_pcl_new end_p_pcl_new p_2_pcl" style={{ borderRight: "0px", width: "22%" }}>
                                                   {ele?.Amount !== 0 && formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
                                                 </div>
-                                              ))}
-                                            </div>
+                                              </div>
+                                            ))}
+
                                           </div>
 
                                           <div className="ps-1 mt-1 h-50">
@@ -910,7 +974,7 @@ const DesignsetPackinglist = ({
                                             {e?.grosswt?.toFixed(3)}
                                           </div>
                                           <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl" style={{ width: "18%" }}>
-                                            {netWtflag ? e?.totals?.metal?.IsPrimaryMetal?.toFixed(3) : "\u00A0"}
+                                            {netWtflag ? (e?.totals?.metal?.Weight + e?.totals?.finding?.Wt)?.toFixed(3) : "\u00A0"}
                                           </div>
                                           <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl" style={{ width: "20%" }}>&nbsp;</div>
                                           <div className="end_pcl_new end_p_pcl_new fspcl" style={{ width: "22%" }}>
@@ -921,107 +985,154 @@ const DesignsetPackinglist = ({
                                     </>
                                   ) : (
                                     <div className="w-100 d-flex flex-column justify-content-between h-100">
-                                      <div className="w-100 d-flex" style={{ flex: 1 }}>
-
-                                        {/* Col 1: Metal + Finding names */}
-                                        <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="be_1_pcl pt-1">
-                                          <div className="d-flex flex-column justify-content-between h-100">
-                                            <div>
-                                              {e?.metal?.map((ele, i) => (
-                                                <div className="fspcl text-break leftpcl" key={`m-${i}`}>
-                                                  {ele?.IsPrimaryMetal === 1 && ele?.ShapeName + " " + ele?.QualityName}
+  
+                                    {/* Loop 1: Metal */}
+                                    {finalMetals?.map((ele, i) => (
+                                       (
+                                        <div className="w-100 d-flex" style={{ flex: 1 }} key={`metal-row-${i}`}>
+                                          
+                                          {/* Col 1: Metal Name */}
+                                          <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="be_1_pcl pt-1">
+                                            <div className="d-flex flex-column justify-content-between ">
+                                              <div>
+                                                <div className="fspcl text-break leftpcl">
+                                                  {ele?.ShapeName + " " + ele?.QualityName}
                                                 </div>
-                                              ))}
-                                              {e?.finding?.map((ele, i) => (
-                                                <div className="fspcl text-break leftpcl" key={`f-${i}`}>
-                                                  f:{ele?.ShapeName} {ele?.QualityName}
-                                                </div>
-                                              ))}
+                                              </div>
+                                             
                                             </div>
-                                            <div className="bg_pcl br_top_pcl">&nbsp;</div>
+                                          </div>
+                                  
+                                          {/* Col 2: Gross Wt */}
+                                          <div style={{ width: netWtflag ? "18%" : "22.50%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                            <div className="d-flex flex-column justify-content-between  w-100">
+                                              <div className="w-100 end_pcl_new end_p_pcl_new">{ ele?.IsPrimaryMetal==1? e?.grosswt?.toFixed(3): ""}</div>
+                                              
+                                            </div>
+                                          </div>
+                                  
+                                          {/* Col 3: Net Wt */}
+                                          {netWtflag && (
+                                            <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                              <div className="d-flex flex-column  w-100 justify-content-between">
+                                                <div>
+                                                  <div className="w-100 end_pcl_new end_p_pcl_new">
+                                                    {(ele?.Weight)?.toFixed(3)}
+                                                  </div>
+                                                </div>
+                                                 
+                                              </div>
+                                            </div>
+                                          )}
+                                  
+                                          {/* Col 4: Rate */}
+                                          <div style={{ width: netWtflag ? "20%" : "24.50%" }} className="be_1_pcl">
+                                            <div className="d-flex flex-column justify-content-between  w-100">
+                                              <div>
+                                                <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                  {ele?.Rate !== 0 && ele?.Rate?.toFixed(2)}
+                                                </div>
+                                              </div>
+                                            
+                                            </div>
+                                          </div>
+                                  
+                                          {/* Col 5: Amount */}
+                                          <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="d-flex flex-column justify-content-between ">
+                                            <div>
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Amount !== 0 && formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
+                                              </div>
+                                            </div>
+                                             
+                                          </div>
+                                  
+                                        </div>
+                                      )
+                                    ))}
+                                  
+                                    {/* Loop 2: Finding */}
+                                    {finalFindings?.map((ele, i) => (
+                                      <div className="w-100 d-flex" style={{ flex: 1 }} key={`finding-row-${i}`}>
+                                        
+                                        {/* Col 1: Finding Name */}
+                                        <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="be_1_pcl pt-1">
+                                          <div className="d-flex flex-column justify-content-between">
+                                            <div>
+                                              <div className="fspcl text-break leftpcl">
+                                                f:{ele?.ShapeName} {ele?.QualityName}
+                                              </div>
+                                            </div>
+                                           
                                           </div>
                                         </div>
-
+                                  
                                         {/* Col 2: Gross Wt */}
                                         <div style={{ width: netWtflag ? "18%" : "22.50%" }} className="be_1_pcl d-flex justify-content-end pt-1">
-                                          <div className="d-flex flex-column justify-content-between h-100 w-100">
-                                            <div className="w-100 end_pcl_new end_p_pcl_new">{e?.grosswt?.toFixed(3)}</div>
-                                            <div className="fw-bold bg_pcl br_top_pcl w-100 end_pcl_new end_p_pcl_new">
-                                              {e?.grosswt?.toFixed(3)}
-                                            </div>
+                                          <div className="d-flex flex-column justify-content-between w-100">
+                                           
+                                            
                                           </div>
                                         </div>
-
-                                        {/* Col 3: Net Wt (finding wt rows + total) */}
+                                  
+                                        {/* Col 3: Net Wt */}
                                         {netWtflag && (
                                           <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
-                                            <div className="d-flex flex-column h-100 w-100 justify-content-between">
+                                            <div className="d-flex flex-column w-100 justify-content-between">
                                               <div>
-                                                {/* metal net wt */}
-                                                {e?.metal?.map((ele, i) => (
-                                                  ele?.IsPrimaryMetal === 1 && (
-                                                    <div key={`mn-${i}`} className="w-100 end_pcl_new end_p_pcl_new">
-                                                      {(e?.totals?.metal?.IsPrimaryMetal - e?.totals?.finding?.Wt)?.toFixed(3)}
-                                                    </div>
-                                                  )
-                                                ))}
-                                                {/* finding wt */}
-                                                {e?.finding?.map((ele, i) => (
-                                                  <div key={`fn-${i}`} className="w-100 end_pcl_new end_p_pcl_new">
-                                                    {ele?.Wt?.toFixed(3)}
-                                                  </div>
-                                                ))}
+                                                <div className="w-100 end_pcl_new end_p_pcl_new">
+                                                  {ele?.Wt?.toFixed(3)}
+                                                </div>
                                               </div>
-                                              <div className="w-100 end_pcl_new end_p_pcl_new bg_pcl br_top_pcl fw-bold">
-                                                {e?.totals?.metal?.IsPrimaryMetal?.toFixed(3)}
-                                              </div>
+                                               
                                             </div>
                                           </div>
                                         )}
-
+                                  
                                         {/* Col 4: Rate */}
                                         <div style={{ width: netWtflag ? "20%" : "24.50%" }} className="be_1_pcl">
-                                          <div className="d-flex flex-column justify-content-between h-100 w-100">
+                                          <div className="d-flex flex-column justify-content-between w-100">
                                             <div>
-                                              {e?.metal?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={`mr-${i}`}>
-                                                  {ele?.IsPrimaryMetal === 1 && ele?.Rate !== 0 && ele?.Rate?.toFixed(2)}
-                                                </div>
-                                              ))}
-                                              {e?.finding?.map((ele, i) => (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={`fr-${i}`}>
-                                                  { ele?.Rate?.toFixed(2)}
-                                                </div>
-                                              ))}
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Rate?.toFixed(2)}
+                                              </div>
                                             </div>
-                                            <div className="bg_pcl br_top_pcl">&nbsp;</div>
+                                   
                                           </div>
                                         </div>
-
+                                  
                                         {/* Col 5: Amount */}
-                                        <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="d-flex flex-column justify-content-between h-100">
+                                        <div style={{ width: netWtflag ? "22%" : "26.50%" }} className="d-flex flex-column justify-content-between">
                                           <div>
-                                            {e?.metal?.map((ele, i) => (
-                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={`ma-${i}`}>
-                                                {ele?.IsPrimaryMetal === 1 && ele?.Amount !== 0 &&
-                                                  formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
-                                              </div>
-                                            ))}
-                                            {e?.finding?.map((ele, i) => (
-                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={`fa-${i}`}>
-                                                {ele?.Amount !== 0 && formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
-                                              </div>
-                                            ))}
+                                            <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                              {ele?.Amount !== 0 && formatAmount(ele?.Amount / result?.header?.CurrencyExchRate)}
+                                            </div>
                                           </div>
-                                          <div className="end_pcl_new end_p_pcl_new fspcl bg_pcl br_top_pcl fw-bold">
-                                            {formatAmount(
-                                              (e?.totals?.metal?.IsPrimaryMetal_Amount + (e?.totals?.finding?.Amount || 0)) /
-                                              result?.header?.CurrencyExchRate
-                                            )}
+                                          
+                                        </div>
+                                  
+                                      </div>
+                                    ))}
+
+<div className="fspcl text-break br_top_pcl bg_pcl fw-bold end_pcl_new end_p_pcl_new w-100" style={{padding:"0"}}>
+                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl"  style={{ width: netWtflag ? "22%" : "26.50%" }}>&nbsp;</div>
+                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl" style={{ width: netWtflag ? "18%" : "22.50%" }}>
+                                            {e?.grosswt?.toFixed(3)}
+                                          </div>
+                                         {netWtflag &&(
+
+                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl" style={{ width: "18%" }} >
+                                            {netWtflag ? (e?.totals?.metal?.Weight + e?.totals?.finding?.Wt)?.toFixed(3) : "\u00A0"}
+                                          </div>
+                                         )}
+                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl"style={{ width: netWtflag ? "20%" : "24.50%" }}>&nbsp;</div>
+                                          <div className="end_pcl_new end_p_pcl_new fspcl" style={{ width: netWtflag ? "22%" : "26.50%" }}>
+                                            {formatAmount((e?.totals?.metal?.Amount + e?.totals?.finding?.Amount) / result?.header?.CurrencyExchRate)}
                                           </div>
                                         </div>
-                                      </div>
-                                    </div>
+                                  
+                                  </div>
+                                  
                                   )}
 
                                 </div>
@@ -1472,7 +1583,7 @@ const DesignsetPackinglist = ({
                               >
                                 {/* {result?.mainTotal?.netwtWithLossWt?.toFixed(3)} */}
                                 {/* {(result?.mainTotal?.metal?.IsPrimaryMetal + result?.mainTotal?.lossWt)?.toFixed(3)} */}
-                                {result?.mainTotal?.metal?.IsPrimaryMetal?.toFixed(3)}
+                                {(result?.mainTotal?.metal?.Weight + result?.mainTotal?.finding?.Wt)?.toFixed(3)}
                               </div>
                             )}
                             {/* <div className="dcolsthpcl" style={{ width: "20%" }} ></div> */}
@@ -1484,7 +1595,7 @@ const DesignsetPackinglist = ({
                                 ?.IsPrimaryMetal_Amount !== 0 &&
                                 formatAmount(
                                   (result?.mainTotal.metal
-                                    ?.IsPrimaryMetal_Amount  + result?.mainTotal?.finding?.Amount )/
+                                    ?.Amount + result?.mainTotal?.finding?.Amount) /
                                   result?.header?.CurrencyExchRate
                                 )}
                             </div>

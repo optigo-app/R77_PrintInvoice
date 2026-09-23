@@ -757,6 +757,12 @@ const RetailOnlyPrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => 
                   ? `${jsonData1?.Cust_CST_STATE}-${jsonData1?.Cust_CST_STATE_No}`
                   : ""}
               </p>
+              {jsonData1?.aadharno &&(
+
+              <p className="line_height_110 ft_12_retailPrint">
+               Aadhar No: {jsonData1?.aadharno} 
+              </p>
+              )}
             </div>
             {jsonData1?.HSN_No !== "" && (
               <div className="col-4 p-1 border-end">

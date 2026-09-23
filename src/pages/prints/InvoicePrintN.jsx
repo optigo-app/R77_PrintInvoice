@@ -44,9 +44,11 @@ const InvoicePrintN = ({
   const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
   const [diamondDetails, setDiamondDetails] = useState([]);
   const [json1, setJson1] = useState([]);
+  const [PureMetalRate, setPureMetalRate] = useState([]);
 
 
   const [retail, setRetail] = useState(true);
+  const [companyDetails, setCompanyDetails] = useState(false);
   const [customerAddress, setCustomerAddress] = useState([]);
   const [total, setTotal] = useState({
     gwt: 0,
@@ -73,6 +75,7 @@ const InvoicePrintN = ({
   const [document, setDocument] = useState([]);
   function loadData(data) {
     // console.log("data", data);
+    setPureMetalRate(data?.BillPrint_Json5)
     let totals = { ...total };
     let address = data?.BillPrint_Json[0]?.Printlable?.split("\r\n");
     data.BillPrint_Json[0].address = address;
@@ -655,6 +658,8 @@ const InvoicePrintN = ({
           let isEmpty = isObjectEmpty(data?.Data);
           if (!isEmpty) {
             loadData(data?.Data);
+            
+             
             setLoader(false);
           } else {
             setLoader(false);
@@ -704,6 +709,9 @@ const InvoicePrintN = ({
 
   const handleChangeRetail = (e) => {
     retail ? setRetail(false) : setRetail(true);
+  };
+  const handleChangeCompanyDetails = (e) => {
+    companyDetails ? setCompanyDetails(false) : setCompanyDetails(true);
   };
 
   const totalConverted =
@@ -901,6 +909,10 @@ const InvoicePrintN = ({
     (sum, item) => sum + Number(item?.LossWt || 0),
     0
   );
+
+
+  
+  console.log("TCL: PureMetalRate", PureMetalRate)
   return (
     <>
       {loader ? (
@@ -915,7 +927,7 @@ const InvoicePrintN = ({
               >
                 <div
                   className={`btnpcl align-items-baseline position-absolute right-0 top-0 m-0 ${style?.right_retailInvoicePrintsBtn} d-flex`}
-                  style={{ right: "-330px" }}
+                  style={{ right: "-400px" }}
                 >
 
                   <div className="form-check pe-3">
@@ -932,6 +944,23 @@ const InvoicePrintN = ({
                       for="retail"
                     >
                       Retail
+                    </label>
+                  </div>
+
+                  <div className="form-check pe-3">
+                    <input
+                      className="form-check-input"
+                      id="companyDetails"
+                      type="checkbox"
+                      checked={companyDetails}
+                      onChange={handleChangeCompanyDetails}
+                    />
+                    <label
+                      className="form-check-label pt-1"
+                      htmlFor="flexCheckDefault"
+                      for="companyDetails"
+                    >
+                      Company Details
                     </label>
                   </div>
 
@@ -969,7 +998,7 @@ const InvoicePrintN = ({
                   <Button />
                 </div>
                 <div className="pt-2 d-flex flex-column">
-                  <div className="headlineJL w-100 p-2">
+                  <div className="headlineJL w-100 p-2" style={{"justifyContent": companyDetails?"flex-start":"center","marginBottom": companyDetails?"0":"10px"}}>
                     {" "}
                     <b style={{ fontSize: "20px" }}>
                       {" "}
@@ -977,7 +1006,9 @@ const InvoicePrintN = ({
                       {retail ? "RETAIL INVOICE" : "TAX INVOICE"}
                     </b>{" "}
                   </div>
-                  <div className="d-flex w-100">
+
+                  {companyDetails &&(
+                    <div className="d-flex w-100">
                     <div className="col-10 p-2">
                       <div className="fslhJL">
                         <h5>
@@ -1033,6 +1064,9 @@ const InvoicePrintN = ({
                       )}
                     </div>
                   </div>
+
+                  )}
+                  
                   {/* header data */}
                   <div className="d-flex border w-100 no_break">
                     <div className={`col-${!retail ? 4 : 8} p-2 b border-end`}>
@@ -1097,6 +1131,25 @@ const InvoicePrintN = ({
 
 
                     <div className="col-4 p-2 position-relative">
+                      {result?.header?.Company_VAT_GST_No !== "" && (
+                        <div className="d-flex">
+                          <div className="col-6">
+                            <b className="JL13">GSTIN </b>
+                          </div>
+                          <div className="col-6">{result?.header?.Company_VAT_GST_No?.split("-")[1]}</div>
+                        </div>
+                      )}
+
+                      {result?.header?.Company_CST_STATE_No !== "" && (
+                        <div className="d-flex">
+                          <div className="col-6">
+                            <b className="JL13">STATE CODE</b>
+                          </div>
+                          <div className="col-6">{result?.header?.Company_CST_STATE_No}</div>
+                        </div>
+                      )}
+
+
                       <div className="d-flex">
                         <div className="col-6">
                           <b className="JL13">Bill No</b>
@@ -1109,18 +1162,7 @@ const InvoicePrintN = ({
                         </div>
                         <div className="col-6">{result?.header?.EntryDate}</div>
                       </div>
-                      <div className="d-flex">
-                        <div className="col-6">
-                          <b className="JL13">DUE DATE</b>
-                        </div>
-                        <div className="col-6">{result?.header?.DueDate}</div>
-                      </div>
-                      <div className="d-flex">
-                        <div className="col-6">
-                          <b className="JL13">DUE DAYS</b>
-                        </div>
-                        <div className="col-6">{result?.header?.DueDays}</div>
-                      </div>
+
                       {/* <div className="d-flex">
                         <div className="col-6">
                           <b className="JL13">HSN</b>
@@ -1159,12 +1201,20 @@ const InvoicePrintN = ({
                         {result?.header?.aadharno}
                       </div>
                     </div>} */}
-                      {/* <div className="d-flex  position-absolute w-100 pb-2 bottom-0">
+                     <div className="position-absolute bottom-0" style={{marginTop:"10px"}}>
+                     <div className="d-flex    w-100 bottom-0 font-bill">
                       <div className="d-flex">
-                        <b className="JL13 fs-5 pe-2">24K Gold Rate</b>
-                        <b className="fs-5"> {NumberWithCommas(result?.header?.MetalRate24K, 2)}</b>
+                        <b className="JL13 lable  pe-2" style={{width:"40px",fontSize:"15px"}}>Gold</b>
+                        <b className="" style={{fontSize:"15px"}}> {NumberWithCommas( PureMetalRate?.[0]?.Price, 2)}</b>
                       </div>
-                    </div> */}
+                    </div>
+                    <div className="d-flex  w-100  bottom-0 font-bill">
+                      <div className="d-flex">
+                        <b className="JL13 label " style={{width:"40px",fontSize:"15px"}}>Silver</b>
+                        <b className="" style={{fontSize:"15px"}}> {NumberWithCommas( PureMetalRate?.[1]?.Price, 2)}</b>
+                      </div>
+                    </div>
+                     </div>
                     </div>
                   </div>
                   {/* Table Heading */}
@@ -2463,22 +2513,49 @@ const InvoicePrintN = ({
                   </div>
                   {/* bank detail */}
                   <div className="border-start border-end border-bottom d-flex no_break">
-                    <div className="col-4 p-2 border-end">
-                      <p className="fw-bold">Bank Detail</p>
-                      <p>Bank name: {result?.header?.bankname}</p>
-                      <p style={{ wordBreak: "normal" }}>
-                        Branch: {result?.header?.bankaddress}
-                      </p>
-                      {/* <p>{result?.header?.PinCode}</p> */}
-                      <p>Account Name: {result?.header?.accountname}</p>
-                      <p>Account No: {result?.header?.accountnumber}</p>
-                      <p>RTGS NEFT IFSC: {result?.header?.rtgs_neft_ifsc}</p>
-                    </div>
-                    <div className="col-4 p-2 border-end d-flex justify-content-between flex-column">
+                    {/* Render the outer div only if at least one bank detail value exists */}
+                    {(result?.header?.bankname ||
+                      result?.header?.bankaddress ||
+                      result?.header?.accountname ||
+                      result?.header?.accountnumber ||
+                      result?.header?.rtgs_neft_ifsc) && (
+                        <div className="col-4 p-2 border-end">
+                          <p className="fw-bold">Bank Detail</p>
+
+                          {result?.header?.bankname && (
+                            <p>Bank name: {result.header.bankname}</p>
+                          )}
+
+                          {result?.header?.bankaddress && (
+                            <p style={{ wordBreak: "normal" }}>
+                              Branch: {result.header.bankaddress}
+                            </p>
+                          )}
+
+                          {/* {result?.header?.PinCode && <p>{result.header.PinCode}</p>} */}
+
+                          {result?.header?.accountname && (
+                            <p>Account Name: {result.header.accountname}</p>
+                          )}
+
+                          {result?.header?.accountnumber && (
+                            <p>Account No: {result.header.accountnumber}</p>
+                          )}
+
+                          {result?.header?.rtgs_neft_ifsc && (
+                            <p>RTGS NEFT IFSC: {result.header.rtgs_neft_ifsc}</p>
+                          )}
+                        </div>
+                      )}
+                    <div className={`${result?.header?.bankname ||
+                      result?.header?.bankaddress ||
+                      result?.header?.accountname ||
+                      result?.header?.accountnumber ||
+                      result?.header?.rtgs_neft_ifsc? "col-4": "col-6"} p-2 border-end d-flex justify-content-between flex-column min-signature-height`} style={{alignItems:"center"}}>
                       <p>Signature</p>
                       <p className="fw-bold">{result?.header?.CustName}</p>
                     </div>
-                    <div className="col-4 p-2 d-flex justify-content-between flex-column">
+                    <div className="col-4 p-2 d-flex justify-content-between flex-column" style={{alignItems:"center"}}>
                       <p>Signature</p>
                       <p className="fw-bold">{result?.header?.CompanyFullName}</p>
                     </div>

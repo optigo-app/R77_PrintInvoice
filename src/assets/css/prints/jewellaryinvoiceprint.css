@@ -422,6 +422,13 @@
     word-break: normal !important;        /* Do NOT break words */
     overflow-wrap: break-word !important; /* Wrap only if needed */
 }
+.font-bill{
+    font-size: 15px !important;
+}
+
+.font-bill label{
+    width: 100px !important;
+}
 @media print {
     .trowJL {
         page-break-inside: avoid;

@@ -48,6 +48,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
     },
     metal: {
       Wt: 0,
+      Weight: 0,
       Pcs: 0,
       RMwt: 0,
       Rate: 0,
@@ -208,6 +209,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
         },
         metal: {
           Wt: 0,
+          Weight: 0,
           Pcs: 0,
           RMwt: 0,
           Rate: 0,
@@ -385,6 +387,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
               metalList.push(j2);
 
               jobwise_totals.metal.Wt += j2?.Wt;
+              jobwise_totals.metal.Weight += j2?.Weight;
               jobwise_totals.metal.Pcs += j2?.Pcs;
               jobwise_totals.metal.RMwt += j2?.RMwt;
               jobwise_totals.metal.Rate += j2?.Rate;
@@ -392,6 +395,7 @@ export const OrganizeDataPrint = (header2, json1_1, json2_1, json3_1, invoiceNo,
               jobwise_totals.metal.FineWt += j2?.FineWt;
               jobwise_totals.metal.length += 1;
               maintotal.metal.Wt += j2?.Wt;
+              maintotal.metal.Weight += j2?.Weight;
               maintotal.metal.RMwt += j2?.RMwt;
               maintotal.metal.total_FineWt += +j2?.FineWt;
               maintotal.metal.FineWt += +j2?.FineWt;

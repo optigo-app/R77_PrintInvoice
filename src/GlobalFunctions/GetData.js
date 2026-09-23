@@ -62,11 +62,18 @@ export const GetData = async (job) => {
             // Compare the numeric values
             return numA - numB;
           });
+          const rd3 = (datas?.rd3)?.sort((a, b) => {
+            const numA = parseInt(a?.SerialJobno?.split('/')[1], 10);
+            const numB = parseInt(b?.SerialJobno?.split('/')[1], 10);
+            // Compare the numeric values
+            return numA - numB;
+          });
 
         const obj = {
             rd:rd,
             rd1:rd1,
             rd2:rd2,
+            rd3:rd3,
             msg:responseMsg
         }
         

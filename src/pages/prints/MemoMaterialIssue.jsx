@@ -60,7 +60,10 @@ function MemoMaterialIssue({
                         );
 
                         setFinalD(sortedItems);
-                        setTaxAmount(data?.Data?.MaterialBill_Json2[0]);
+                        
+                       
+                        // setTaxAmount(data?.Data?.MaterialBill_Json2[0] || {}) ;
+                        setTaxAmount(data?.Data?.MaterialBill_Json2?.[0] ? [data.Data.MaterialBill_Json2[0]] : {});
                         setExtraTaxAmount(data?.Data?.MaterialBill_Json3);
 
                         setLoader(false);

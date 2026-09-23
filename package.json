@@ -76,7 +76,8 @@
     "sass": "^1.83.0",
     "to-words": "^3.6.1",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts --max_old_space_size=4096 start",

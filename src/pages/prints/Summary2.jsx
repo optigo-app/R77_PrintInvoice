@@ -326,6 +326,10 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         {result?.header?.customerpincode}
                       </div>
                       <div>Phno:-{result?.header?.customermobileno}</div>
+                      {result?.header?.aadharno &&(
+
+                      <div>Aadhar no:-{result?.header?.aadharno}</div>
+                      )}
                       <div>
 
                         {(result?.header?.Cust_VAT_GST_No || result?.header?.CustGstNo) && (
@@ -598,7 +602,7 @@ const Summary2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     {result?.header?.SalesRepPolicyTermsDescription !== "" && (<div className="py-1 pbias2 fsh2_s2"><span className="fw-bold">TERMS INCLUDED</span> : <span dangerouslySetInnerHTML={{ __html: result?.header?.SalesRepPolicyTermsDescription }}></span></div>)}
                     <div className="d-flex border mt-1 fw-bold pbias2 fsh2_s2" style={{ height: "5rem" }}>
                       <div className="w-50 d-flex justify-content-center align-items-end border-end fsh2_s2">RECEIVER'S SIGNATURE & SEAL</div>
-                      <div className="w-50 d-flex justify-content-center align-items-end fsh2_s2">for,Classmate corporation Pvt Ltd</div>
+                      <div className="w-50 d-flex justify-content-center align-items-end fsh2_s2">for, {result?.header?.CompanyFullName || ""}</div>
                     </div>
                   </>
                 )}

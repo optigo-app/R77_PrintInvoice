@@ -210,7 +210,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
 
                                     const jobWiseMetalData = getJobWiseMetalData(e?.data?.rd?.serialjobno);
 
-                                   
+
                                     const totalRowsWanted = 21;
                                     const allActualData = (e?.data?.rd1 || []).filter(
                                         (item) => item.MasterManagement_DiamondStoneTypeid !== 0
@@ -223,8 +223,12 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                     if (rowChunks.length === 0) rowChunks.push([]);
 
                                     // ---------- reusable dcf-wrapper card (unchanged styling/markup) ----------
-                                    const renderDcfWrapper = (chunkRows, cardKey) => {
-                                        const dummyCount = Math.max(0, totalRowsWanted - chunkRows.length);
+                                    const renderDcfWrapper = (chunkRows, cardKey, isFirstPageOfJob) => {
+                                         
+                                        const dummyCount = Math.max(
+                                            0,
+                                            totalRowsWanted - chunkRows.length
+                                        );
                                         const dummyRows = Array.from({ length: dummyCount });
 
                                         return (
@@ -356,6 +360,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="dcf-cell dcf-col-wt dcf-header-cell">Wt.</div>
                                                 </div>
 
+                                                
                                                 {/* Actual data rows for this chunk */}
                                                 {chunkRows.map((item, index) => (
                                                     <div className="dcf-row dcf-actual-issue-row" key={`actual-${cardKey}-${index}`} style={{ height: "16px" }}>
@@ -431,343 +436,332 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                     };
 
                                     // ---------- reusable pcf-page/pcf-wrapper card (your ORIGINAL markup, unchanged, real data) ----------
-                                    const renderPcfWrapper = (cardKey) => (
-                                        <div className="pcf-page" key={cardKey}>
-                                            <div className="pcf-wrapper">
-                                                <div className="dcf-row">
-                                                    <div className="dcf-row" style={{ display: 'flex', position: 'relative', height: '16px' }}>
-                                                        <div
-                                                            style={{
-                                                                flex: 1,
-                                                                color: "black",
-                                                                fontWeight: "bold",
-                                                                textAlign: "center",
-                                                                background: `${e?.data?.rd?.prioritycolorcode}`,
-                                                                paddingTop: "2px"
-                                                            }}
-                                                        >
-                                                            {e?.data?.rd?.prioritycode}
-                                                        </div>
+                                    // ---------- reusable pcf-page/pcf-wrapper card ----------
+                                    const renderPcfWrapper = (cardKey) => {
 
+                                        const uniqueRd2Data = Object.values(
+                                            rd2Data.reduce((acc, curr) => {
+                                                if (!acc[curr.serialjobno]) {
+                                                    acc[curr.serialjobno] = { ...curr };
+                                                } else {
+                                                    acc[curr.serialjobno].FinalWt = (acc[curr.serialjobno].FinalWt || 0) + (curr.FinalWt || 0);
+                                                }
+                                                return acc;
+                                            }, {})
+                                        );
 
-                                                        {/* The centered title overlay */}
-                                                        <div className="dcf-title-bar" style={{
-                                                            position: 'absolute',
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            color: 'white',
-                                                            pointerEvents: 'none' // Ensures the text doesn't interfere with mouse clicks
-                                                        }}>
+                                        const getBaseJobNo = (jobno) => {
+                                            if (!jobno) return jobno;
+                                            return jobno.replace(/S\d+$/i, '');
+                                        };
 
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        const currentJobNo = e?.data?.rd?.serialjobno;
+                                        const isBaseJob = !/S\d+$/i.test(currentJobNo || '');
+                                        const currentBase = getBaseJobNo(currentJobNo);
 
-                                                {/* Top info block: left form + right barcode/image/karat */}
-                                                <div className="pcf-header-block">
+                                        const rd2RowsForThisCard = isBaseJob
+                                            ? uniqueRd2Data.filter(r => getBaseJobNo(r?.serialjobno) === currentBase)
+                                            : uniqueRd2Data.filter(r => r?.serialjobno === currentJobNo);
 
-                                                    {/* LEFT: form fields */}
-                                                    <div className="pcf-header-left">
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label">Qty- {e?.data?.rd?.IsSplits_Quotation_Quantity} </div>
-                                                            <div className="pcf-info-value-red" style={{ fontSize: "12px", lineHeight: "1", color: "red" }}>{e?.data?.rd?.serialjobno}</div>
-                                                            <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center", fontWeight: "bold" }}> Design Code. </div>
-                                                        </div>
+                                        // Common (base) job -> same rows as the DCF card (family rows without the base total row)
+                                        // Split jobs S1/S2/S3 -> nothing, so it shows only on the common job
+                                        const pcfMetalRows = isBaseJob ? rd2RowsForThisCard.slice(1) : [];
 
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label">Order Date</div>
-                                                            <div className="pcf-info-value"> {e?.data?.rd?.OrderDate}</div>
-                                                            <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center" }}>{e?.data?.rd?.Designcode}</div>
-
-                                                        </div>
-
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label">Due Date </div>
-                                                            <div className="pcf-info-value"> {e?.data?.rd?.promisedate}</div>
-                                                            <div className="pcf-info-label2">Dia. Wt.</div>
-                                                            <div className="pcf-info-value2"> {e?.additional?.dia?.ActualWeight?.toFixed(2)}</div>
-                                                        </div>
-
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label">Cust Code </div>
-                                                            <div className="pcf-info-value">{e?.data?.rd?.CustomerCode}</div>
-                                                            <div className="pcf-info-label2">Dia. Pcs.</div>
-                                                            <div className="pcf-info-value2">{e?.additional?.dia?.ActualPcs}</div>
-                                                        </div>
-
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label">Order No </div>
-                                                            <div className="pcf-info-value">{e?.data?.rd?.OrderNo}</div>
-                                                            <div className="pcf-info-label2">{/S\d+$/.test(jobWiseMetalData?.serialjobno) ? jobWiseMetalData?.Metal_Type_Color?.substring(0, 4) : "Metal"}  Wt</div>
-                                                            <div className="pcf-info-value2">{jobWiseMetalData?.FinalWt?.toFixed(2)}</div>
-                                                        </div>
-
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Category </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}>{e?.data?.rd?.category}</div>
-                                                        </div>
-
-                                                        {/* <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Design Master Size </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}>{e?.data?.rd?.DefaultSize}</div>
-                                                        </div> */}
-
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Order Size </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> {e?.data?.rd?.Size}</div>
-                                                        </div>
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Customer Logo
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="imghideshow"
-                                                                    className="mx-1"
-                                                                    checked={e?.data?.rd?.Ustamping}
-                                                                />
+                                        return (
+                                            <div className="pcf-page" key={cardKey}>
+                                                <div className="pcf-wrapper">
+                                                    <div className="dcf-row">
+                                                        <div className="dcf-row" style={{ display: 'flex', position: 'relative', height: '16px' }}>
+                                                            <div
+                                                                style={{
+                                                                    flex: 1,
+                                                                    color: "black",
+                                                                    fontWeight: "bold",
+                                                                    textAlign: "center",
+                                                                    background: `${e?.data?.rd?.prioritycolorcode}`,
+                                                                    paddingTop: "2px"
+                                                                }}
+                                                            >
+                                                                {e?.data?.rd?.prioritycode}
                                                             </div>
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}></div>
-                                                        </div>
-                                                        <div className="pcf-info-row">
-                                                            <div className="pcf-info-label" style={{ height: "14px", flex: "0 0 50%", fontSize: "10px", color: "red", lineHeight: "1" }}>{e?.data?.rd?.lineid} </div>
-                                                            {/* <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> {e?.data?.rd?.MetalColorCo}</div> */}
-                                                            <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> {MultimetalColor}</div>
+
+                                                            {/* The centered title overlay */}
+                                                            <div className="dcf-title-bar" style={{
+                                                                position: 'absolute',
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                display: 'flex',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center',
+                                                                color: 'white',
+                                                                pointerEvents: 'none' // Ensures the text doesn't interfere with mouse clicks
+                                                            }}>
+
+                                                            </div>
                                                         </div>
                                                     </div>
 
-                                                    {/* RIGHT: barcode / image / karat boxes */}
-                                                    <div className="pcf-header-right">
-                                                        <div className="pcf-barcode-row barcode_img">
-                                                            {e?.data?.rd?.serialjobno !==
-                                                                (null || "" || undefined) && (
-                                                                    <BarcodeGenerator
-                                                                        data={e?.data?.rd?.serialjobno}
+                                                    {/* Top info block: left form + right barcode/image/karat */}
+                                                    <div className="pcf-header-block">
+
+                                                        {/* LEFT: form fields */}
+                                                        <div className="pcf-header-left">
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label">Qty- {e?.data?.rd?.IsSplits_Quotation_Quantity} </div>
+                                                                <div className="pcf-info-value-red" style={{ fontSize: "12px", lineHeight: "1", color: "red" }}>{e?.data?.rd?.serialjobno}</div>
+                                                                <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center", fontWeight: "bold" }}> Design Code. </div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label">Order Date</div>
+                                                                <div className="pcf-info-value"> {e?.data?.rd?.OrderDate}</div>
+                                                                <div className="pcf-info-label2" style={{ flex: "0 0 40%", borderRight: "none", textAlign: "center", justifyContent: "center" }}>{e?.data?.rd?.Designcode}</div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label">Due Date </div>
+                                                                <div className="pcf-info-value"> {e?.data?.rd?.promisedate}</div>
+                                                                <div className="pcf-info-label2">Dia. Wt.</div>
+                                                                <div className="pcf-info-value2"> {e?.additional?.dia?.ActualWeight?.toFixed(2)}</div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label">Cust Code </div>
+                                                                <div className="pcf-info-value">{e?.data?.rd?.CustomerCode}</div>
+                                                                <div className="pcf-info-label2">Dia. Pcs.</div>
+                                                                <div className="pcf-info-value2">{e?.additional?.dia?.ActualPcs}</div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label">Order No </div>
+                                                                <div className="pcf-info-value">{e?.data?.rd?.OrderNo}</div>
+                                                                <div className="pcf-info-label2">{/S\d+$/.test(jobWiseMetalData?.serialjobno) ? jobWiseMetalData?.Metal_Type_Color?.substring(0, 4) : "Metal"}  Wt</div>
+                                                                <div className="pcf-info-value2">{jobWiseMetalData?.FinalWt?.toFixed(2)}</div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Category </div>
+                                                                <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}>{e?.data?.rd?.category}</div>
+                                                            </div>
+
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Order Size </div>
+                                                                <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> {e?.data?.rd?.Size}</div>
+                                                            </div>
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label" style={{ flex: "0 0 50%" }}>Customer Logo
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        id="imghideshow"
+                                                                        className="mx-1"
+                                                                        checked={e?.data?.rd?.Ustamping}
                                                                     />
-                                                                )}
-                                                        </div>
-                                                        <div className="pcf-image-box">
-                                                            <img
-
-                                                                src={
-                                                                    e?.data?.rd?.DesignImage !== ''
-                                                                        ? e?.data?.rd?.DesignImage
-                                                                        : require("../../assets/img/default.jpg")
-                                                                } />
-                                                        </div>
-                                                        <div className="pcf-karat-row" style={{ justifyContent: 'end' }}>
-                                                            {activeColors?.map((code, index) => (
-                                                                <div
-                                                                    key={index}
-                                                                    className="dcf-cell dcf-karat"
-                                                                    style={{
-                                                                        backgroundColor: getBgColor(code),
-                                                                        border: '1px solid #000',
-                                                                        padding: '3px',
-
-                                                                        flex: "0 0 33px",
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center'
-                                                                    }}
-                                                                >
-                                                                    {boxText}
                                                                 </div>
-                                                            ))}
+                                                                <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}></div>
+                                                            </div>
+                                                            <div className="pcf-info-row">
+                                                                <div className="pcf-info-label" style={{ height: "14px", flex: "0 0 50%", fontSize: "10px", color: "red", lineHeight: "1" }}>{e?.data?.rd?.lineid} </div>
+                                                                <div className="pcf-info-value-wide" style={{ flex: "0 0 50%" }}> {MultimetalColor}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* RIGHT: barcode / image / karat boxes */}
+                                                        <div className="pcf-header-right">
+                                                            <div className="pcf-barcode-row barcode_img">
+                                                                {e?.data?.rd?.serialjobno !==
+                                                                    (null || "" || undefined) && (
+                                                                        <BarcodeGenerator
+                                                                            data={e?.data?.rd?.serialjobno}
+                                                                        />
+                                                                    )}
+                                                            </div>
+                                                            <div className="pcf-image-box">
+                                                                <img
+                                                                    src={
+                                                                        e?.data?.rd?.DesignImage !== ''
+                                                                            ? e?.data?.rd?.DesignImage
+                                                                            : require("../../assets/img/default.jpg")
+                                                                    } />
+                                                            </div>
+                                                            <div className="pcf-karat-row" style={{ justifyContent: 'end' }}>
+                                                                {activeColors?.map((code, index) => (
+                                                                    <div
+                                                                        key={index}
+                                                                        className="dcf-cell dcf-karat"
+                                                                        style={{
+                                                                            backgroundColor: getBgColor(code),
+                                                                            border: '1px solid #000',
+                                                                            padding: '3px',
+                                                                            flex: "0 0 33px",
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center'
+                                                                        }}
+                                                                    >
+                                                                        {boxText}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Department table header */}
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-table-header-cell">Department</div>
-                                                    <div className="pcf-cell pcf-col-wrkr pcf-table-header-cell">WrKr</div>
-                                                    <div className="pcf-cell pcf-col-inwt pcf-table-header-cell">IN WT.</div>
-                                                    <div className="pcf-cell pcf-col-outwt pcf-table-header-cell">OUT WT.</div>
-                                                    <div className="pcf-cell pcf-col-scrap pcf-table-header-cell">Scrap</div>
-                                                    <div className="pcf-cell pcf-col-dust pcf-table-header-cell">DUST</div>
-                                                    <div className="pcf-cell pcf-col-qcsign pcf-table-header-cell">QC SIGN.</div>
-                                                </div>
+                                                    {/* Department table header */}
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-table-header-cell">Department</div>
+                                                        <div className="pcf-cell pcf-col-wrkr pcf-table-header-cell">IN WT.</div>
+                                                        <div className="pcf-cell pcf-col-inwt pcf-table-header-cell">Scrap</div>
+                                                        <div className="pcf-cell pcf-col-outwt pcf-table-header-cell">QC Sign.</div>
+                                                        <div className="pcf-cell pcf-col-scrap pcf-table-header-cell"></div>
 
-                                                {/* Department rows */}
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">WAXING</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">CASTING</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">FILLING</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">ELE. POLISH</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">PRE. POLISH</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">LIGHT POL.</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">SETTING</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">FITTING</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-
-                                                <div className="pcf-row pcf-empty-row">
-                                                    <div className="pcf-cell pcf-col-dept"></div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">FIN. POLISH</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">FINAL QC</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">RHODIUM</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">CHILAI</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                <div className="pcf-row">
-                                                    <div className="pcf-cell pcf-col-dept pcf-dept-name">MINA</div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-
-                                                {/* blank spacer row before final weight */}
-                                                <div className="pcf-row pcf-empty-row">
-                                                    <div className="pcf-cell pcf-col-dept"></div>
-                                                    <div className="pcf-cell pcf-col-wrkr"></div>
-                                                    <div className="pcf-cell pcf-col-inwt"></div>
-                                                    <div className="pcf-cell pcf-col-outwt"></div>
-                                                    <div className="pcf-cell pcf-col-scrap"><b>Final Wt.</b></div>
-                                                    <div className="pcf-cell pcf-col-dust"></div>
-                                                    <div className="pcf-cell pcf-col-qcsign"></div>
-                                                </div>
-                                                {/* Instruction */}
-                                                <div className="dcf-row" style={{ borderBottom: "none", lineHeight: "1.2" }}>
-                                                    <div className="dcf-instruction-label dcf-instruction-box"> <span>Instruction : </span>
-
-                                                        <span
-
-                                                            style={{ fontSize: "8px", lineHeight: "9px" }}
-                                                            dangerouslySetInnerHTML={{
-                                                                __html:
-                                                                    e?.data?.rd?.ProductInstructionfull?.length > 530
-                                                                        ? `${e.data.rd.ProductInstructionfull.slice(0, 530)}...`
-                                                                        : e?.data?.rd?.ProductInstructionfull ||
-                                                                        e?.data?.rd?.QuoteRemark ||
-                                                                        "",
-                                                            }}
-                                                        />
                                                     </div>
 
+                                                    {/* Department rows */}
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">WAXING</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[0]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">CASTING</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[1]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">FILLING</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[2]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">ELE. POLISH</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[3]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">PRE. POLISH</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[4]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">LIGHT POL.</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[5]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">SETTING</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[6]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">FITTING</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">{pcfMetalRows?.[7]?.Metal_Type_Color}</div>
+                                                    </div>
+
+                                                    <div className="pcf-row pcf-empty-row">
+                                                        <div className="pcf-cell pcf-col-dept"></div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">Batch No</div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">FIN. POLISH</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">FINAL QC</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">RHODIUM</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">CHILAI</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                    </div>
+
+                                                    <div className="pcf-row">
+                                                        <div className="pcf-cell pcf-col-dept pcf-dept-name">MINA</div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                    </div>
+
+                                                    {/* blank spacer row before final weight */}
+                                                    <div className="pcf-row pcf-empty-row">
+                                                        <div className="pcf-cell pcf-col-dept"></div>
+                                                        <div className="pcf-cell pcf-col-wrkr"></div>
+                                                        <div className="pcf-cell pcf-col-inwt"></div>
+                                                        <div className="pcf-cell pcf-col-outwt"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"><b>Final Wt.</b></div>
+                                                    </div>
+
+                                                    {/* Instruction */}
+                                                    <div className="dcf-row" style={{ borderBottom: "none", lineHeight: "1.2" }}>
+                                                        <div className="dcf-instruction-label dcf-instruction-box"> <span>Instruction : </span>
+                                                            <span
+                                                                style={{ fontSize: "8px", lineHeight: "9px" }}
+                                                                dangerouslySetInnerHTML={{
+                                                                    __html:
+                                                                        e?.data?.rd?.ProductInstructionfull?.length > 530
+                                                                            ? `${e.data.rd.ProductInstructionfull.slice(0, 530)}...`
+                                                                            : e?.data?.rd?.ProductInstructionfull ||
+                                                                            e?.data?.rd?.QuoteRemark ||
+                                                                            "",
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
+                                        );
+                                    };
 
                                     // ---------- ALL dcf-wrapper cards first, pcf-page LAST, 2 per bagprint22 row ----------
                                     const allCards = [
-                                        ...rowChunks.map((chunk, idx) => renderDcfWrapper(chunk, `${i}-dcf-${idx}`)),
+                                        // ...rowChunks.map((chunk, idx) => renderDcfWrapper(chunk, `${i}-dcf-${idx}`)),
+                                        ...rowChunks.map((chunk, idx) => renderDcfWrapper(chunk, `${i}-dcf-${idx}`, i === 0)),
                                         renderPcfWrapper(`${i}-pcf`),
                                     ];
 

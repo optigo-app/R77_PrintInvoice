@@ -305,37 +305,37 @@ const JewelleryTaxInvoice2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
     }
 
     // console.log("result", result);
-   
-const formatPaymentData = (rawData) => {
-    if (!rawData) return [];
-  
 
-    const mergedMap = rawData.split("@-@").reduce((acc, item) => {
-      const parts = item.split("#-#");
-      const label = parts[0]?.trim() || "";
-      const id = parts[1]?.trim() || "";
-      const amount = parseFloat(parts[2]) || 0;
-      const key = `${label}_${id}`;
-  
-      if (acc[key]) {
-        acc[key].amount += amount;
-      } else {
-        acc[key] = { label, id, amount };
-      }
-  
-      return acc;
-    }, {});
-    return Object.values(mergedMap).map(item => ({
-      label: item.label,
-      id: item.id,
-      amount: item.amount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    }));
-  };
+    const formatPaymentData = (rawData) => {
+        if (!rawData) return [];
 
-   const pay_details = formatPaymentData(result?.header?.InvPayDet);
+
+        const mergedMap = rawData.split("@-@").reduce((acc, item) => {
+            const parts = item.split("#-#");
+            const label = parts[0]?.trim() || "";
+            const id = parts[1]?.trim() || "";
+            const amount = parseFloat(parts[2]) || 0;
+            const key = `${label}_${id}`;
+
+            if (acc[key]) {
+                acc[key].amount += amount;
+            } else {
+                acc[key] = { label, id, amount };
+            }
+
+            return acc;
+        }, {});
+        return Object.values(mergedMap).map(item => ({
+            label: item.label,
+            id: item.id,
+            amount: item.amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            })
+        }));
+    };
+
+    const pay_details = formatPaymentData(result?.header?.InvPayDet);
 
     return (
         <>
@@ -368,10 +368,13 @@ const formatPaymentData = (rawData) => {
                                                             {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode},
                                                             {result?.header?.CompanyState}({result?.header?.CompanyCountry})
                                                         </div>
-                                                        <div className="fslhJL">
-                                                            T {result?.header?.CompanyTellNo} | TOLL FREE{" "}
-                                                            {result?.header?.CompanyTollFreeNo}
-                                                        </div>
+                                                        {(result?.header?.CompanyTellNo || result?.header?.CompanyTollFreeNo) && (
+                                                            <div className="fslhJL">
+                                                                {result?.header?.CompanyTellNo && `TH ${result?.header?.CompanyTellNo}`}
+                                                                {result?.header?.CompanyTellNo && result?.header?.CompanyTollFreeNo && " | "}
+                                                                {result?.header?.CompanyTollFreeNo && `TOLL FREE ${result?.header?.CompanyTollFreeNo}`}
+                                                            </div>
+                                                        )}
                                                         <div className="fslhJL">
                                                             {result?.header?.CompanyEmail} |{result?.header?.CompanyWebsite}
                                                         </div>
@@ -508,7 +511,7 @@ const formatPaymentData = (rawData) => {
                                                         <div className='p-1 text-break'>
                                                             {a?.MetalTypePurity} {a?.MetalColorCode} {grossNetFlag ? `| ${a?.grosswt?.toFixed(3)} gms GW | ${a?.NetWt?.toFixed(3)} gms NW` : ""}
                                                             {
-                                                                `${a?.totals?.diamonds?.Wt === 0 ? '' : (' | ' + a?.totals?.diamonds?.Wt?.toFixed(3) + " cts ")} `
+                                                                `${a?.totals?.diamonds?.Wt === 0 ? '' : (' | Lab Diamond: ' + a?.totals?.diamonds?.Wt?.toFixed(3) + " cts ")} `
                                                             }
                                                             {
                                                                 `${a?.totals?.colorstone?.Wt === 0 ? '' : (' | ' + a?.totals?.colorstone?.Wt?.toFixed(3)) + " cts "} `
@@ -519,7 +522,7 @@ const formatPaymentData = (rawData) => {
                                                         </div>
                                                         {
                                                             a?.diamonds?.map((e) => {
-                                                                return <div className='p-1'>Labgrown : {e?.Pcs} Pcs | {e?.Wt?.toFixed(3)} Cts | {e?.Colorname} {e?.QualityName} </div>
+                                                                return <div className='p-1'>Diamond : {e?.Pcs} Pcs | {e?.Wt?.toFixed(3)} Cts | {e?.Colorname} {e?.QualityName} </div>
                                                             })
                                                         }
                                                         {
@@ -558,21 +561,21 @@ const formatPaymentData = (rawData) => {
                                     return <div key={i}>{e?.name}({e?.docno}) : <span className='fw-bold'>{formatAmount(e?.amount)}</span></div>
                                 })
                             }
-                        </div> */}     
-                                         <div className='pay-det'>
+                        </div> */}
+                                        <div className='pay-det'>
                                             {pay_details?.map((e, i) => {
                                                 return <div key={i}>{e?.label}  {e?.id ? `(${e?.id})` : ''}  : <span className='fw-bold'>{e?.amount}</span></div>
                                             })}
-                                         </div>
+                                        </div>
                                         <div>Balance : <span className='fw-bold'>{formatAmount(generalLedgerData?.BalAmt, 2)}</span></div>
                                         {
                                             result?.header?.PrintRemark && (
-                                            <>
-                                               <div className='fw-bold text-decoration-underline'>REMARKS:</div><div dangerouslySetInnerHTML={{ __html: result?.header?.PrintRemark }}></div>
-                                            </>
+                                                <>
+                                                    <div className='fw-bold text-decoration-underline'>REMARKS:</div><div dangerouslySetInnerHTML={{ __html: result?.header?.PrintRemark }}></div>
+                                                </>
                                             )
                                         }
-                                      
+
                                     </div>
                                     <div className='w33_jts p-1 fs_jts brr_jti2 text-break'>
                                         {/* {

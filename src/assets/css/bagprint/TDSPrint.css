@@ -1,0 +1,76 @@
+.tds-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #000000;
+    border: 1.5px solid #000000;
+  }
+  .column-header-row{
+    border: 1px solid black;
+  }
+  /* Header Styles */
+  .tds-table thead th {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+    text-align: center;
+    padding: 6px 4px;
+    border: 1px solid #000000;
+    vertical-align: middle;
+  }
+  
+  /* Row Borders & Standard Padding */
+  .tds-table td {
+    padding: 5px 6px;
+    border: 1px solid #000000;
+    vertical-align: middle;
+  }
+  
+  /* Customer Group Header Row */
+  .tds-table .customer-row td {
+    background-color: #e0e0e0;
+    font-weight: bold;
+    text-align: left;
+    font-size: 14px;
+    border-top: 1.5px solid #000000;
+    border-bottom: 1px solid #000000;
+  }
+  
+  /* Standard Data Rows */
+  .tds-table .data-row td {
+    background-color: #ffffff;
+  }
+  
+  /* Subtotal Rows */
+  .tds-table .subtotal-row td {
+    background-color: #ffffff;
+    border-bottom: 1.5px solid #000000;
+  }
+  
+  /* Grand Total Row at Bottom */
+  .tds-table .grand-total-row td {
+    background-color: #ffffff;
+    border-top: 2px solid #000000;
+    border-bottom: 2px solid #000000;
+  }
+  
+  .tds-table .grand-total-label {
+    background-color: #000000 !important;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  /* Helper Utility Classes */
+  .text-right {
+    text-align: right;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .font-bold {
+    font-weight: bold;
+  }

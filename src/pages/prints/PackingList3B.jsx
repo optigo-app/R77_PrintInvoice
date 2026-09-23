@@ -127,40 +127,61 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       datas.resultArray.forEach((item) => {
         // console.log("datas?.resultArray", datas?.resultArray);
 
-        if (item?.GroupJob !== '' && item?.metal?.some(el => el?.IsPrimaryMetal === 1)) {
-          const primaryMetal = item?.metal?.find(el => el?.IsPrimaryMetal === 1);
-          const metalWt = primaryMetal?.Wt || 0;
+        if (item?.GroupJob !== '' && item?.metal?.length > 0) {
           const makingChargeUnit = item?.MaKingCharge_Unit;
-
+        
           if (makingChargeUnit !== 0) {
-            const makingCharge = metalWt * makingChargeUnit;
-
-            const labourObject = {
-              jobNo: item?.SrJobno || item?.GroupJob,
-              GroupjobNo: item?.GroupJob,
-              NetWt: item?.NetWt,
-              name: 'Labour',
-              MakingUnit: makingChargeUnit,
-              MakingCharge: makingCharge,
-              MetalWt: metalWt,
-            };
-
             if (!datas.labour) {
               datas.labour = [];
             }
-            datas.labour.push(labourObject);
-
-            // console.log(`Labour object for item:`, labourObject);
+        
+            item.metal.forEach((el) => {
+              const metalWt = el?.Wt || 0;
+              const makingCharge = metalWt * makingChargeUnit;
+        
+              // check if a labour entry with the same MakingUnit already exists
+              const existing = datas.labour.find(
+                (l) => l.MakingUnit === makingChargeUnit
+              );
+        
+              if (existing) {
+                // merge into existing entry
+                existing.MetalWt += metalWt;
+                existing.MakingCharge += makingCharge;
+                existing.NetWt = (existing.NetWt || 0) + (item?.NetWt || 0);
+        
+                // keep track of all job numbers merged into this entry
+                existing.jobNo = Array.isArray(existing.jobNo)
+                  ? [...existing.jobNo, item?.SrJobno || item?.GroupJob]
+                  : [existing.jobNo, item?.SrJobno || item?.GroupJob];
+              } else {
+                const labourObject = {
+                  jobNo: item?.SrJobno || item?.GroupJob,
+                  GroupjobNo: item?.GroupJob,
+                  NetWt: item?.NetWt,
+                  name: 'Labour',
+                  MakingUnit: makingChargeUnit,
+                  MakingCharge: makingCharge,
+                  MetalWt: metalWt,
+                };
+                datas.labour.push(labourObject);
+              }
+            });
           } else {
-            // console.log(`Skipping item at index due to MaKingCharge_Unit being 0`);
+            // console.log(`Skipping item due to MaKingCharge_Unit being 0`);
           }
         } else {
-          // console.log(`Skipping item at index due to GroupJob being empty or no primary metal found`);
+          // console.log(`Skipping item due to GroupJob being empty or no metal found`);
         }
       });
     } else {
       // console.log("No resultArray found or it's empty.");
     }
+
+    
+    console.log("TCL:  datas.labour",  datas.labour)
+
+    
 
     datas.header.PrintRemark = datas.header.PrintRemark?.replace(/<br\s*\/?>/gi, "");
 
@@ -598,20 +619,48 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   //   );
   //   return acc + (calculation || 0);
   // }, 0);
-  const totalMakingAmount = result?.resultArray?.reduce((acc, e) => {
+  // const totalMakingAmount = result?.resultArray?.reduce((acc, e) => {
 
-    const weight = e?.GroupJob !== ''
-      ? (e?.totals?.metal?.Wt - e?.totals?.metal?.IsNotPrimaryMetalWt)
-      : e?.totals?.metal?.Wt;
+  //   const weight = e?.GroupJob !== ''
+  //     ? (e?.totals?.metal?.Wt - e?.totals?.metal?.IsNotPrimaryMetalWt)
+  //     : e?.totals?.metal?.Wt;
 
-    const calculation = e?.MakingChargeOnid == 4
-      ? e?.MaKingCharge_Unit
-      // : e?.MaKingCharge_Unit * weight;
-      : e?.MakingAmount;
+  //   const calculation = e?.MakingChargeOnid == 4
+  //     ? e?.MaKingCharge_Unit
+  //     // : e?.MaKingCharge_Unit * weight;
+  //     : e?.MakingAmount;
 
-    return acc + (calculation || 0);
+  //   return acc + (calculation || 0);
 
+  // }, 0);
+
+  // const totalMakingAmount = (result?.resultArray || []).reduce((grandSum, e) => {
+  //   const secondaryMetal = e?.metal?.find((m) => m?.IsPrimaryMetal === 0);
+  //   const amountA = e?.MakingAmount || 0;
+  //   const amountB = secondaryMetal?.SettingAmount || 0;
+  //   return grandSum + amountA + amountB;
+  // }, 0);
+
+  const totalMakingAmount = (result?.resultArray || []).reduce((grandSum, e) => {
+    const amountA = e?.MakingAmount || 0;
+  
+    const metalSettingSum = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0).reduce(
+      (sum, m) => sum + (m?.Wt * e?.MaKingCharge_Unit || 0),
+      0
+    ) || 0;
+  
+    const findingSettingSum = e?.finding?.reduce(
+      (sum, f) => sum + (f?.Wt * e?.MaKingCharge_Unit || 0),
+      0
+    ) || 0;
+  
+    const amountB = metalSettingSum + findingSettingSum;
+  
+    return grandSum + amountA + amountB;
   }, 0);
+
+
+
 
 
   const totalMetalSummaryAmount = result?.resultArray?.reduce((totalAcc, item) => {
@@ -795,10 +844,10 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
   const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
     let remainingFindings = [...findings];
-  
+
     const updatedMetals = metals.map((metal) => {
       if (metal.IsPrimaryMetal !== 1) return metal;
-  
+
       // findings that match this primary metal on Quality + Size + Rate
       const matched = remainingFindings.filter(
         (f) =>
@@ -807,13 +856,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
           f?.Rate === metal?.Rate &&
           f?.Supplier === metal?.Supplier
       );
-  
+
       if (matched.length === 0) return metal;
-  
+
       // remove the matched findings from the pool so they aren't reused
       // by another primary metal row and won't appear in the final findings list
       remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
-  
+
       const totals = matched.reduce(
         (acc, f) => ({
           Pcs: acc.Pcs + (f.Pcs || 0),
@@ -825,7 +874,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         }),
         { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
       );
-  
+
       return {
         ...metal,
         Pcs: (metal.Pcs || 0) + totals.Pcs,
@@ -836,10 +885,60 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         Weight: (metal.Weight || 0) + totals.Weight,
       };
     });
-  
+
     return { findings: remainingFindings, metals: updatedMetals };
   };
 
+
+  const calcFinalAmount = (e) => {
+    const secondaryMetals = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0) || [];
+  
+    // decide: merge into one labour row, or show two separate rows
+    const labourRows = (() => {
+      const rateA = e?.MaKingCharge_Unit || 0;
+      const amountA = e?.MakingAmount || 0;
+  
+      const rows = [{ rate: rateA, amount: amountA || 0 }];
+  
+      for (const metal of secondaryMetals) {
+        const rateB = metal?.SettingRate;
+        const amountB = metal?.SettingAmount || 0;
+  
+        // loose compare, per spec — switch to Number(existing.rate) === Number(rateB) for strict numeric matching
+        const existingRow = rows.find((row) => row.rate == rateB);
+  
+        if (existingRow) {
+          existingRow.amount += amountB;
+        } else {
+          rows.push({ rate: rateB, amount: amountB });
+        }
+      }
+  
+      return rows;
+    })();
+  
+    const labourTotal = labourRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+  
+    const extraCharge =
+      (e?.OtherCharges || 0) +
+      (e?.TotalDiamondHandling || 0) +
+      (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
+      (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
+      (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
+      (e?.totals?.diamonds?.SettingAmount || 0) +
+      (e?.totals?.colorstone?.SettingAmount || 0) +
+      (e?.totals?.finding?.SettingAmount || 0) +
+      (
+        e?.GroupJob !== ""
+          ? (e?.MaKingCharge_Unit || 0) * (e?.totals?.metal?.Wt || 0)
+          : labourTotal
+      );
+  
+    return extraCharge / (result?.header?.CurrencyExchRate || 1);
+  };
+
+  const GrandfinalAmount =
+  result?.resultArray?.reduce((sum, e) => sum + calcFinalAmount(e), 0) || 0;
   return (
     <>
       {loader ? (
@@ -1153,38 +1252,69 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
               {/* table rows */}
               {result?.resultArray?.map((e, i) => {
 
+                 
                 // Calculate extra charges safely
-                const labourTotal = e?.GroupJob !== ""
-                  ? (result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)
-                    ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0)
-                  : 0;
+               
 
-                const extraCharge =
-                  (e?.OtherCharges || 0) +
-                  (e?.TotalDiamondHandling || 0) +
-                  (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
-                  (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
-                  (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
-                  (e?.totals?.diamonds?.SettingAmount || 0) +
-                  (e?.totals?.colorstone?.SettingAmount || 0) +
-                  (e?.totals?.finding?.SettingAmount || 0) +
-                  labourTotal +
+                // labourTotal
+                // find the secondary (non-primary) metal row
+                const secondaryMetals = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0) || [];
+                
+                // decide: merge into one labour row, or show two separate rows
+                const labourRows = (() => {
+                  const rateA = e?.MaKingCharge_Unit;
+                  const amountA = e?.MakingAmount;
+                
+                  const rows = [{ rate: rateA, amount: amountA || 0 }];
+                
+                  for (const metal of secondaryMetals) {
+                    const rateB = metal?.SettingRate;
+                    const amountB = metal?.SettingAmount || 0;
+                
+                    // loose compare, per spec — switch to Number(existing.rate) === Number(rateB) for strict numeric matching
+                    const existingRow = rows.find((row) => row.rate == rateB);
+                
+                    if (existingRow) {
+                      existingRow.amount += amountB;
+                    } else {
+                      rows.push({ rate: rateB, amount: amountB });
+                    }
+                  }
+                
+                  return rows;
+                })();
+                
+                const labourTotal = labourRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+                
+                console.log("TCL: labourTotal", labourTotal)
+                // const labourTotal = e?.GroupJob !== ""
+                // ? (result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)
+                //   ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0)
+                // : 0;
 
-                  (
-                    e?.GroupJob !== ""
-                      ? (e?.MaKingCharge_Unit || 0) *
-                      ((e?.totals?.metal?.Wt || 0) -
-                        (e?.totals?.metal?.IsNotPrimaryMetalWt || 0))
-                      :
-                      // e?.MakingChargeOnid === 4
-                      //   ? (e?.MaKingCharge_Unit || 0)
-                      //   : (e?.MaKingCharge_Unit || 0) *
-                      //   (e?.totals?.metal?.Wt || 0)
-                      e?.MakingAmount
-                  );
+              const extraCharge =
+                (e?.OtherCharges || 0) +
+                (e?.TotalDiamondHandling || 0) +
+                (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
+                (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
+                (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
+                (e?.totals?.diamonds?.SettingAmount || 0) +
+                (e?.totals?.colorstone?.SettingAmount || 0) +
+                (e?.totals?.finding?.SettingAmount || 0) +
+                (
+                  e?.GroupJob !== ""
+                    ? (e?.MaKingCharge_Unit || 0) *
+                    ((e?.totals?.metal?.Wt || 0))
+                    :
+                    // e?.MakingChargeOnid === 4
+                    //   ? (e?.MaKingCharge_Unit || 0)
+                    //   : (e?.MaKingCharge_Unit || 0) *
+                    //   (e?.totals?.metal?.Wt || 0)
+                    labourTotal
+                );
 
-                const finalAmount =
-                  extraCharge / (result?.header?.CurrencyExchRate || 1);
+              const finalAmount =
+                extraCharge / (result?.header?.CurrencyExchRate || 1);
 
 
                 const discountDisplay = discountCriteria
@@ -1205,13 +1335,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 const diamonddata = mergeDiadetails(e?.diamonds);
                 const colorstonedata = mergeDiadetails(e?.colorstone);
 
-                
+
 
                 // const cirtiFinding = SolCertNo(
                 //   e?.GroupJob !== "" ? e?.GroupJob : e?.SrJobno,
                 //   1
                 // );
-        
+
 
                 const jobNos =
                   e?.GroupJob !== ""
@@ -1486,7 +1616,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
                           {/* Finding */}
 
-                          
+
 
                           <div style={{ margin: "0px 2px" }}>
                             {mergedFindings?.map((data, index) => (
@@ -1756,19 +1886,32 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             ))
                           ) : (
                             e?.MaKingCharge_Unit !== 0 && (
-                              <div className="d-flex w-100">
-                                <div className="lcol1_pcls start_center_pcls pdl_pcls">
-                                  Labour
+                              // <div className="d-flex w-100">
+                              //   <div className="lcol1_pcls start_center_pcls pdl_pcls">
+                              //     Labour
+                              //   </div>
+                              //   <div className="lcol1_pcls end_pcls pdr_pcls">
+                              //     {formatAmount(e?.MaKingCharge_Unit)}
+                              //   </div>
+                              //   <div className="lcol1_pcls end_pcls pdr_pcls">
+                              //     {/* {formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
+                              //     {formatAmount(e?.MakingAmount / result?.header?.CurrencyExchRate, 2)}
+                              //     {/* {e?.MakingChargeOnid==4 ? formatAmount(e?.MaKingCharge_Unit) : formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
+                              //   </div>
+                              // </div>
+                              labourRows.map((row, idx) => (
+                                <div className="d-flex w-100" key={idx}>
+                                  <div className="lcol1_pcls start_center_pcls pdl_pcls">
+                                    Labour
+                                  </div>
+                                  <div className="lcol1_pcls end_pcls pdr_pcls">
+                                    {formatAmount(row.rate)}
+                                  </div>
+                                  <div className="lcol1_pcls end_pcls pdr_pcls">
+                                    {formatAmount(row.amount / result?.header?.CurrencyExchRate, 2)}
+                                  </div>
                                 </div>
-                                <div className="lcol1_pcls end_pcls pdr_pcls">
-                                  {formatAmount(e?.MaKingCharge_Unit)}
-                                </div>
-                                <div className="lcol1_pcls end_pcls pdr_pcls">
-                                  {/* {formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
-                                  {formatAmount(e?.MakingAmount / result?.header?.CurrencyExchRate, 2)}
-                                  {/* {e?.MakingChargeOnid==4 ? formatAmount(e?.MaKingCharge_Unit) : formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
-                                </div>
-                              </div>
+                              ))
                             )
                           )}
 
@@ -2075,17 +2218,18 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   <div className="d-flex w-100">
                     <div className="w-100 end_pcls pdr_pcls">
                       {formatAmount(
-                        (
-                          (result?.mainTotal?.OtherCharges || 0) +
-                          (result?.mainTotal?.TotalDiamondHandling || 0) +
-                          (result?.mainTotal?.diamonds?.SettingAmount || 0) +
-                          (result?.mainTotal?.colorstone?.SettingAmount || 0) +
-                          (result?.mainTotal?.finding?.SettingAmount || 0) +
-                          (totalMakingAmount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_1_amount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_2_amount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_3_amount || 0)
-                        ) / (result?.header?.CurrencyExchRate || 1)
+                        // (
+                        //   (result?.mainTotal?.OtherCharges || 0) +
+                        //   (result?.mainTotal?.TotalDiamondHandling || 0) +
+                        //   (result?.mainTotal?.diamonds?.SettingAmount || 0) +
+                        //   (result?.mainTotal?.colorstone?.SettingAmount || 0) +
+                        //   (result?.mainTotal?.finding?.SettingAmount || 0) +
+                        //   (totalMakingAmount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_1_amount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_2_amount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_3_amount || 0)
+                        // ) / (result?.header?.CurrencyExchRate || 1)
+                        GrandfinalAmount
                       )}
                     </div>
                   </div>

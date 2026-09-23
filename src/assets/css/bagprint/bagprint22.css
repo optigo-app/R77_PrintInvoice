@@ -482,9 +482,9 @@
   /* prevent a single box from splitting across two pages —
      but do NOT force a break after every box */
 
-  .pcf-image-box img {
-    height: 110px !important;
-  }
+     .pcf-image-box img {
+      height: 110px !important;
+    }
 
   .pcf-instruction-box {
     height: 72px !important;

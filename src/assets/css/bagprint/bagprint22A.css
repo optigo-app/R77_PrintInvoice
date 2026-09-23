@@ -396,9 +396,9 @@ width: 25mm !important;
 /* ---- department table columns ---- */
 .pcf-col-dept    { flex: 0 0 19.15%; font-weight: bold; }
 .pcf-col-wrkr    { flex: 0 0 11.47%; }
-.pcf-col-inwt    { flex: 0 0 11.47%; }
+.pcf-col-inwt    { flex: 0 0 13.47%; }
 .pcf-col-outwt   { flex: 0 0 12.58%; }
-.pcf-col-scrap   { flex: 0 0 13.68%; }
+.pcf-col-scrap   { flex: 0 0 42.68%; }
 .pcf-col-dust    { flex: 0 0 11.47%; }
 .pcf-col-qcsign  { flex: 0 0 20.18%; }
 

@@ -27,6 +27,7 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const [loader, setLoader] = useState(true);
   const [diamondWise, setDiamondWise] = useState([]);
   const [imgFlag, setImgFlag] = useState(true);
+  const [remarksFlag, setRemarksFlag] = useState(false);
   const [findingRateFlag, setFindingRateFlag] = useState(false);
 
   const [findingFlag, setFindingFlag] = useState(false);
@@ -223,6 +224,13 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       setImgFlag(true);
     }
   };
+  const handleCheckboxRemarks = () => {
+    if (remarksFlag) {
+      setRemarksFlag(false);
+    } else {
+      setRemarksFlag(true);
+    }
+  };
 
   const handleCheckboxFindingRate = () => {
     if (findingRateFlag) {
@@ -283,6 +291,25 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     });
   }
 
+  const Multimetal_summary = Object.values(
+    (result?.json2 || [])
+      .filter(item => item.MasterManagement_DiamondStoneTypeid === 4 && item.IsPrimaryMetal === 0)
+      .reduce((acc, item) => {
+        if (!acc[item.ShapeName]) {
+          acc[item.ShapeName] = {
+            ShapeName: item.ShapeName,
+            TotalWt: 0,
+            TotalAmount: 0
+          };
+        }
+        acc[item.ShapeName].TotalWt += item.Wt;
+        acc[item.ShapeName].TotalAmount += item.Amount;
+        return acc;
+      }, {})
+  );
+  
+  console.log(Multimetal_summary);
+
 
 
  
@@ -298,6 +325,19 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             <>
               <div className="containerdp10 pab60_dp10">
                 <div className="d-flex justify-content-end align-items-center hidebtndp10 mb-4">
+                <input
+                    type="checkbox"
+                    id="imghideshow"
+                    className="mx-1"
+                    checked={remarksFlag}
+                    onChange={handleCheckboxRemarks}
+                  />
+                  <label
+                    htmlFor="imghideshow"
+                    className="me-3 user-select-none"
+                  >
+                   Remarks
+                  </label>
                   <input
                     type="checkbox"
                     id="imghideshow"
@@ -767,7 +807,8 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     <div className="theadsubcol2_dp10 centerdp10 border-end h-100 pe-1 border-end-0 end_dp10">
                                       {/* {(e?.NetWt + e?.LossWt)?.toFixed(3)} */}
                                       {!findingFlag
-                                        ? el?.Wt?.toFixed(3)
+                                        // ? el?.Wt?.toFixed(3)
+                                        ? el?.IsPrimaryMetal == 1 ? el?.Wt?.toFixed(3) : ""
                                         : el?.IsPrimaryMetal == 1
                                           ? (
                                             el?.Wt - e?.totals?.finding?.Wt
@@ -845,16 +886,21 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   })}
                                 </div>
                               )}
-                              <div className="p-2 px-1">
-                                {e?.JobRemark !== "" ? (
-                                  <>
-                                    <b className="fsgdp10">Remark : </b>{" "}
-                                    {e?.JobRemark}
-                                  </>
-                                ) : (
-                                  ""
-                                )}{" "}
-                              </div>
+
+                              {remarksFlag &&(
+                                 <div className="p-2 px-1">
+                                 {e?.QuoteRemark !== "" ? (
+                                   <>
+                                     <b className="fsgdp10">Remark : </b>{" "}
+                                     {e?.QuoteRemark}
+                                   </>
+                                 ) : (
+                                   ""
+                                 )}{" "}
+                               </div>
+
+                              )}
+                             
                             </div>
                             <div
                               className="tbcol3dp10"
@@ -1242,6 +1288,20 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             gm
                           </div>
                         </div>
+                        {Multimetal_summary?.map((e, i) => {
+                          return(
+                            <div key={i} className="d-flex justify-content-between px-1">
+                            <div className="w-50 fw-bold">{e?.ShapeName}</div>
+                            <div className="w-50 end_dp10 pe-1">
+                              {(
+                                e?.TotalWt
+                              )?.toFixed(3)}{" "}
+                              gm
+                            </div>
+                          </div>
+
+                          )
+                        })}
                         {MetShpWise?.map((e, i) => {
                           return (
                             <div
@@ -1301,6 +1361,19 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             )}
                           </div>
                         </div>
+                        {Multimetal_summary?.map((e, i) => {
+                          return(
+                            <div key={i} className="d-flex justify-content-between px-1">
+                            <div className="w-50 fw-bold">{e?.ShapeName}</div>
+                            <div className="w-50 end_dp10">
+                              {formatAmount(
+                                e?.TotalAmount
+                              )}
+                            </div>
+                          </div>
+                        )})}
+
+
                         {MetShpWise?.map((e, i) => {
                           return (
                             <div
