@@ -29,6 +29,7 @@ export default function WIPReport({ queries, headers }) {
 
     console.log("TCL: WIPReport -> queries", queries)
     const [data, setData] = useState([]);
+    const [diamondData, setDiamondData] = useState([]);
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
     const resultString = GetUniquejob(queryParams?.str_srjobno);
@@ -38,6 +39,8 @@ export default function WIPReport({ queries, headers }) {
     const [headerData, setHeaderData] = useState({});
     const [diaflag, setDiaFlag] = useState(true);
     const [lineflag, setLineFlag] = useState(true);
+    const [companyflag, setCompanyFlag] = useState(true);
+    const [materialflag, setMaterialFlag] = useState(false);
 
     useEffect(() => {
 
@@ -45,17 +48,18 @@ export default function WIPReport({ queries, headers }) {
         const fetchData = async () => {
             try {
 
-                const body={
-                    "con": "{\"id\": \"\", \"mode\": \"WIPprint\", \"appuserid\": \""+queries?.appuserid+"\"}",
-                    "p": "{\"wip_id\": \""+queries?.wip_id+"\"}",
+                const body = {
+                    "con": "{\"id\": \"\", \"mode\": \"WIPprint\", \"appuserid\": \"" + queries?.appuserid + "\"}",
+                    "p": "{\"wip_id\": \"" + queries?.wip_id + "\"}",
                     "f": "DynamicReport ( get sp list )"
-                  }
+                }
 
-                const allDatas = await GetWipData(queries,body);
+                const allDatas = await GetWipData(queries, body);
 
 
                 setData(allDatas?.Data?.rd1 || []);
                 setHeaderData(allDatas?.Data?.rd[0] || {});
+                setDiamondData(allDatas?.Data?.rd2 || []);
             } catch (error) {
                 console.log(error);
             }
@@ -89,10 +93,49 @@ export default function WIPReport({ queries, headers }) {
             setLineFlag(true);
         }
     };
+    const handleCompanyCheckbox = () => {
+        if (companyflag) {
+            setCompanyFlag(false);
+        } else {
+            setCompanyFlag(true);
+        }
+    };
+    const handleMaterialCheckbox = () => {
+        if (materialflag) {
+            setMaterialFlag(false);
+        } else {
+            setMaterialFlag(true);
+        }
+    };
+    
+    function getMaterialTypes(JobSerialKey) {
+        return diamondData
+            .filter(x => x.JobSerialKey === JobSerialKey && x.ItemId===3)
+            .map(x => x.materialtypename.substring(0, 3))
+            .join(',');
+    }
 
 
     return (
         <>
+            {companyflag && (
+                <style>{`
+                @page:first {
+                    margin-bottom: 160px;
+                }
+            `}</style>
+            )}
+
+            {diaflag && !companyflag && !lineflag && (
+                <style>{`
+                @page {
+                    margin-top: 40px;
+                }@page:first {
+                    margin-top: 20px;
+                }
+                
+            `}</style>
+            )}
             <div style={{ marginBottom: "2rem" }}>
                 {data?.length === 0 ? (
                     <Loader />
@@ -109,6 +152,38 @@ export default function WIPReport({ queries, headers }) {
 
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center" }}>
+
+                                <div>
+                                        <input
+                                            type="checkbox"
+                                            id="companyid"
+                                            className="mx-1"
+                                            checked={materialflag}
+                                            onChange={handleMaterialCheckbox}
+                                        />
+                                        <label
+                                            htmlFor="companyid"
+                                            className="me-3 user-select-none"
+                                        >
+                                            Dia. Type
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <input
+                                            type="checkbox"
+                                            id="companyid"
+                                            className="mx-1"
+                                            checked={companyflag}
+                                            onChange={handleCompanyCheckbox}
+                                        />
+                                        <label
+                                            htmlFor="companyid"
+                                            className="me-3 user-select-none"
+                                        >
+                                            Company Details
+                                        </label>
+                                    </div>
 
                                     <div>
                                         <input
@@ -172,128 +247,134 @@ export default function WIPReport({ queries, headers }) {
                                     margin: "0 auto",
                                 }}
                             >
-                                <div
-                                    style={{
-                                        width: "100%",
 
-                                    }}
-                                    className="print_header"
-                                >
-                                    {/* Top Title Bar */}
+                                {companyflag && (
+
                                     <div
                                         style={{
-                                            background: "#9e9e9e",
-                                            color: "#fff",
-                                            fontWeight: "bold",
-                                            fontSize: "28px",
-                                            padding: "0px 15px",
-                                            letterSpacing: "1px",
+                                            width: "100%",
 
                                         }}
+                                        className="print_header"
                                     >
-                                        WIP REPORT
-                                    </div>
-
-                                    {/* Content */}
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            padding: "0px 15px",
-                                        }}
-                                    >
-                                        {/* Left Section */}
-                                        <div>
-                                            <div
-                                                style={{
-                                                    fontSize: "24px",
-                                                    fontWeight: "bold",
-
-                                                    color: "#000",
-                                                }}
-                                            >
-                                                {headerData?.CompanyFullName || ""}
-                                            </div>
-
-                                            <div
-                                                style={{
-                                                    fontSize: "13px",
-                                                    color: "#000",
-
-                                                }}
-                                            >
-                                                {headerData?.CompanyAddress || ""}
-                                            </div>
-                                            <div
-                                                style={{
-                                                    fontSize: "13px",
-                                                    color: "#000",
-
-                                                }}
-                                            >
-                                                {headerData?.CompanyAddress2 || ""}
-                                            </div>
-
-                                            <div
-                                                style={{
-                                                    fontSize: "13px",
-                                                    color: "#000",
-
-                                                }}
-                                            >
-                                                {headerData?.CompanyCity || ""}-{headerData?.CompanyPinCode || ""}, {headerData?.CompanyState || ""}({headerData?.CompanyCountry || ""})
-                                            </div>
-
-                                            <div
-                                                style={{
-                                                    fontSize: "13px",
-                                                    color: "#000",
-
-                                                }}
-                                            >
-                                                T {headerData?.CompanyTellNo || ""}
-                                            </div>
-
-                                            <div
-                                                style={{
-                                                    fontSize: "13px",
-
-                                                }}
-                                            >
-                                                {headerData?.CompanyEmail || ""} &nbsp; {headerData?.CompanyWebsite || ""}
-                                            </div>
-                                        </div>
-
-                                        {/* Right Logo */}
+                                        {/* Top Title Bar */}
                                         <div
                                             style={{
-                                                width: "90px",
-                                                height: "90px",
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
+                                                background: "#9e9e9e",
+                                                color: "#fff",
+                                                fontWeight: "bold",
+                                                fontSize: "28px",
+                                                padding: "0px 15px",
+                                                letterSpacing: "1px",
+
                                             }}
                                         >
-                                            <img
-                                                src={headerData?.PrintLogo}
-                                                alt="ring"
-                                                style={{
-                                                    width: "70px",
-                                                    objectFit: "contain",
-                                                }}
-                                            />
+                                            WIP REPORT
                                         </div>
+
+                                        {/* Content */}
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                padding: "0px 15px",
+                                            }}
+                                        >
+                                            {/* Left Section */}
+                                            <div>
+                                                <div
+                                                    style={{
+                                                        fontSize: "24px",
+                                                        fontWeight: "bold",
+
+                                                        color: "#000",
+                                                    }}
+                                                >
+                                                    {headerData?.CompanyFullName || ""}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: "13px",
+                                                        color: "#000",
+
+                                                    }}
+                                                >
+                                                    {headerData?.CompanyAddress || ""}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: "13px",
+                                                        color: "#000",
+
+                                                    }}
+                                                >
+                                                    {headerData?.CompanyAddress2 || ""}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: "13px",
+                                                        color: "#000",
+
+                                                    }}
+                                                >
+                                                    {headerData?.CompanyCity || ""}-{headerData?.CompanyPinCode || ""}, {headerData?.CompanyState || ""}({headerData?.CompanyCountry || ""})
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: "13px",
+                                                        color: "#000",
+
+                                                    }}
+                                                >
+                                                    T {headerData?.CompanyTellNo || ""}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        fontSize: "13px",
+
+                                                    }}
+                                                >
+                                                    {headerData?.CompanyEmail || ""} &nbsp; {headerData?.CompanyWebsite || ""}
+                                                </div>
+                                            </div>
+
+                                            {/* Right Logo */}
+                                            <div
+                                                style={{
+                                                    width: "90px",
+                                                    height: "90px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <img
+                                                    src={headerData?.PrintLogo}
+                                                    alt="ring"
+                                                    style={{
+                                                        width: "70px",
+                                                        objectFit: "contain",
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Bottom Border */}
+                                        <div
+                                            style={{
+                                                borderTop: "2px solid #d3d3d3",
+                                                margin: "0 15px",
+                                            }}
+                                        />
                                     </div>
 
-                                    {/* Bottom Border */}
-                                    <div
-                                        style={{
-                                            borderTop: "2px solid #d3d3d3",
-                                            margin: "0 15px",
-                                        }}
-                                    />
-                                </div>
+                                )}
+
                                 {filtered.map((item, index) => (
                                     <div
                                         key={index}
@@ -306,7 +387,7 @@ export default function WIPReport({ queries, headers }) {
                                             overflow: "hidden",
                                             // marginBottom: lineflag?"5px":"",
                                             marginBottom: lineflag && diaflag
-                                                ? "5px"
+                                                ? "4px"
                                                 : diaflag
                                                     ? "0px"
                                                     : lineflag
@@ -376,7 +457,7 @@ export default function WIPReport({ queries, headers }) {
                                                     }}
                                                     className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                 >
-                                                    <div style={{ width: "90px" }}>LINE ID:</div>
+                                                    <div style={{ width: "72px" }}>LINE ID:</div>
 
                                                     <div style={{ fontWeight: "bold" }}>
                                                         {item?.lineid}
@@ -392,7 +473,7 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>DESIGN:</div>
+                                                <div style={{ width: "72px" }}>DESIGN:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
                                                     {item?.designno || ""}
@@ -406,7 +487,7 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>JOB NO:</div>
+                                                <div style={{ width: "72px" }}>JOB NO:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
                                                     {item?.serialjobno}{" "}[{item?.Locationname}] {item?.Quantity}
@@ -420,7 +501,7 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>Size:</div>
+                                                <div style={{ width: "72px" }}>Size:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>{item?.size || ""}</div>
                                             </div>
@@ -431,7 +512,7 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>Metal:</div>
+                                                <div style={{ width: "72px" }}>Metal:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>{item?.MetalType + " " + item?.MetalColor || ""}</div>
                                             </div>
@@ -444,7 +525,7 @@ export default function WIPReport({ queries, headers }) {
                                                         }}
                                                         className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                     >
-                                                        <div style={{ width: "90px" }}>Dia. Qty:</div>
+                                                        <div style={{ width: "72px" }}>Dia. Qty:</div>
 
                                                         <div style={{ fontWeight: "bold" }}>{item?.DiaQlty || ""}</div>
                                                     </div>
@@ -455,7 +536,7 @@ export default function WIPReport({ queries, headers }) {
                                                         }}
                                                         className={`${lineflag ? " line-height1" : "line-height2"}`}
                                                     >
-                                                        <div style={{ width: "90px" }}>Dia. Color:</div>
+                                                        <div style={{ width: "72px" }}>Dia. Color:</div>
 
                                                         <div style={{ fontWeight: "bold", width: "112px" }}>{item?.DiaColor}</div>
                                                     </div>
@@ -471,10 +552,10 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>Dia. weight:</div>
+                                                <div style={{ width: "72px" }}>Dia. weight:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
-                                                    {item?.Diamond_actualusedpcs}/{item?.Diamond_actualused?.toFixed(3) + " cwt"}
+                                                    {item?.Diamond_actualusedpcs}/{item?.Diamond_actualused?.toFixed(3) + " cwt"} {materialflag && getMaterialTypes(item?.serialjobno) &&`(${getMaterialTypes(item?.serialjobno)})`  } 
                                                 </div>
                                             </div>
 
@@ -484,7 +565,7 @@ export default function WIPReport({ queries, headers }) {
                                                 }}
                                                 className={`${lineflag ? " line-height1" : "line-height2"}`}
                                             >
-                                                <div style={{ width: "90px" }}>C. weight:</div>
+                                                <div style={{ width: "72px" }}>C. weight:</div>
 
                                                 <div style={{ fontWeight: "bold" }}>
                                                     {item?.ColorStone_actualusedpcs}/{item?.ColorStone_actualused?.toFixed(3) + " cwt"}

@@ -27,6 +27,10 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     const [MetShpWise, setMetShpWise] = useState([]);
     const [notGoldMetalTotal, setNotGoldMetalTotal] = useState(0);
     const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
+    const [companyDetails, setCompanyDetails] = useState(true);
+    const [tunchDetails, setTunchDetails] = useState(true);
+    const [pcsDetails, setPcsDetails] = useState(true);
+    const [summaryDetails, setSummaryDetails] = useState(true);
 
     const [brokarage, setBrokarage] = useState([]);
     const [msg, setMsg] = useState("");
@@ -558,6 +562,88 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     // console.log('address', address);
     // console.log('total', total);
 
+    const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
+        let remainingFindings = [...findings];
+      
+        const updatedMetals = metals.map((metal) => {
+          if (metal.IsPrimaryMetal !== 1) return metal;
+      
+          // findings that match this primary metal on Quality + Size + Rate
+          const matched = remainingFindings.filter(
+            (f) =>
+              f?.QualityName === metal?.QualityName &&
+              f?.SizeName === metal?.SizeName &&
+              f?.Rate === metal?.Rate &&
+              f?.Supplier === metal?.Supplier
+          );
+      
+          if (matched.length === 0) return metal;
+      
+          // remove the matched findings from the pool so they aren't reused
+          // by another primary metal row and won't appear in the final findings list
+          remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
+      
+          const totals = matched.reduce(
+            (acc, f) => ({
+              Pcs: acc.Pcs + (f.Pcs || 0),
+              Wt: acc.Wt + (f.Wt || 0),
+              FineWt: acc.FineWt + (f.FineWt || 0),
+              Amount: acc.Amount + (f.Amount || 0),
+              RMwt: acc.RMwt + (f.RMwt || 0),
+              Weight: acc.Weight + (f.Weight || 0),
+            }),
+            { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
+          );
+      
+          return {
+            ...metal,
+            Pcs: (metal.Pcs || 0) + totals.Pcs,
+            Wt: (metal.Wt || 0) + totals.Wt,
+            FineWt: (metal.FineWt || 0) + totals.FineWt,
+            Amount: (metal.Amount || 0) + totals.Amount,
+            RMwt: (metal.RMwt || 0) + totals.RMwt,
+            Weight: (metal.Weight || 0) + totals.Weight,
+          };
+        });
+      
+        return { findings: remainingFindings, metals: updatedMetals };
+      };
+
+
+      
+      
+  const handleCompanyDetails = () => {
+    if (companyDetails) setCompanyDetails(false);
+    else {
+      setCompanyDetails(true);
+    }
+  };
+
+  const handleTunchDetails = () => {
+    if (tunchDetails) setTunchDetails(false);
+    else {
+      setTunchDetails(true);
+    }
+  };
+  
+  const handlePcsDetails = () => {
+    if (pcsDetails) setPcsDetails(false);
+    else {
+      setPcsDetails(true);
+    }
+  };
+  
+  const handleSummaryDetails = () => {
+    if (summaryDetails) setSummaryDetails(false);
+    else {
+      setSummaryDetails(true);
+    }
+  };
+    
+    
+     
+     
+
     return (
         <>
             {loader ? (
@@ -567,6 +653,49 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                     <div className="pad_60_allPrint">
                         {/* buttons */}
                         <div className="d-flex justify-content-end align-items-center print_sec_sum4 mb-4 pt-4">
+                            
+                            <div className="form-check d-flex align-items-center detailPrint1L_font_13">
+                                <input
+                                    className="border-dark me-2"
+                                    type="checkbox"
+                                    checked={companyDetails}
+                                    onChange={(e) => handleCompanyDetails(e)}
+                                    name="companyDetails"
+                                />
+                                <label className="pt-1">Company details </label>
+                            </div>
+                            <div className="form-check d-flex align-items-center detailPrint1L_font_13">
+                                <input
+                                    className="border-dark me-2"
+                                    type="checkbox"
+                                    checked={tunchDetails}
+                                    onChange={(e) => handleTunchDetails(e)}
+                                    name="tunchDetails"
+                                />
+                                <label className="pt-1">Tunch </label>
+                            </div>
+                            <div className="form-check d-flex align-items-center detailPrint1L_font_13">
+                                <input
+                                    className="border-dark me-2"
+                                    type="checkbox"
+                                    htmlFor="pcsDetails"
+                                    checked={pcsDetails}
+                                    onChange={(e) => handlePcsDetails(e)}
+                                    name="pcsDetails"
+                                />
+                                <label id="pcsDetails" className="pt-1">Pcs </label>
+                            </div>
+                            <div className="form-check d-flex align-items-center detailPrint1L_font_13">
+                                <input
+                                    className="border-dark me-2"
+                                    type="checkbox"
+                                    htmlFor="summaryDetails"
+                                    checked={summaryDetails}
+                                    onChange={(e) => handleSummaryDetails(e)}
+                                    name="summaryDetails"
+                                />
+                                <label id="summaryDetails" className="pt-1">Summary </label>
+                            </div>
                             <div className="form-check d-flex align-items-center detailPrint1L_font_13">
                                 <input
                                     className="border-dark me-2"
@@ -575,7 +704,7 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                     onChange={(e) => handleChange(e)}
                                     name="image"
                                 />
-                                <label className="pt-1">With Image</label>
+                                <label className="pt-1">With Image </label>
                             </div>
                             <div className="form-check detailPrint1L_font_14">
                                 <input
@@ -595,36 +724,40 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                         </div>
 
                         {/* Company Details */}
-                        <div className="d-flex align-items-center pb-2 border-bottom recordDetailPrint1">
-                            <div className="col-6">
-                                <h2 className="fw-bold detailPrint1L_font_16 pb-1">{json0Data?.CompanyFullName}</h2>
-                                {json0Data?.CompanyAddress !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.CompanyAddress}</p>)}
-                                {json0Data?.CompanyAddress2 !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.CompanyAddress2}</p>)}
-                                <p className="lhDetailPrint1 pb-1">
-                                    {json0Data?.CompanyCity !== "" && `${json0Data?.CompanyCity}`}{json0Data?.CompanyPinCode !== "" && `-${json0Data?.CompanyPinCode},`}
-                                    {json0Data?.CompanyState !== "" && `${json0Data?.CompanyState}`}{json0Data?.CompanyCountry !== "" && `${(json0Data?.CompanyCountry)}`}
-                                </p>
-                                {json0Data?.CompanyTellNo !== "" && (<p className="lhDetailPrint1 pb-1">T {json0Data?.CompanyTellNo}</p>)}
-                                <p className="lhDetailPrint1 pb-1">
-                                    {json0Data?.CompanyEmail} {json0Data?.CompanyWebsite !== "" && `| ${json0Data?.CompanyWebsite}`}
-                                </p>
-                                <p className="lhDetailPrint1 pb-1">
-                                    {json0Data?.Company_VAT_GST_No}
-                                    {json0Data?.Company_CST_STATE_No !== "" && `| ${json0Data?.Company_CST_STATE}`}
-                                    {json0Data?.Company_CST_STATE_No !== "" && `-${json0Data?.Company_CST_STATE_No}`} {json0Data?.Pannumber !== "" && `| PAN-${json0Data?.Pannumber}`}
-                                </p>
-                            </div>
-                            <div className="col-6">
-                                {isImageWorking && (json0Data?.PrintLogo !== "" &&
-                                    <img src={json0Data?.PrintLogo} alt=""
-                                        className='h-auto ms-auto d-block object-fit-contain w-55'
-                                        style={{width:"55%"}}
-                                        onError={handleImageErrors} height={120} width={150} />)}
-                            </div>
-                        </div>
+
+                        {companyDetails && (
+                              <div className="d-flex align-items-center pb-2 border-bottom recordDetailPrint1">
+                              <div className="col-6">
+                                  <h2 className="fw-bold detailPrint1L_font_16 pb-1">{json0Data?.CompanyFullName}</h2>
+                                  {json0Data?.CompanyAddress !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.CompanyAddress}</p>)}
+                                  {json0Data?.CompanyAddress2 !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.CompanyAddress2}</p>)}
+                                  <p className="lhDetailPrint1 pb-1">
+                                      {json0Data?.CompanyCity !== "" && `${json0Data?.CompanyCity}`}{json0Data?.CompanyPinCode !== "" && `-${json0Data?.CompanyPinCode},`}
+                                      {json0Data?.CompanyState !== "" && `${json0Data?.CompanyState}`}{json0Data?.CompanyCountry !== "" && `${(json0Data?.CompanyCountry)}`}
+                                  </p>
+                                  {json0Data?.CompanyTellNo !== "" && (<p className="lhDetailPrint1 pb-1">T {json0Data?.CompanyTellNo}</p>)}
+                                  <p className="lhDetailPrint1 pb-1">
+                                      {json0Data?.CompanyEmail} {json0Data?.CompanyWebsite !== "" && `| ${json0Data?.CompanyWebsite}`}
+                                  </p>
+                                  <p className="lhDetailPrint1 pb-1">
+                                      {json0Data?.Company_VAT_GST_No}
+                                      {json0Data?.Company_CST_STATE_No !== "" && `| ${json0Data?.Company_CST_STATE}`}
+                                      {json0Data?.Company_CST_STATE_No !== "" && `-${json0Data?.Company_CST_STATE_No}`} {json0Data?.Pannumber !== "" && `| PAN-${json0Data?.Pannumber}`}
+                                  </p>
+                              </div>
+                              <div className="col-6">
+                                  {isImageWorking && (json0Data?.PrintLogo !== "" &&
+                                      <img src={json0Data?.PrintLogo} alt=""
+                                          className='h-auto ms-auto d-block object-fit-contain w-55'
+                                          style={{width:"55%"}}
+                                          onError={handleImageErrors} height={120} width={150} />)}
+                              </div>
+                          </div>
+                        )}
+                      
 
                         {/* Customer Details */}
-                        <div className="d-flex border-start border-end border-bottom mb-1 recordDetailPrint1">
+                        <div className="d-flex border-start border-end border-bottom mb-1 recordDetailPrint1" style={{borderTop: companyDetails ? "none" : "1px solid #dee2e6"}}>
                             <div className="col-4 border-end  p-1">
                                 <p className="lhDetailPrint1">{json0Data?.lblBillTo}</p>
                                 <p className="lhDetailPrint1 fw-bold detailPrint1L_font_14">
@@ -706,12 +839,15 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                         <p className="fw-bold WdthCod d-flex align-items-center justify-content-center border-end ">
                                             Code
                                         </p>
-                                        <p className="fw-bold WdthSiz d-flex align-items-center justify-content-center border-end ">
+                                        <p className="fw-bold WdthSiz d-flex align-items-center justify-content-center border-end " style={{width:pcsDetails ? "17.3%" : "26.3%"}}>
                                             Size
                                         </p>
+                                        {pcsDetails &&(
+
                                         <p className="fw-bold WdthPcs d-flex align-items-center justify-content-center border-end " style={{ width: "7%" }}>
                                             Pcs
                                         </p>
+                                        )}
                                         <p className="fw-bold WdthWT d-flex align-items-center justify-content-center border-end " style={{ width: "12.75%" }}>
                                             Wt
                                         </p>
@@ -849,12 +985,16 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                                             {/* Lineid - */}
                                                             {e?.lineid}</p>
                                                     )}
-                                                    <p className="text-center">
-                                                        Tunch :{" "}
-                                                        <span className="fw-bold">
-                                                            {NumberWithCommas(e?.Tunch, 3)}
-                                                        </span>
-                                                    </p>
+                                                    {tunchDetails &&(
+                                                          <p className="text-center">
+                                                          Tunch :{" "}
+                                                          <span className="fw-bold">
+                                                              {NumberWithCommas(e?.Tunch, 3)}
+                                                          </span>
+                                                      </p>
+
+                                                    )}
+                                                  
                                                     <p className="text-center">
                                                         Gross Wt:{" "}
                                                         <span className="fw-bold">
@@ -881,12 +1021,15 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                                                         {ele?.MaterialTypeName !== "" && ele?.MaterialTypeName} {ele?.ShapeName} {ele?.QualityName}{" "}
                                                                         {ele?.Colorname}
                                                                     </p>
-                                                                    <p className="WdthSiz text-center paddingRightDetailPrint1 text-break">
+                                                                    <p className="WdthSiz text-center paddingRightDetailPrint1 text-break" style={{width:pcsDetails ? "17.3%" : "26.3%"}}>
                                                                         {ele?.SizeName}
                                                                     </p>
+                                                                    {pcsDetails &&(
+
                                                                     <p className="WdthPcs text-end paddingRightDetailPrint1" style={{ width: "7%" }}>
                                                                         {NumberWithCommas(ele?.Pcs, 0)}
                                                                     </p>
+                                                                    )}
                                                                     <p className="WdthWT text-end paddingRightDetailPrint1" style={{ width: "12.75%" }}>
                                                                         {fixedValues(ele?.Wt, 3)}
                                                                     </p>
@@ -902,11 +1045,15 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                                     <div className="d-flex border-bottom position-absolute bottom-0 w-100  border-top totalMinHeightDetailPrint1 lightGrey start-0">
                                                         <p className="WdthRemnTotl1 paddingRightDetailPrint1 "></p>
                                                         <p className="WdthRemnTotl1 paddingRightDetailPrint1 "></p>
-                                                        <p className="WdthPcsTotl paddingRightDetailPrint1 text-end fw-bold d-flex align-items-center justify-content-end" style={{ width: "7%" }}>
-                                                            {/* {e?.diamondsTotal?.Pcs === 0 && NumberWithCommas(e?.totals?.diamonds?.Pcs, 0)} */}
-                                                            {e?.totals?.diamonds?.Pcs !== 0 && NumberWithCommas(e?.totals?.diamonds?.Pcs, 0)}
-                                                        </p>
-                                                        <p className="WdthWtTotl paddingRightDetailPrint1 text-end fw-bold d-flex align-items-center justify-content-end" style={{ width: "13.75%" }}>
+                                                        {pcsDetails &&(
+                                                              <p className="WdthPcsTotl paddingRightDetailPrint1 text-end fw-bold d-flex align-items-center justify-content-end" style={{ width: "7%" }}>
+                                                              {/* {e?.diamondsTotal?.Pcs === 0 && NumberWithCommas(e?.totals?.diamonds?.Pcs, 0)} */}
+                                                              {e?.totals?.diamonds?.Pcs !== 0 && NumberWithCommas(e?.totals?.diamonds?.Pcs, 0)}
+                                                          </p>
+
+                                                        ) }
+                                                      
+                                                        <p className="WdthWtTotl paddingRightDetailPrint1 text-end fw-bold d-flex align-items-center justify-content-end" style={{ width: pcsDetails? "13.75%" :"21.75%"}}>
                                                             {e?.totals?.diamonds?.Wt !== 0 &&
                                                                 fixedValues(e?.totals?.diamonds?.Wt, 3)}
                                                         </p>
@@ -1223,10 +1370,14 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                     <div className="WdthRemnTotl1">
                                         <p className=""></p>
                                     </div>
-                                    <div className="WdthPcsTotl text-end fw-bold" style={{ width: "23%" }}>
+                                    {pcsDetails &&(
+                                        <div className="WdthPcsTotl text-end fw-bold" style={{ width: "23%" }}>
                                         <p className="" >{NumberWithCommas(finalD?.mainTotal?.diamonds?.Pcs, 0)}</p>
                                     </div>
-                                    <div className="WdthWtTotl text-end" style={{ width: "13.75%" }}>
+
+                                    )}
+                                    
+                                    <div className="WdthWtTotl text-end" style={{ width: pcsDetails? "13.75%" : "36.75%"}}>
                                         <p className="fw-bold">
                                             {NumberWithCommas(finalD?.mainTotal?.diamonds?.Wt, 3)}
                                         </p>
@@ -1308,7 +1459,10 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                         {/* Summary */}
                         <div className="SpBrders pt-1">
                             <div className="d-flex w-100 recordDetailPrint1 detailPrint1L_font_11">
-                                <div className="col-4 pe-1">
+
+                                {summaryDetails &&(
+                                    <>
+                                    <div className="col-4 pe-1">
                                     <p className="border-start fw-bold text-center border-bottom w-100 border-end border-top lightGrey">
                                         SUMMARY
                                     </p>
@@ -1496,6 +1650,13 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                         </div>
                                     </div>
                                 </div>
+                                    </>
+                                )}
+
+                                {!summaryDetails &&(
+                                    <div className="col-8 pe-1"> </div>
+                                )}
+                                
 
                                 {/* Remark */}
                                 <div className="col-2 pe-1">

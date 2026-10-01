@@ -81,13 +81,13 @@ function DiamondStock({ queries, headers }) {
                     <div className="row-group">
                       <div className="col-left">
                         <div className="frow">
-                          <div className="cell label" style={{ width: "21%" }}>Wt.</div>
+                          <div className="cell label" style={{ width: "34%" }}>Wt.</div>
                           <div className="cell value" style={{ width: "72%" }}>
                             {item?.TotalRemainingWeight?.toFixed(3)}
                           </div>
                         </div>
                         <div className="frow">
-                          <div className="cell label" style={{ width: "21%" }}>Col.</div>
+                          <div className="cell label" style={{ width: "34%" }}>Col.</div>
                           <div className="cell value" style={{ width: "72%" }}>{item?.color}</div>
                         </div>
                         {/* <div className="frow">
@@ -120,29 +120,29 @@ function DiamondStock({ queries, headers }) {
 
                     
                     <div className="frow">
-                      <div className="cell label" style={{ width: "11%" }}>Cla</div>
-                      <div className="cell value" style={{ width: "39%" }}>{item?.quality}</div>
-                      {/* <div className="cell label" style={{ width: "9%" }}>Lab.</div> */}
+                      <div className="cell label" style={{ width: "13%" }}>Cla</div>
+                      <div className="cell value" style={{ width: "25%" }}>{item?.quality}</div>
+                      <div className="cell label" style={{ width: "18%" }}>Cert.</div>
                       <div className="cell value ellipsis" style={{ width: "41%" }}>
                         {item?.certno}
                       </div>
                     </div>
                     {/* Row 4 */}
                     <div className="frow">
-                      <div className="cell label" style={{ width: "11%" }}>Cut</div>
-                      <div className="cell value" style={{ width: "39%" }}>{item?.cutname}</div>
-                      <div className="cell label" style={{ width: "11%" }}>Sha.</div>
-                      <div className="cell value ellipsis" style={{ width: "39%" }}>
+                      <div className="cell label" style={{ width: "13%" }}>Cut</div>
+                      <div className="cell value" style={{ width: "25%" }}>{item?.cutname}</div>
+                      <div className="cell label" style={{ width: "18%" }}>Shape</div>
+                      <div className="cell value ellipsis" style={{ width: "44%" }}>
                       {item?.shape}
                       </div>
                     </div>
 
                     {/* Row 5 */}
                     <div className="frow">
-                      <div className="cell label" style={{ width: "11%" }}>Pol.</div>
-                      <div className="cell value" style={{ width: "39%" }}>{item?.polishname}</div>
-                      <div className="cell label" style={{ width: "12%" }}>Mea.</div>
-                      <div className="cell value value-small" style={{ width: "39%" }}>
+                      <div className="cell label" style={{ width: "13%" }}>Pol.</div>
+                      <div className="cell value" style={{ width: "25%" }}>{item?.polishname}</div>
+                      <div className="cell label" style={{ width: "7%" }}>M.</div>
+                      <div className="cell value value-small" style={{ width: "55%" }}>
                         {item?.length && item?.width && item?.depth
                           ? `${item.length}x${item.width}x${item.depth}`
                           : [item?.length, item?.width, item?.depth].filter(Boolean).join("x")}
@@ -151,20 +151,20 @@ function DiamondStock({ queries, headers }) {
 
                     {/* Row 6 */}
                     <div className="frow">
-                      <div className="cell label" style={{ width: "12%" }}>Sym.</div>
-                      <div className="cell value" style={{ width: "38%" }}>{item?.symmetryname}</div>
-                      <div className="cell label" style={{ width: "12%" }}>Dep.</div>
-                      <div className="cell value" style={{ width: "39%" }}>{item?.depth_per}</div>
+                      <div className="cell label" style={{ width: "13%" }}>Sym.</div>
+                      <div className="cell value" style={{ width: "25%" }}>{item?.symmetryname}</div>
+                      <div className="cell label" style={{ width: "18%" }}>Depth</div>
+                      <div className="cell value" style={{ width: "44%" }}>{item?.depth_per}</div>
                     </div>
 
                     {/* Row 7 */}
                     <div className="frow">
-                      <div className="cell label" style={{ width: "11%" }}>Flo.</div>
-                      <div className="cell value" style={{ width: "39%" }}>
+                      <div className="cell label" style={{ width: "13%" }}>Flo.</div>
+                      <div className="cell value" style={{ width: "25%" }}>
                         {item?.fluorescencename}
                       </div>
-                      <div className="cell label" style={{ width: "12%" }}>Tab.</div>
-                      <div className="cell value" style={{ width: "39%" }}>{item?.table_per}</div>
+                      <div className="cell label" style={{ width: "18%" }}>Table</div>
+                      <div className="cell value" style={{ width: "44%" }}>{item?.table_per}</div>
                     </div>
                   </div>
                 </div>

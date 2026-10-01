@@ -179,6 +179,7 @@ export const printConditions = [
   { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
   { printName: 'print 1', etpType: 'print', componentName: 'Print1' },
   { printName: 'invoice print vr', etpType: 'print', componentName: 'InvoicePrintVR' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 
 
 ];

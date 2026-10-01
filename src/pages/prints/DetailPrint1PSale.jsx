@@ -27,6 +27,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
   const [json0Data, setJson0Data] = useState({});
   const [json1Data, setJson1Data] = useState([]);
   const [json1Data2, setJson1Data2] = useState([]);
+  const [json2Data, setJson2Data] = useState([]);
   const [MetShpWise, setMetShpWise] = useState([]);
   const [notGoldMetalTotal, setNotGoldMetalTotal] = useState(0);
   const [notGoldMetalWtTotal, setNotGoldMetalWtTotal] = useState(0);
@@ -118,6 +119,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
     setAddress(label);
     setJson0Data(data?.BillPrint_Json[0]);
     setJson1Data2(data?.BillPrint_Json2);
+    setJson2Data(data?.BillPrint_Json2);
     setLoader(false);
     let datas = OrganizeDataPrint(data?.BillPrint_Json[0], data?.BillPrint_Json1, data?.BillPrint_Json2);
 
@@ -599,8 +601,84 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
   
   console.log(Multimetal_summary);
 
+  const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
+    let remainingFindings = [...findings];
+  
+    const updatedMetals = metals.map((metal) => {
+      if (metal.IsPrimaryMetal !== 1) return metal;
+  
+      // findings that match this primary metal on Quality + Size + Rate
+      const matched = remainingFindings.filter(
+        (f) =>
+          f?.QualityName === metal?.QualityName &&
+          f?.SizeName === metal?.SizeName &&
+          f?.Rate === metal?.Rate &&
+          f?.Supplier === metal?.Supplier
+      );
+  
+      if (matched.length === 0) return metal;
+  
+      // remove the matched findings from the pool so they aren't reused
+      // by another primary metal row and won't appear in the final findings list
+      remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
+  
+      const totals = matched.reduce(
+        (acc, f) => ({
+          Pcs: acc.Pcs + (f.Pcs || 0),
+          Wt: acc.Wt + (f.Wt || 0),
+          FineWt: acc.FineWt + (f.FineWt || 0),
+          Amount: acc.Amount + (f.Amount || 0),
+          RMwt: acc.RMwt + (f.RMwt || 0),
+          Weight: acc.Weight + (f.Weight || 0),
+        }),
+        { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
+      );
+  
+      return {
+        ...metal,
+        Pcs: (metal.Pcs || 0) + totals.Pcs,
+        Wt: (metal.Wt || 0) + totals.Wt,
+        FineWt: (metal.FineWt || 0) + totals.FineWt,
+        Amount: (metal.Amount || 0) + totals.Amount,
+        RMwt: (metal.RMwt || 0) + totals.RMwt,
+        Weight: (metal.Weight || 0) + totals.Weight,
+      };
+    });
+  
+    return { findings: remainingFindings, metals: updatedMetals };
+  };
 
 
+ 
+  const MetalData = Object.values(
+    json2Data
+      ?.filter(item => item.MasterManagement_DiamondStoneTypeid === 4 || item.MasterManagement_DiamondStoneTypeid === 5)
+      ?.reduce((acc, item) => {
+        const shape = item.ShapeName;
+        const size = parseFloat(item.SizeName) || 0;
+        const purewt = (item.Weight * size) / 100;
+
+        if (!acc[shape]) {
+          acc[shape] = {
+            ShapeName: shape,
+            TotalPcs: 0,
+            TotalWt: 0,
+            TotalPureWt: 0,
+            TotalAmount: 0
+          };
+        }
+        acc[shape].TotalPcs += item.Pcs || 0;
+        acc[shape].TotalWt += item.Wt || 0;
+        acc[shape].TotalPureWt += purewt;
+        acc[shape].TotalAmount += item.Amount || 0;
+
+        return acc;
+      }, {})
+  );
+
+  
+  console.log("TCL:MetalData ", MetalData)
+ 
  
   return (
     <>
@@ -953,6 +1031,9 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                   return sum + (Number(item?.SettingAmount) || 0);
                 }, 0);
 
+                const { findings: finalFindings, metals: finalMetals } =
+                mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals);
+
 
 
                 return (
@@ -1049,7 +1130,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                     }
                                   </p>
                                   <p className={`WdthAmt text-end fw-bold`}>
-                                    {NumberWithCommas(ele?.Amount, 2)}
+                                    {NumberWithCommas(ele?.Amount / json0Data?.CurrencyExchRate, 2)}
                                   </p>
                                 </div>
                               );
@@ -1067,7 +1148,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                             <p className="WdthRemnTotl paddingRightDetailPrint1 text-end fw-bold d-flex align-items-center justify-content-end"></p>
                             <p className="WdthAmtTotl text-end fw-bold d-flex align-items-center justify-content-end paddingRightDetailPrint1l">
                               {e?.totals?.diamonds?.Amount !== 0 &&
-                                NumberWithCommas(e?.totals?.diamonds?.Amount, 2)}
+                                NumberWithCommas(e?.totals?.diamonds?.Amount / json0Data?.CurrencyExchRate, 2)}
                             </p>
                           </div>
                         </div>
@@ -1078,8 +1159,8 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                       {console.log("TCL: eeeeeeeeeeeeeeeeeee", e)}
                       <div className={`metalGoldDetailPrint1p border-end position-relative pt-1 paddingLeftDetailPrint1 paddingRightDetailPrint1`}>
                         <div className="h-100 paddingBottomTotalDetailPrint1">
-                          {mergedMetals.length > 0 &&
-                            mergedMetals.map((ele, ind) => {
+                          {finalMetals.length > 0 &&
+                            finalMetals.map((ele, ind) => {
                               return (
                                 <div className={`d-flex`} key={ind}>
                                   <p className="Wdth1 paddingRightDetailPrint1 text-break">
@@ -1094,26 +1175,26 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                               e?.NetWt + (e?.totals?.diamonds?.Wt / 5),
                                               3
                                             )
-                                            : NumberWithCommas(ele?.Wt, 3)
+                                            : NumberWithCommas(ele?.Weight, 3)
                                         )
                                         : ""
                                     }
                                   </p>
                                   <p className="Wdth1 text-end paddingRightDetailPrint1" style={{ width: "17%" }}>
-                                    {fixedValues((ele?.Wt + e?.LossWt) -e?.totals?.finding?.Wt, 3)}
+                                    {fixedValues((ele?.Weight + e?.LossWt), 3)}
                                   </p>
                                   <p className="Wdth1 text-end paddingRightDetailPrint1">
                                     {NumberWithCommas(ele?.Rate, 2)}
                                   </p>
                                   <p className={`Wdth1 text-end ${ind > 0 && "fw-bold"}`} style={{ width: "26%" }}>
-                                    {(NumberWithCommas(ele?.Amount, 2))}
+                                    {(NumberWithCommas(ele?.Amount / json0Data?.CurrencyExchRate, 2))}
                                   </p>
                                 </div>
                               );
                             })}
 
                           <div style={{ margin: "0px 2px" }}>
-                            {mergedFindings.map((data, index) => (
+                            {finalFindings.map((data, index) => (
                               <React.Fragment key={index}>
 
                                 <div className={`d-flex`} key={index}>
@@ -1137,9 +1218,9 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                   <p className={`Wdth1 text-end  `} style={{ width: "26%" }}>
                                     {e?.GroupJob !== ''
                                       ? (e?.metal
-                                        ?.filter((m) => m?.IsPrimaryMetal === 1)[0]
-                                        ?.Rate * (parseFloat(data?.Wt) || 0))?.toFixed(2)
-                                      : data?.Amount?.toFixed(2)
+                                        ?.filter((m) => (m?.IsPrimaryMetal === 1)[0]
+                                        ?.Rate * (parseFloat(data?.Wt))/ json0Data?.CurrencyExchRate))?.toFixed(2)
+                                      : (data?.Amount / json0Data?.CurrencyExchRate)?.toFixed(2)
                                     }
                                   </p>
                                 </div>
@@ -1163,7 +1244,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                               {/* fixedValues(e?.totals?.metal?.Wt + (e?.totals?.diamonds?.Wt / 5), 3)} */}
                             </p>
                             <p className="Wdth1 text-end fw-bold d-flex justify-content-end align-items-center paddingRightDetailPrint1" style={{ width: "17%" }}>
-                              {e?.NetWt !== 0 && fixedValues(e?.NetWt + e?.LossWt, 3)}
+                               {fixedValues((e?.totals?.metal?.Weight + e?.totals?.finding?.Wt), 3)}
                             </p>
                             <p className="Wdth1 text-end paddingRightDetailPrint1"></p>
                             <p className="Wdth1 text-end fw-bold d-flex justify-content-end align-items-center  paddingRightDetailPrint1 " style={{ width: "26%" }}>
@@ -1205,7 +1286,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                                   <p
                                     className={`WdthAmt text-end fw-bold`}
                                   >
-                                    {NumberWithCommas(ele?.Amount, 2)}
+                                    {NumberWithCommas(ele?.Amount / json0Data?.CurrencyExchRate, 2)}
                                   </p>
                                 </div>
                               );
@@ -1224,7 +1305,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                             <p className="WdthAmtTotl text-end fw-bold d-flex align-items-center justify-content-end paddingLeftDetailPrint1  ">
                               {e?.totals?.colorstone?.Amount !== 0 &&
                                 NumberWithCommas(
-                                  e?.totals?.colorstone?.Amount,
+                                  e?.totals?.colorstone?.Amount / json0Data?.CurrencyExchRate,
                                   2
                                 )}
                             </p>
@@ -1348,14 +1429,14 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           <div>
                             <p className="text-end fw-bold">
                               {e?.UnitCost !== 0 &&
-                                NumberWithCommas(e?.UnitCost, 2)}
+                                NumberWithCommas(e?.UnitCost / json0Data?.CurrencyExchRate, 2)}
                             </p>
                           </div>
                         </div>
                         <div className="position-absolute bottom-0 w-100 border-top border-bottom  totalMinHeightDetailPrint1 lightGrey d-flex align-items-center justify-content-end start-0">
                           <p className="text-end fw-bold  paddingRightDetailPrint1 paddingRightDetailPrint1">
                             {e?.UnitCost !== 0 &&
-                              NumberWithCommas(e?.UnitCost, 2)}
+                              NumberWithCommas(e?.UnitCost / json0Data?.CurrencyExchRate, 2)}
                           </p>
                         </div>
                       </div>
@@ -1393,7 +1474,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                               <div className="col-7 fw-bold">
                                 <p className=" text-end">
                                   {e?.DiscountAmt !== 0 &&
-                                    NumberWithCommas(e?.DiscountAmt, 2)}
+                                    NumberWithCommas(e?.DiscountAmt / json0Data?.CurrencyExchRate, 2)}
                                 </p>
                               </div>
                             </div>
@@ -1408,7 +1489,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           ></span> */}
                             <span className="fw-bold">
                               {e?.TotalAmount !== 0 &&
-                                NumberWithCommas(e?.TotalAmount, 2)}
+                                NumberWithCommas(e?.TotalAmount / json0Data?.CurrencyExchRate, 2)}
                             </span>
                           </p>
                         </div>
@@ -1440,15 +1521,15 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                 )}
               </div>
               <div className="cgstTotalDetailPrint1 text-end border-end  paddingLeftDetailPrint1 paddingRightDetailPrint1 py-1">
-                {total?.discountTotalAmount !== 0 && (<p>{(total?.discountTotalAmount).toFixed(2)}</p>)}
+                {total?.discountTotalAmount !== 0 && (<p>{(total?.discountTotalAmount / json0Data?.CurrencyExchRate).toFixed(2)}</p>)}
                 {json0Data?.Privilege_discount !== 0 && (
                   <p>- {json0Data?.Privilege_discount}</p>
                 )}
                 {taxes.length > 0 &&
                   taxes.map((e, i) => {
-                    return <p key={i}>{NumberWithCommas(e?.amount, 2)}</p>;
+                    return <p key={i}>{NumberWithCommas(e?.amount / json0Data?.CurrencyExchRate, 2)}</p>;
                   })}
-                {json0Data?.AddLess !== 0 && <p>{json0Data?.AddLess}</p>}
+                {json0Data?.AddLess !== 0 && <p>{json0Data?.AddLess / json0Data?.CurrencyExchRate}</p>}
               </div>
             </div>
 
@@ -1478,7 +1559,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                   </div>
                   <div className="WdthAmtTotl text-end">
                     <p className="fw-bold">
-                      {NumberWithCommas(finalD?.mainTotal?.diamonds?.Amount, 2)}
+                      {NumberWithCommas(finalD?.mainTotal?.diamonds?.Amount / json0Data?.CurrencyExchRate, 2)}
                     </p>
                   </div>
                 </div>
@@ -1502,7 +1583,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                   </div>
                   <div className="Wdth1 text-end paddingRightDetailPrint1" style={{ width: "26%" }}>
                     <p className="fw-bold">
-                      {NumberWithCommas(finalD?.mainTotal?.MetalAmount, 2)}
+                   {NumberWithCommas((finalD?.mainTotal?.metal?.Amount + (finalD?.mainTotal?.finding?.Amount )) / json0Data?.CurrencyExchRate, 2)}
                     </p>
                   </div>
                 </div>
@@ -1528,7 +1609,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                   </div>
                   <div className="WdthAmtTotl text-end d-flex justify-content-end align-items-center h-100 ">
                     <p className="fw-bold">
-                      {NumberWithCommas(total?.colorStoneAmount, 2)}
+                      {NumberWithCommas(total?.colorStoneAmount / json0Data?.CurrencyExchRate, 2)}
                     </p>
                   </div>
                 </div>
@@ -1536,7 +1617,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
 
               <div className={`otherAmountDetailPrint1p border-end border-bottom d-table paddingLeftDetailPrint1 paddingRightDetailPrint1`}>
                 <p className="py-1 d-flex align-items-center justify-content-end d-table-cell align-middle fw-bold" >
-                  <span>{NumberWithCommas(finalD?.mainTotal?.miscChargesTotals, 2)}</span>
+                  <span>{NumberWithCommas(finalD?.mainTotal?.miscChargesTotals / json0Data?.CurrencyExchRate, 2)}</span>
                 </p>
               </div>
 
@@ -1554,7 +1635,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
 
               <div className="totalAmountDetailPrint1 border-end  border-bottom paddingLeftDetailPrint1 paddingRightDetailPrint1">
                 <p className="d-flex justify-content-end align-items-center h-100 text-end fw-bold">
-                  {(NumberWithCommas(total?.withDiscountTaxAmount, 2))}
+                  {(NumberWithCommas(total?.withDiscountTaxAmount / json0Data?.CurrencyExchRate, 2))}
                 </p>
               </div>
             </div>
@@ -1569,13 +1650,21 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                   <div className="d-flex border-end">
                     {/* Weights */}
                     <div className="border-start col-6 border-end SpacAtTp position-relative summaryPadBotDetailPrint1 d-flex flex-column">
-                      <div className="d-flex justify-content-between">
+                      {/* <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">GOLD IN 24KT</p>
                         <p className="px-1">
                           {finalD?.mainTotal?.metal?.Rate === 0 ? `${fixedValues(finalD?.mainTotal?.total_purenetwt - notGoldMetalWtTotal, 3)} gm` : `0.000 gm`}
                         </p>
-                      </div>
-                      {Multimetal_summary?.map((e, i) => {
+                      </div> */}
+                      {
+                                                                                               MetalData?.map((e, i) => {
+                                                                                                 return <div className="d-flex justify-content-between" key={i}>
+                                                                                                   <p className="fw-bold px-1">FINE {e?.ShapeName}</p>
+                                                                                                   <p className="px-1"> {fixedValues(e?.TotalPureWt, 3)} gm </p>
+                                                                                                 </div>
+                                                                                               })
+                                                                                             }
+                      {/* {Multimetal_summary?.map((e, i) => {
                         return(
                           
                           <div className="d-flex justify-content-between">
@@ -1585,15 +1674,15 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           </p>
                         </div>
                         )
-                      })}
-                      {
+                      })} */}
+                      {/* {
                         MetShpWise?.map((e, i) => {
                           return <div className="d-flex justify-content-between" key={i}>
                             <p className="fw-bold px-1">{e?.ShapeName}</p>
                             <p className="px-1"> {fixedValues(e?.metalfinewt, 3)} gm </p>
                           </div>
                         })
-                      }
+                      } */}
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">GROSS WT</p>
                         <p className="px-1">
@@ -1608,7 +1697,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                       </div>
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">NET WT</p>
-                        <p className="px-1"> {fixedValues(finalD?.mainTotal?.metal?.IsPrimaryMetal, 3)} gm</p>
+                        <p className="px-1"> {fixedValues(finalD?.mainTotal?.metal?.Weight + finalD?.mainTotal?.finding?.Wt, 3)} gm</p>
                       </div>
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">DIAMOND WT</p>
@@ -1651,7 +1740,7 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
 
                     {/* Amounts */}
                     <div className="col-6 position-relative SpacAtTp summaryPadBotDetailPrint1 d-flex flex-column">
-                      <div className="d-flex justify-content-between">
+                      {/* <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">GOLD</p>
                         <p className="px-1">
                           {" "}
@@ -1668,8 +1757,8 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                           </p>
                         </div>
                         )
-                      })}
-                      {
+                      })} */}
+                      {/* {
                         MetShpWise?.map((e, i) => {
                           return <div className="d-flex justify-content-between">
                             <React.Fragment key={i}><p className="fw-bold px-1">{e?.ShapeName}</p>
@@ -1680,7 +1769,18 @@ const DetailPrint1PSale = ({ token, invoiceNo, printName, urls, evn, ApiVer }) =
                             </React.Fragment>
                           </div>
                         })
-                      }
+                      } */}
+                      {MetalData?.map((e, i) => {
+                                                                                            return (
+                                                                                              <div key={i} className="d-flex justify-content-between">
+                                                                                                <p className="fw-bold px-1">{e?.ShapeName}</p>
+                                                                                                <p className="px-1">
+                                                                                                  {" "}
+                                                                                                  {NumberWithCommas(e?.TotalAmount / json0Data?.CurrencyExchRate, 2)}
+                                                                                                </p>
+                                                                                              </div>
+                                                                                            )
+                                                                                          })}
                       <div className="d-flex justify-content-between">
                         <p className="fw-bold px-1">DIAMOND</p>
                         <p className="px-1">

@@ -92,7 +92,7 @@
   border-left: 1px solid #000;
 }
 .dcf-barcode {
-  flex: 0 0 200px;
+  /* flex: 0 0 200px; */
   justify-content: center;
   letter-spacing: 2px;
 
@@ -136,7 +136,7 @@
   height: 6mm !important;
   
   transform: translate(0px) rotate(0deg) !important;
-  width: 20mm !important;
+  width: 45mm !important;
 }
 
 

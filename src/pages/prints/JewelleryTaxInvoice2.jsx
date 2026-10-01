@@ -368,15 +368,21 @@ const JewelleryTaxInvoice2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                                                             {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode},
                                                             {result?.header?.CompanyState}({result?.header?.CompanyCountry})
                                                         </div>
-                                                        {(result?.header?.CompanyTellNo || result?.header?.CompanyTollFreeNo) && (
+                                                        {/* {(result?.header?.CompanyTellNo || result?.header?.CompanyTollFreeNo) && (
                                                             <div className="fslhJL">
-                                                                {result?.header?.CompanyTellNo && `TH ${result?.header?.CompanyTellNo}`}
+                                                                {result?.header?.CompanyTellNo && `PH ${result?.header?.CompanyTellNo}`}
                                                                 {result?.header?.CompanyTellNo && result?.header?.CompanyTollFreeNo && " | "}
                                                                 {result?.header?.CompanyTollFreeNo && `TOLL FREE ${result?.header?.CompanyTollFreeNo}`}
                                                             </div>
+                                                        )} */}
+                                                       {(result?.header?.CompanyTellNo) && (
+                                                            <div className="fslhJL">
+                                                                {result?.header?.CompanyTellNo && `PH ${result?.header?.CompanyTellNo}`}
+                                                            </div>
                                                         )}
                                                         <div className="fslhJL">
-                                                            {result?.header?.CompanyEmail} |{result?.header?.CompanyWebsite}
+                                                            {result?.header?.CompanyEmail}
+                                                             {/* |{result?.header?.CompanyWebsite} */}
                                                         </div>
                                                         {/* <div className='fslhpcl3'>{result?.header?.Company_VAT_GST_No} | {result?.header?.Cust_CST_STATE}-{result?.header?.Company_CST_STATE_No} | PAN-EDJHF236D</div> */}
                                                         <div className="fslhJL">

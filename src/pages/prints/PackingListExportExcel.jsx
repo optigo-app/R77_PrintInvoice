@@ -1010,9 +1010,9 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                     <tr>
                                         <td colSpan={4} style={{ ...grandTotalTd, textAlign: "center" }}>TOTAL</td>
                                         <td style={grandTotalTd}>{grandTotal.Quantity}</td>
-                                        <td style={grandTotalTd}>{formatAmount(grandTotal.grosswt, 3)}</td>
+                                        <td style={grandTotalTd}>{grandMetalTotalWt ? formatAmount(grandMetalTotalWt, 3) : ""} </td>
                                         <td style={grandTotalTd}></td>
-                                        <td style={grandTotalTd}> {grandMetalTotalWt ? formatAmount(grandMetalTotalWt, 3) : ""}</td>
+                                        <td style={grandTotalTd}> {formatAmount(grandTotal.grosswt, 3)}</td>
                                         <td style={grandTotalTd}></td>
                                         <td style={grandTotalTd}>{grandDiaTotalWt ? formatAmount(grandDiaTotalWt, 3) : ""}</td>
                                         <td style={grandTotalTd}>{grandDiaTotalPcs || ""}</td>
