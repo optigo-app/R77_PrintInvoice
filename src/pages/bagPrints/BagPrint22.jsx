@@ -312,7 +312,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="dcf-cell dcf-label">Design Code</div>
                                                     <div className="dcf-cell dcf-value">{e?.data?.rd?.Designcode}</div>
 
-                                                    <div className="dcf-cell dcf-barcode barcode_img" style={{ width: '50%' }}>
+                                                    <div className="dcf-cell dcf-barcode barcode_img" style={{ width: '100%' }}>
                                                         {e?.data?.rd?.serialjobno !==
                                                             (null || "" || undefined) && (
                                                                 <BarcodeGenerator
@@ -466,6 +466,20 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                         // Common (base) job -> same rows as the DCF card (family rows without the base total row)
                                         // Split jobs S1/S2/S3 -> nothing, so it shows only on the common job
                                         const pcfMetalRows = isBaseJob ? rd2RowsForThisCard.slice(1) : [];
+                                        
+                                        const rd2DataPurity = isBaseJob ? rd2RowsForThisCard : [];
+                                       
+
+                                        
+                                         
+                                        const purityList = [
+                                            ...new Set(
+                                              rd2DataPurity
+                                                ?.map(item => item?.Metal_Type_Color?.split(" ")[1])
+                                                .filter(Boolean)
+                                            )
+                                          ];
+
 
                                         return (
                                             <div className="pcf-page" key={cardKey}>
@@ -693,7 +707,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="pcf-cell pcf-col-wrkr"></div>
                                                         <div className="pcf-cell pcf-col-inwt"></div>
                                                         <div className="pcf-cell pcf-col-outwt"></div>
-                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">UIN No -</div>
                                                     </div>
 
                                                     <div className="pcf-row">
@@ -701,7 +715,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="pcf-cell pcf-col-wrkr"></div>
                                                         <div className="pcf-cell pcf-col-inwt"></div>
                                                         <div className="pcf-cell pcf-col-outwt"></div>
-                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"> Stamping - {purityList?.join(",")}</div>
                                                     </div>
 
                                                     <div className="pcf-row">

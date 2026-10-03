@@ -729,17 +729,17 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Header info rows ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={14} style={{ textAlign: "center", fontWeight: "bold", fontSize: "14px", padding: "6px" }}>
+                                <td colSpan={17} style={{ textAlign: "center", fontWeight: "bold", fontSize: "14px", padding: "6px" }}>
                                     PACKING LIST
                                 </td>
                             </tr>
                             <tr>
-                                <td colSpan={4} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>Invoice No. &amp; Date :</td>
-                                <td colSpan={4} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.InvoiceNo}</td>
+                                <td colSpan={6} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>Invoice No. &amp; Date :</td>
+                                <td colSpan={5} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.InvoiceNo}</td>
                                 <td colSpan={6} style={{ border: "1px solid #000", textAlign: "center", padding: "4px" }}>{result?.header?.EntryDate}</td>
                             </tr>
                             <tr>
-                                <td colSpan={7} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
+                                <td colSpan={8} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
                                     <div><b>To :</b>
                                         <div className="fslhJL">
                                             <b className="JL13" style={{ fontSize: "14px" }}>
@@ -793,7 +793,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
 
                                     </div>
                                 </td>
-                                <td colSpan={7} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
+                                <td colSpan={9} style={{ border: "1px solid #000", verticalAlign: "top", padding: 8 }}>
                                     <div><b>EXPORTER</b></div>
                                     <div>{result?.header?.companyname}</div>
                                     <div>{result?.header?.CompanyAddress}</div>
@@ -819,9 +819,12 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 <th style={th}>DIAMOND TYPE</th>
                                 <th style={th}>DIA. WT IN CT</th>
                                 <th style={th}>DIAMOND PCS</th>
-                                <th style={th}> DIA</th>
-                                <th style={th}> CS</th>
-                                <th style={th}> MISC</th>
+                                <th style={th}> DIA Pcs</th>
+                                <th style={th}> DIA Wt</th>
+                                <th style={th}> CS Pcs</th>
+                                <th style={th}> CS Wt</th>
+                                <th style={th}> MISC Pcs</th>
+                                <th style={th}> MISC Wt</th>
 
 
 
@@ -834,7 +837,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                 // ── section header ──
                                 const sectionHeaderRow = (
                                     <tr key={`section-${groupIndex}`}>
-                                        <td colSpan={14} style={sectionHeaderTd}>{group?.DisplayName}</td>
+                                        <td colSpan={17} style={sectionHeaderTd}>{group?.DisplayName}</td>
                                     </tr>
                                 );
 
@@ -921,24 +924,48 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                                             rowSpan={totalSubRows}
                                                             style={tdMerged({ textAlign: "center" })}
                                                         >
-                                                            {e?.totals?.diamonds?.Pcs || e?.totals?.diamonds?.Wt
-                                                                ? `'${e?.totals?.diamonds?.Pcs || 0}/${e?.totals?.diamonds?.Wt || 0}`
+                                                            {e?.totals?.diamonds?.Pcs 
+                                                                ? `${e?.totals?.diamonds?.Pcs || 0}`
                                                                 : ""}
                                                         </td>
                                                         <td
                                                             rowSpan={totalSubRows}
                                                             style={tdMerged({ textAlign: "center" })}
                                                         >
-                                                            {e?.totals?.colorstone?.Pcs || e?.totals?.colorstone?.Wt
-                                                                ? `'${e?.totals?.colorstone?.Pcs || 0}/${e?.totals?.colorstone?.Wt || 0}`
+                                                            { e?.totals?.diamonds?.Wt
+                                                                ? `${e?.totals?.diamonds?.Wt || 0}`
                                                                 : ""}
                                                         </td>
                                                         <td
                                                             rowSpan={totalSubRows}
                                                             style={tdMerged({ textAlign: "center" })}
                                                         >
-                                                            {e?.totals?.misc?.Pcs || e?.totals?.misc?.Wt
-                                                                ? `'${e?.totals?.misc?.Pcs || 0}/${e?.totals?.misc?.Wt || 0}`
+                                                            {e?.totals?.colorstone?.Pcs 
+                                                                ? `${e?.totals?.colorstone?.Pcs || 0}`
+                                                                : ""}
+                                                        </td>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            { e?.totals?.colorstone?.Wt
+                                                                ? `${e?.totals?.colorstone?.Wt || 0}`
+                                                                : ""}
+                                                        </td>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            {e?.totals?.misc?.Pcs 
+                                                                ? `${e?.totals?.misc?.Pcs || 0}`
+                                                                : ""}
+                                                        </td>
+                                                        <td
+                                                            rowSpan={totalSubRows}
+                                                            style={tdMerged({ textAlign: "center" })}
+                                                        >
+                                                            { e?.totals?.misc?.Wt
+                                                                ? `${e?.totals?.misc?.Wt || 0}`
                                                                 : ""}
                                                         </td>
 
@@ -982,6 +1009,9 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                         <td style={totalRowTd}></td>
                                         <td style={totalRowTd}></td>
                                         <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}></td>
+                                        <td style={totalRowTd}></td>
                                     </tr>
                                 );
 
@@ -1019,6 +1049,9 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                                         <td style={grandTotalTd}></td>
                                         <td style={grandTotalTd}></td>
                                         <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}></td>
+                                        <td style={grandTotalTd}></td>
                                     </tr>
 
 
@@ -1029,7 +1062,7 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Remark ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={11} style={{ padding: "6px", fontSize: "11px" }}>
+                                <td colSpan={17} style={{ padding: "6px", fontSize: "11px" }}>
                                     Note: {result?.header?.Remark || ""}
                                 </td>
                             </tr>
@@ -1038,20 +1071,20 @@ const ValueSheetExcel = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => 
                         {/* ── Footer ── */}
                         <tbody>
                             <tr>
-                                <td colSpan={11} style={{ padding: "6px", textAlign: "center", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={17} style={{ padding: "6px", textAlign: "center", fontWeight: "bold", fontSize: "20px" }}>
                                     {result?.header?.InvoiceNo || ""}
                                 </td>
                             </tr>
                             <tr>
-                                <td colSpan={11} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={17} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
                                     FOR {result?.header?.CompanyFullName || ""}
                                 </td>
                             </tr>
                             <tr style={{ height: "80px" }}>
-                                <td colSpan={11}></td>
+                                <td colSpan={17}></td>
                             </tr>
                             <tr>
-                                <td colSpan={11} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
+                                <td colSpan={17} style={{ padding: "6px", textAlign: "right", fontWeight: "bold", fontSize: "20px" }}>
                                     AUTHORISED/PROPRIETOR
                                 </td>
                             </tr>

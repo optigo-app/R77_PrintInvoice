@@ -44,6 +44,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     const [diamondDetails, setDiamondDetails] = useState([]);
     const [json2data, setJson2data] = useState([]);
     const [metalType, setMetaltype] = useState([]);
+    const [discountflag, setDiscountflag] = useState(false);
 
     useEffect(() => {
         const sendData = async () => {
@@ -682,6 +683,12 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             setShipToFlag(true);
         }
     };
+    const handleDiscountFlag = () => {
+        if (discountflag) setDiscountflag(false);
+        else {
+            setDiscountflag(true);
+        }
+    };
 
     const handleImageErrors = () => {
         setIsImageWorking(false);
@@ -747,7 +754,17 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     const mergeMiscData = (dataArray) => {
         return Object.values(
             dataArray.reduce((accumulator, currentItem) => {
-                const key = currentItem.ShapeName;
+                const shapeName = currentItem.Shape_Code?.toLowerCase() || "";
+                const QualityName = currentItem.Quality_Code?.toLowerCase() || "";
+                const ColorName = currentItem.Color_Code?.toLowerCase() || "";
+                const SizeName = currentItem.SizeName?.toLowerCase() || "";
+                const Rate = currentItem.Rate || 0;
+                
+    
+                const key = [shapeName, QualityName, ColorName, SizeName, Rate]
+                    .filter(Boolean)
+                    .join("_");
+                // const key = currentItem.ShapeName;
 
                 // If this ShapeName hasn't been seen yet, initialize it
                 if (!accumulator[key]) {
@@ -777,16 +794,17 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         const mergedMap = dataArray.reduce((acc, current) => {
             // Normalizing to lowercase handles cases like 'Heart' vs 'heart' safely
             // const key = current.ShapeName?.toLowerCase() || "unknown";
-            const shapeName = current.ShapeName?.toLowerCase() || "";
+            const shapeName = current.Shape_Code?.toLowerCase() || "";
+            const QualityName = current.Quality_Code?.toLowerCase() || "";
+            const ColorName = current.Color_Code?.toLowerCase() || "";
+            const SizeName = current.SizeName?.toLowerCase() || "";
+            const Rate = current.Rate || 0;
             const isSolGem = String(current.IsSolGem ?? "0");
-            const typename = String(current?.MaterialTypeName || "")
+            const typename = String(current?.MaterialTypeName || "").toLowerCase();
 
-            let key = `${shapeName}_${isSolGem}`;
-
-            if (typename !== "") {
-                key += `_${typename}`
-            }
-
+            const key = [shapeName, QualityName, ColorName, SizeName, Rate, isSolGem, typename]
+                .filter(Boolean)
+                .join("_");
 
 
 
@@ -998,7 +1016,18 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     <div className="container_pcls" >
                         {/* print btn and flag */}
                         <div className=" d-flex align-items-center justify-content-end my-5 whole_none_pcl3">
-                        
+                            <div className="px-2">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleDiscountFlag}
+                                    value={discountflag}
+                                    checked={discountflag}
+                                    id="discountFlag"
+                                />
+                                <label htmlFor="discountFlag" className="user-select-none mx-1">
+                                    Discount
+                                </label>
+                            </div>
                             <div className="px-2">
                                 <input
                                     type="checkbox"
@@ -1335,9 +1364,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 {duty && (
                                     <div className="col65_pcls centerall_pcls bright_pcls" style={{ "textAlign": "center" }}>Duty <br /> Amount</div>
 
-                                )}
-                                <div className={duty ? "col7_pcls_duty centerall_pcls  bright_pcls" : "col7_pcls centerall_pcls  bright_pcls"}>Discount</div>
-                                <div className={duty ? "col7_pcls_duty centerall_pcls" : "col7_pcls centerall_pcls"}>Total Amount</div>
+                                )}{
+                                    discountflag && (
+
+                                        <div className={duty ? "col7_pcls_duty centerall_pcls  bright_pcls" : "col7_pcls centerall_pcls  bright_pcls"}>Discount</div>
+                                    )
+                                }
+                                <div className={duty ? "col7_pcls_duty centerall_pcls" : "col7_pcls centerall_pcls"} style={{ width: discountflag ? "5%" : "10%" }}>Total Amount</div>
                             </div>
 
                             {/* table rows */}
@@ -2138,49 +2171,54 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                 </div>
                                             )}
 
-                                            <div className={duty ? "col7_pcls_duty   d-flex flex-column justify-content-between bright_pcls" : "col7_pcls   d-flex flex-column justify-content-between bright_pcls" }>
-                                                <div className="start_pcls pdr_pcls" style={{ height: "100%", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-end" }}>
+                                            {discountflag && (
+                                                <div className={duty ? "col7_pcls_duty   d-flex flex-column justify-content-between bright_pcls" : "col7_pcls   d-flex flex-column justify-content-between bright_pcls"}>
+                                                    <div className="start_pcls pdr_pcls" style={{ height: "100%", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-end" }}>
 
-                                                    <div>
-                                                        {e?.DiscountAmt > 0 &&
-                                                            discountDisplay.map((item, ind) => {
-                                                                const key = Object.keys(item)[0];
-                                                                return (
-                                                                    <>
+                                                        <div>
+                                                            {e?.DiscountAmt > 0 &&
+                                                                discountDisplay.map((item, ind) => {
+                                                                    const key = Object.keys(item)[0];
+                                                                    return (
+                                                                        <>
 
-                                                                        <p key={ind}>
-                                                                           <span className="fw-bold"> {key}</span>: {item[key]}
-                                                                        </p>
-                                                                    </>
-                                                                );
-                                                            })}
-                                                        {e?.DiscountAmt > 0 && (
-                                                            <p>
-                                                             {formatAmount(e?.DiscountAmt)}
-                                                            </p>
+                                                                            <p key={ind}>
+                                                                                <span className="fw-bold"> {key}</span>: {item[key]}
+                                                                            </p>
+                                                                        </>
+                                                                    );
+                                                                })}
+                                                            {e?.DiscountAmt > 0 && (
+                                                                <p>
+                                                                    {formatAmount(e?.DiscountAmt)}
+                                                                </p>
+                                                            )}
+
+                                                        </div>
+                                                    </div>
+                                                    <div className="start_pcls btop_pcls bg_pcls pdr_pcls fw-bold">
+                                                        &nbsp;
+                                                        {formatAmount(
+                                                            // e?.TotalAmount / result?.header?.CurrencyExchRate
+                                                            (e?.DiscountAmt) / result?.header?.CurrencyExchRate
                                                         )}
-
                                                     </div>
                                                 </div>
-                                                <div className="start_pcls btop_pcls bg_pcls pdr_pcls fw-bold">
-                                                    &nbsp;
-                                                    {formatAmount(
-                                                        // e?.TotalAmount / result?.header?.CurrencyExchRate
-                                                        (e?.DiscountAmt ) / result?.header?.CurrencyExchRate
-                                                    )}
-                                                </div>
-                                            </div>
+
+
+                                            )}
+
 
 
 
                                             {/* Total Amount */}
-                                            <div className={duty ? "col7_pcls_duty   d-flex flex-column justify-content-between" : "col7_pcls   d-flex flex-column justify-content-between"}>
+                                            <div className={duty ? "col7_pcls_duty   d-flex flex-column justify-content-between" : "col7_pcls   d-flex flex-column justify-content-between"} style={{ width: discountflag ? "5%" : "10%" }}>
                                                 <div className="start_pcls pdr_pcls fw-bold" style={{ height: "100%", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-end" }}>
                                                     {formatAmount(
                                                         // e?.TotalAmount / result?.header?.CurrencyExchRate
                                                         (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
                                                     )}
-                                                    
+
                                                 </div>
                                                 <div className="start_pcls btop_pcls bg_pcls pdr_pcls fw-bold">
                                                     &nbsp;
@@ -2363,13 +2401,16 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         )}
                                     </div>
                                 )}
-                                <div className={duty ? "col7_pcls_duty  end_pcls bright_pcls" : "col7_pcls end_pcls pdr_pcls bright_pcls"}>
-                                    {formatAmount(
-                                        (  result?.mainTotal?.DiscountAmt) /
-                                        result?.header?.CurrencyExchRate
-                                    )}
-                                </div>
-                                <div className={duty ? "col7_pcls_duty  end_pcls" : "col7_pcls end_pcls pdr_pcls"}>
+                                {discountflag && (
+
+                                    <div className={duty ? "col7_pcls_duty  end_pcls bright_pcls" : "col7_pcls end_pcls pdr_pcls bright_pcls"}>
+                                        {formatAmount(
+                                            (result?.mainTotal?.DiscountAmt) /
+                                            result?.header?.CurrencyExchRate
+                                        )}
+                                    </div>
+                                )}
+                                <div className={duty ? "col7_pcls_duty  end_pcls" : "col7_pcls end_pcls pdr_pcls"} style={{ width: discountflag ? "5%" : "10%" }}>
                                     {formatAmount(
                                         (result?.mainTotal?.TotalAmount +
                                             result?.mainTotal?.DiscountAmt) /
@@ -2820,7 +2861,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                 <div className="metal_type_sum4 fw-bold ps-1 show_summury_title">
                                                     Metal Type
                                                 </div>
-                                                
+
                                                 <div className="net_wt_sum4 fw-bold">
                                                     Net Wt <br />
                                                     (gm)
@@ -2841,7 +2882,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                             <div className="metal_type_sum4 ps-1 text-start">
                                                                 {e?.metalType}
                                                             </div>
-                                                             
+
                                                             <div className="net_wt_sum4">
                                                                 {fixedValues(e?.NetWt, 3)}
                                                             </div>

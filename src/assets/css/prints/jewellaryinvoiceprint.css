@@ -422,12 +422,22 @@
     word-break: normal !important;        /* Do NOT break words */
     overflow-wrap: break-word !important; /* Wrap only if needed */
 }
-.font-bill{
-    font-size: 15px !important;
+
+.min-signature-height{
+    min-height: 90px;
+}
+.min-height-info{
+    min-height: 140px;
+}
+.border {
+    border-color: black !important;
 }
 
-.font-bill label{
-    width: 100px !important;
+.border-end {
+    border-color: black !important;
+}
+.border-start{
+    border-color: black !important;
 }
 @media print {
     .trowJL {
@@ -460,5 +470,8 @@
     }
     .w_40_jrtic{
         width: 40% !important; 
+    }
+    .min-height-info{
+        min-height: 120px !important;
     }
 }

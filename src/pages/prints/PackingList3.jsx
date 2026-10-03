@@ -33,6 +33,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   const [secondarySize, setSecondarySize] = useState(false);
   const [processedMetalsWt, setProcessedMetalsWt] = useState([]);
   const [processedMetalsAmount, setProcessedMetalsAmount] = useState([]);
+   const [json2Data, setJson2Data] = useState([]);
 
   useEffect(() => {
     const sendData = async () => {
@@ -105,6 +106,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     data.BillPrint_Json[0].address = address;
 
     // console.log("data", data);
+    setJson2Data(data?.BillPrint_Json2);
     const datas = OrganizeInvoicePrintData(
       data?.BillPrint_Json[0],
       data?.BillPrint_Json1,
@@ -115,40 +117,55 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     if (!datas.labour) {
       datas.labour = [];
     }
-
     if (datas?.resultArray && datas.resultArray.length > 0) {
       datas.resultArray.forEach((item) => {
         // console.log("datas?.resultArray", datas?.resultArray);
 
-        if (item?.GroupJob !== '' && item?.metal?.some(el => el?.IsPrimaryMetal === 1)) {
-          const primaryMetal = item?.metal?.find(el => el?.IsPrimaryMetal === 1);
-          const metalWt = primaryMetal?.Wt || 0;
+        if (item?.GroupJob !== '' && item?.metal?.length > 0) {
           const makingChargeUnit = item?.MaKingCharge_Unit;
-
+        
           if (makingChargeUnit !== 0) {
-            const makingCharge = metalWt * makingChargeUnit;
-
-            const labourObject = {
-              jobNo: item?.SrJobno || item?.GroupJob,
-              GroupjobNo: item?.GroupJob,
-              NetWt: item?.NetWt,
-              name: 'Labour',
-              MakingUnit: makingChargeUnit,
-              MakingCharge: makingCharge,
-              MetalWt: metalWt,
-            };
-
             if (!datas.labour) {
               datas.labour = [];
             }
-            datas.labour.push(labourObject);
-
-            // console.log(`Labour object for item:`, labourObject);
+        
+            item.metal.forEach((el) => {
+              const metalWt = el?.Wt || 0;
+              const makingCharge = metalWt * makingChargeUnit;
+        
+              // check if a labour entry with the same MakingUnit already exists
+              const existing = datas.labour.find(
+                (l) => l.MakingUnit === makingChargeUnit
+              );
+        
+              if (existing) {
+                // merge into existing entry
+                existing.MetalWt += metalWt;
+                existing.MakingCharge += makingCharge;
+                existing.NetWt = (existing.NetWt || 0) + (item?.NetWt || 0);
+        
+                // keep track of all job numbers merged into this entry
+                existing.jobNo = Array.isArray(existing.jobNo)
+                  ? [...existing.jobNo, item?.SrJobno || item?.GroupJob]
+                  : [existing.jobNo, item?.SrJobno || item?.GroupJob];
+              } else {
+                const labourObject = {
+                  jobNo: item?.SrJobno || item?.GroupJob,
+                  GroupjobNo: item?.GroupJob,
+                  NetWt: item?.NetWt,
+                  name: 'Labour',
+                  MakingUnit: makingChargeUnit,
+                  MakingCharge: makingCharge,
+                  MetalWt: metalWt,
+                };
+                datas.labour.push(labourObject);
+              }
+            });
           } else {
-            // console.log(`Skipping item at index due to MaKingCharge_Unit being 0`);
+            // console.log(`Skipping item due to MaKingCharge_Unit being 0`);
           }
         } else {
-          // console.log(`Skipping item at index due to GroupJob being empty or no primary metal found`);
+          // console.log(`Skipping item due to GroupJob being empty or no metal found`);
         }
       });
     } else {
@@ -559,11 +576,136 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   // console.log("result", result);
   // console.log("diamondArr", diamondArr); 
 
+  const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
+    let remainingFindings = [...findings];
+
+    const updatedMetals = metals.map((metal) => {
+      if (metal.IsPrimaryMetal !== 1) return metal;
+
+      // findings that match this primary metal on Quality + Size + Rate
+      const matched = remainingFindings.filter(
+        (f) =>
+          f?.QualityName === metal?.QualityName &&
+          f?.SizeName === metal?.SizeName &&
+          f?.Rate === metal?.Rate &&
+          f?.Supplier === metal?.Supplier
+      );
+
+      if (matched.length === 0) return metal;
+
+      // remove the matched findings from the pool so they aren't reused
+      // by another primary metal row and won't appear in the final findings list
+      remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
+
+      const totals = matched.reduce(
+        (acc, f) => ({
+          Pcs: acc.Pcs + (f.Pcs || 0),
+          Wt: acc.Wt + (f.Wt || 0),
+          FineWt: acc.FineWt + (f.FineWt || 0),
+          Amount: acc.Amount + (f.Amount || 0),
+          RMwt: acc.RMwt + (f.RMwt || 0),
+          Weight: acc.Weight + (f.Weight || 0),
+        }),
+        { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
+      );
+
+      return {
+        ...metal,
+        Pcs: (metal.Pcs || 0) + totals.Pcs,
+        Wt: (metal.Wt || 0) + totals.Wt,
+        FineWt: (metal.FineWt || 0) + totals.FineWt,
+        Amount: (metal.Amount || 0) + totals.Amount,
+        RMwt: (metal.RMwt || 0) + totals.RMwt,
+        Weight: (metal.Weight || 0) + totals.Weight,
+      };
+    });
+
+    return { findings: remainingFindings, metals: updatedMetals };
+  };
+
+  const MetalData = Object.values(
+    json2Data
+      ?.filter(item => item.MasterManagement_DiamondStoneTypeid === 4 || item.MasterManagement_DiamondStoneTypeid === 5)
+      ?.reduce((acc, item) => {
+        const shape = item.ShapeName;
+        const size = parseFloat(item.SizeName) || 0;
+        const purewt = (item.Weight * size) / 100;
+
+        if (!acc[shape]) {
+          acc[shape] = {
+            ShapeName: shape,
+            TotalPcs: 0,
+            TotalWt: 0,
+            TotalPureWt: 0,
+            TotalAmount: 0
+          };
+        }
+        acc[shape].TotalPcs += item.Pcs || 0;
+        acc[shape].TotalWt += item.Wt || 0;
+        acc[shape].TotalPureWt += purewt;
+        acc[shape].TotalAmount += item.Amount || 0;
+
+        return acc;
+      }, {})
+  );
+
   console.log("TCL: result", result)
 
   const goldTotalAmount = result?.json2
     ?.filter((e) => e?.ShapeName?.toUpperCase() === "GOLD")
     ?.reduce((sum, e) => sum + (e?.Amount || 0), 0);
+
+    const calcFinalAmount = (e) => {
+      const secondaryMetals = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0) || [];
+    
+      // decide: merge into one labour row, or show two separate rows
+      const labourRows = (() => {
+        const rateA = e?.MaKingCharge_Unit || 0;
+        const amountA = e?.MakingAmount || 0;
+    
+        const rows = [{ rate: rateA, amount: amountA || 0 }];
+    
+        for (const metal of secondaryMetals) {
+          const rateB = metal?.SettingRate;
+          const amountB = metal?.SettingAmount || 0;
+    
+          // loose compare, per spec — switch to Number(existing.rate) === Number(rateB) for strict numeric matching
+          const existingRow = rows.find((row) => row.rate == rateB);
+    
+          if (existingRow) {
+            existingRow.amount += amountB;
+          } else {
+            rows.push({ rate: rateB, amount: amountB });
+          }
+        }
+    
+        return rows;
+      })();
+      
+      
+    
+      const labourTotal = labourRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+    
+      const extraCharge =
+        (e?.OtherCharges || 0) +
+        (e?.TotalDiamondHandling || 0) +
+        (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
+        (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
+        (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
+        (e?.totals?.diamonds?.SettingAmount || 0) +
+        (e?.totals?.colorstone?.SettingAmount || 0) +
+        (e?.totals?.finding?.SettingAmount || 0) +
+        (
+          e?.GroupJob !== ""
+            ? (e?.MaKingCharge_Unit || 0) * (e?.totals?.metal?.Wt || 0)
+            : labourTotal
+        );
+    
+      return extraCharge / (result?.header?.CurrencyExchRate || 1);
+    };
+  
+    const GrandfinalAmount =
+    result?.resultArray?.reduce((sum, e) => sum + calcFinalAmount(e), 0) || 0;
 
   return (
     <>
@@ -808,40 +950,78 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 const totalSetAmt = mergedFindings.reduce((sum, item) => {
                   return sum + (Number(item?.SettingAmount) || 0);
                 }, 0);
+
+                
                                 
-                 
-                // Calculate extra charges safely
-                const labourTotal = e?.GroupJob !== ""
-                  ? (result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)
-                    ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0)
-                  : 0;
+                // labourTotal
+                // find the secondary (non-primary) metal row
+                const secondaryMetals = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0) || [];
+                
+                // decide: merge into one labour row, or show two separate rows
+                const labourRows = (() => {
+                  const rateA = e?.MaKingCharge_Unit;
+                  const amountA = e?.MakingAmount;
+                
+                  const rows = [{ rate: rateA, amount: amountA || 0 }];
+                
+                  for (const metal of secondaryMetals) {
+                    const rateB = metal?.SettingRate;
+                    const amountB = metal?.SettingAmount || 0;
+                
+                    // loose compare, per spec — switch to Number(existing.rate) === Number(rateB) for strict numeric matching
+                    const existingRow = rows.find((row) => row.rate == rateB);
+                
+                    if (existingRow) {
+                      existingRow.amount += amountB;
+                    } else {
+                      rows.push({ rate: rateB, amount: amountB });
+                    }
+                  }
+                
+                  return rows;
+                })();
+                
+                const labourTotal = labourRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+                
+                console.log("TCL: labourTotal", labourTotal)
+                // const labourTotal = e?.GroupJob !== ""
+                // ? (result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)
+                //   ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0)
+                // : 0;
 
-                const extraCharge =
-                  (e?.OtherCharges || 0) +
-                  (e?.TotalDiamondHandling || 0) +
-                  (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
-                  (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
-                  (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
-                  (e?.totals?.diamonds?.SettingAmount || 0) +
-                  (e?.totals?.colorstone?.SettingAmount || 0) +
-                  (e?.totals?.finding?.SettingAmount || 0) +
-                  labourTotal +
+              const extraCharge =
+                (e?.OtherCharges || 0) +
+                (e?.TotalDiamondHandling || 0) +
+                (e?.totals?.misc?.IsHSCODE_1_amount || 0) +
+                (e?.totals?.misc?.IsHSCODE_2_amount || 0) +
+                (e?.totals?.misc?.IsHSCODE_3_amount || 0) +
+                (e?.totals?.diamonds?.SettingAmount || 0) +
+                (e?.totals?.colorstone?.SettingAmount || 0) +
+                (e?.totals?.finding?.SettingAmount || 0) +
+                (
+                  e?.GroupJob !== ""
+                    ? (e?.MaKingCharge_Unit || 0) *
+                    ((e?.totals?.metal?.Wt || 0))
+                    :
+                    // e?.MakingChargeOnid === 4
+                    //   ? (e?.MaKingCharge_Unit || 0)
+                    //   : (e?.MaKingCharge_Unit || 0) *
+                    //   (e?.totals?.metal?.Wt || 0)
+                    labourTotal
+                );
 
-                  (
-                    e?.GroupJob !== ""
-                      ? (e?.MaKingCharge_Unit || 0) *
-                      ((e?.totals?.metal?.Wt || 0) -
-                        (e?.totals?.metal?.IsNotPrimaryMetalWt || 0))
-                      :
-                      // e?.MakingChargeOnid === 4
-                      //   ? (e?.MaKingCharge_Unit || 0)
-                      //   : (e?.MaKingCharge_Unit || 0) *
-                      //   (e?.totals?.metal?.Wt || 0)
-                      e?.MakingAmount
-                  );
+              const finalAmount =
+                extraCharge / (result?.header?.CurrencyExchRate || 1);
 
-                const finalAmount =
-                  extraCharge / (result?.header?.CurrencyExchRate || 1);
+
+                  const { findings: finalFindings, metals: finalMetals } =
+                  mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals);
+
+                  
+
+
+
+
                 return (
                   <div
                     className="d-flex tbody_pcls bbottom_pcls tb_fs_pcls pbia_pcl3 border-top"
@@ -1037,9 +1217,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     {/* Metal */}
                     <div className="col4_pcls d-flex flex-column justify-content-between bright_pcls">
                       <div>
-                        {mergedMetals?.map((el, ind) => {
-                          { }
-
+                        {finalMetals?.map((el, ind) => {
+                          
                           // ************************ Counting & Conditions ************************
                           const isChainOrHook = e?.specialFinding?.FindingTypename?.toLowerCase()?.includes("chain") ||
                             e?.specialFinding?.FindingTypename?.toLowerCase()?.includes("hook");
@@ -1082,52 +1261,51 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           // ************************ Counting & Conditions ************************
 
                           if (e?.GroupJob !== '' && e?.GroupJob === el?.StockBarcode) { // When Group Job Then Only Show Primary Job's Metal Name
-                            // ************************ 02/12/2025 Completed An Bug ************************
+                        
                             const WtMRate = (weight * rate)?.toFixed(2);
-                            // console.log("WtMRate", WtMRate);
+                         
 
                             const isAmtNotLess = WtMRate > e?.totals?.metal?.Amount;
-                            // console.log("isAmtNotLess", isAmtNotLess);
+                           
 
                             const firstElementWt = e?.metal?.[0]?.Wt;
-                            // console.log("firstElementWt", firstElementWt);
+                  
 
                             const isAmtLess = WtMRate < e?.totals?.metal?.Amount;
-                            // console.log("isAmtNotLess", isAmtNotLess);
+                      
 
                             const FindingAmt = e?.finding?.map((data) => {
                               if (e?.GroupJob !== '' && e?.GroupJob !== data?.StockBarcode) {
                                 const primaryMetal = e?.metal?.filter((m) => m?.IsPrimaryMetal === 1)[0];
-                                // Check if primaryMetal exists to avoid errors
+                              
                                 const metalRate = primaryMetal?.Rate;
-                                // console.log("metalRate", metalRate);
+                 
 
                                 const FWT = data?.Wt;
-                                // console.log("FWT", FWT);
+                               
 
                                 const FAmount = FWT * metalRate
-                                // console.log("FAmount", FAmount);
+                           
 
                                 return FAmount?.toFixed(2)
                               } else {
                                 return data?.Amount ? data?.Amount.toFixed(2) : "0.00";
                               }
                             });
-                            // console.log("FindingAmt", FindingAmt);
+                      
 
                             const totalFindingAmt = FindingAmt?.reduce((acc, curr) => acc + (parseFloat(curr) || 0), 0);
-                            // console.log("totalFindingAmt", totalFindingAmt);
+                    
 
                             const SecondaryMetalAmounts = e?.metal?.map((el) =>
                               el?.StockBarcode !== el?.GroupJob && el?.IsPrimaryMetal === 0
                                 ? el?.Wt * el?.Rate
                                 : 0
                             );
-                            // console.log("SecondaryMetalAmounts", SecondaryMetalAmounts);
+         
 
                             const totalSecondaryMetalAmt = SecondaryMetalAmounts?.reduce((acc, amt) => acc + amt, 0);
-                            // console.log("totalSecondaryMetalAmt", totalSecondaryMetalAmt);
-                            // ************************ 02/12/2025 Completed An Bug ************************
+                             
 
                             return (
                               <div className="d-flex w-100" key={ind}>
@@ -1138,7 +1316,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   {grossWeight}
                                 </div>
                                 <div className="mcol3_pcls end_pcls pdr_pcls">
-                                  {weight}
+                                  {e?.GroupJob !== '' && e?.GroupJob === el?.StockBarcode ? weight :el?.Weight?.toFixed(3) || 0}
                                   {/* {console.log("weight", weight)} */}
                                 </div>
                                 <div className="mcol4_pcls end_pcls pdr_pcls">
@@ -1165,14 +1343,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 </div>
                                 <div className="mcol2_pcls end_pcls pdr_pcls"></div>
                                 <div className="mcol3_pcls end_pcls pdr_pcls">
-                                  {fixedValues(el?.Wt - e?.LossWt, 3)}
+                                  {fixedValues(el?.Weight - e?.LossWt, 3)}
                                 </div>
                                 <div className="mcol4_pcls end_pcls pdr_pcls">
                                   {rate}
                                 </div>
                                 <div className="mcol5_pcls end_pcls pdr_pcls fw-bold">
                                   {/* {(el?.Wt * el?.Rate)?.toFixed(2)} */}
-                                   {el?.Amount?.toFixed(2)}
+                                   {(el?.Amount /  result?.header?.CurrencyExchRate)?.toFixed(2)}
                                 </div>
                               </div>
                             );
@@ -1189,14 +1367,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   {el?.IsPrimaryMetal == 1 ? grossWeight : ""}
                                 </div>
                                 <div className="mcol3_pcls end_pcls pdr_pcls">
-                                  {weight}
+                                  {el?.Weight?.toFixed(3) || 0}
                                 </div>
                                 <div className="mcol4_pcls end_pcls pdr_pcls">
                                   {parseFloat(rate) !== 0 ? rate : ""}
                                 </div>
                                 <div className="mcol5_pcls end_pcls pdr_pcls fw-bold">
                                   {/* {parseFloat(rate) !== 0 ? Number(amount).toFixed(2) : ""} */}
-                                  {el?.Amount?.toFixed(2)}
+                                  {(el?.Amount /  result?.header?.CurrencyExchRate)?.toFixed(2)}
                                 </div>
                               </div>
                             );
@@ -1207,9 +1385,9 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
                         {/* Finding */}
                         
-                       { console.log("TCL: mergedFindings", mergedFindings)}
+                       { console.log("TCL: finalFindings", finalFindings)}
                         <div style={{ margin: "0px 2px" }}>
-                          {mergedFindings?.map((data, index) => (
+                          {finalFindings?.map((data, index) => (
                             <React.Fragment key={index}>
                         
                                 <div style={{ display: "flex" }}>
@@ -1253,10 +1431,10 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   >
                                     <p>
                                       {e?.GroupJob !== ''
-                                        ? (e?.metal
+                                        ? ((e?.metal
                                           ?.filter((m) => m?.IsPrimaryMetal === 1)[0]
-                                          ?.Rate * (parseFloat(data?.Wt) || 0))?.toFixed(2)
-                                        : data?.Amount?.toFixed(2)
+                                          ?.Rate * (parseFloat(data?.Wt) / result?.header?.CurrencyExchRate) || 0))?.toFixed(2)
+                                        : (data?.Amount /  result?.header?.CurrencyExchRate)?.toFixed(2)
                                       }
                                     </p>
                                   </div>
@@ -1309,8 +1487,11 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           {e?.grosswt !== 0 && e?.grosswt?.toFixed(3)}
                         </div>
                         <div className="mcol3_pcls end_pcls pdr_pcls">
-                          {e?.NetWt + e?.LossWt !== 0 &&
-                            (e?.NetWt + e?.LossWt)?.toFixed(3)}
+
+                          {e?.GroupJob !== ''  ? e?.NetWt + e?.LossWt !== 0 &&
+                            (e?.NetWt + e?.LossWt)?.toFixed(3) :e?.totals?.metal?.Weight +e?.totals?.finding?.Wt !== 0 &&
+                            (e?.totals?.metal?.Weight +e?.totals?.finding?.Wt)?.toFixed(3)}
+                           
                         </div>
                         <div
                           className="end_pcls pdr_pcls"
@@ -1318,7 +1499,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                         >
                           {e?.totals?.metal?.Amount !== 0 &&
                             formatAmount(
-                              e?.totals?.metal?.Amount /
+                             ( e?.totals?.metal?.Amount +e?.totals?.finding?.Amount) /
                               result?.header?.CurrencyExchRate
                             )}
                         </div>
@@ -1425,54 +1606,55 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     <div className="col6_pcls  d-flex flex-column justify-content-between bright_pcls">
                       <div>
                         {e?.GroupJob !== "" ? (
-                          result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)?.map((el) => (
-                            <div className="d-flex w-100">
-                              <div className="lcol1_pcls start_center_pcls pdl_pcls">
-                                {el?.name}
-                              </div>
-                              <div className="lcol1_pcls end_pcls pdr_pcls">
-                                {formatAmount(el?.MakingUnit)}
-                              </div>
-                              <div className="lcol1_pcls end_pcls pdr_pcls">
-                                {formatAmount(el?.MakingCharge, 2)}
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          e?.MaKingCharge_Unit !== 0 && (
-                            <div className="d-flex w-100">
-                              <div className="lcol1_pcls start_center_pcls pdl_pcls">
-                                Labour
-                              </div>
-                              <div className="lcol1_pcls end_pcls pdr_pcls">
-                                {formatAmount(e?.MaKingCharge_Unit)}
-                              </div>
-                              <div className="lcol1_pcls end_pcls pdr_pcls">
-                                {/* {formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
-                                {formatAmount(e?.MakingAmount)}
-                                {/* {e?.MakingChargeOnid==4 ? formatAmount(e?.MaKingCharge_Unit) : formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
-                              </div>
-                            </div>
-                          )
-                        )}
+                                                    result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)?.map((el) => (
+                                                      <div className="d-flex w-100">
+                                                        <div className="lcol1_pcls start_center_pcls pdl_pcls">
+                                                          {el?.name}
+                                                        </div>
+                                                        <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                          {formatAmount(el?.MakingUnit)}
+                                                        </div>
+                                                        <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                          {formatAmount(el?.MakingCharge / result?.header?.CurrencyExchRate, 2)}
+                                                        </div>
+                                                      </div>
+                                                    ))
+                                                  ) : (
+                                                 
+                                                      // <div className="d-flex w-100">
+                                                      //   <div className="lcol1_pcls start_center_pcls pdl_pcls">
+                                                      //     Labour
+                                                      //   </div>
+                                                      //   <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                      //     {formatAmount(e?.MaKingCharge_Unit)}
+                                                      //   </div>
+                                                      //   <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                      //     {/* {formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
+                                                      //     {formatAmount(e?.MakingAmount / result?.header?.CurrencyExchRate, 2)}
+                                                      //     {/* {e?.MakingChargeOnid==4 ? formatAmount(e?.MaKingCharge_Unit) : formatAmount(e?.MaKingCharge_Unit * e?.totals?.metal?.Wt ,2)} */}
+                                                      //   </div>
+                                                      // </div>
+                                                      labourRows.map((row, idx) => (
+                                                        row.rate !== 0 && (
+                                                          <div className="d-flex w-100" key={idx}>
+                                                          <div className="lcol1_pcls start_center_pcls pdl_pcls">
+                                                            Labour
+                                                          </div>
+                                                          <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                            {formatAmount(row.rate)}
+                                                          </div>
+                                                          <div className="lcol1_pcls end_pcls pdr_pcls">
+                                                            {formatAmount(row.amount / result?.header?.CurrencyExchRate, 2)}
+                                                          </div>
+                                                        </div>
 
-                        {mergedBySettingRate?.length !== 0 && (
-                          mergedBySettingRate?.map((val, ind) => (
-                            <div className="d-flex w-100">
-                            <div className="lcol1_pcls start_center_pcls pdl_pcls">
-                              Finding
-                            </div>
-                            <div className="lcol1_pcls end_pcls pdr_pcls">
-                               {val?.SettingRate ? val?.SettingRate?.toFixed(2) : ""}
-                            </div>
-                            <div className="lcol1_pcls end_pcls pdr_pcls">
-                            {val?.SettingAmount ? val?.SettingAmount?.toFixed(2) : ""}
-                               
-                            </div>
-                          </div>
-                          )
-                          
-                       ))}
+                                                        )
+                                                        
+                                                      ))
+                                                  
+                                                  )}
+
+                         
 
 
 
@@ -1653,7 +1835,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     </div>
                     <div className="end_pcls pdr_pcls" style={{ width: "45%" }}>
                       {formatAmount(
-                        result?.mainTotal?.metal?.Amount /
+                      (  result?.mainTotal?.metal?.Amount + result?.mainTotal?.finding?.Amount) /
                         result?.header?.CurrencyExchRate
                       )}
                     </div>
@@ -1689,17 +1871,18 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   <div className="d-flex w-100">
                     <div className="w-100 end_pcls pdr_pcls">
                       {formatAmount(
-                        (
-                          (result?.mainTotal?.OtherCharges || 0) +
-                          (result?.mainTotal?.TotalDiamondHandling || 0) +
-                          (result?.mainTotal?.diamonds?.SettingAmount || 0) +
-                          (result?.mainTotal?.colorstone?.SettingAmount || 0) +
-                          (result?.mainTotal?.finding?.SettingAmount || 0) +
-                          (totalMakingAmount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_1_amount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_2_amount || 0) +
-                          (result?.mainTotal?.misc?.IsHSCODE_3_amount || 0)
-                        ) / (result?.header?.CurrencyExchRate || 1)
+                        // (
+                        //   (result?.mainTotal?.OtherCharges || 0) +
+                        //   (result?.mainTotal?.TotalDiamondHandling || 0) +
+                        //   (result?.mainTotal?.diamonds?.SettingAmount || 0) +
+                        //   (result?.mainTotal?.colorstone?.SettingAmount || 0) +
+                        //   (result?.mainTotal?.finding?.SettingAmount || 0) +
+                        //   (totalMakingAmount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_1_amount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_2_amount || 0) +
+                        //   (result?.mainTotal?.misc?.IsHSCODE_3_amount || 0)
+                        // ) / (result?.header?.CurrencyExchRate || 1)
+                        GrandfinalAmount,2
                       )}
                     </div>
                   </div>
@@ -1830,7 +2013,15 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                   </div>
                   <div className="d-flex w-100 fsgdp10">
                     <div className="w-50 bright_dp10  bl_dp10">
-                      <div className="d-flex justify-content-between px-1">
+                      {
+                                            MetalData?.map((e, i) => {
+                                              return <div className="d-flex justify-content-between px-1" key={i}>
+                                                <p className="w-50 fw-bold tb_fs_pcls">FINE {e?.ShapeName}</p>
+                                                <p className="w-50 end_dp10 pe-1 tb_fs_pcls"> {fixedValues(e?.TotalPureWt, 3)} gm </p>
+                                              </div>
+                                            })
+                                          }
+                      {/* <div className="d-flex justify-content-between px-1">
                         <div className="w-50 fw-bold">GOLD IN 24KT</div>
                         <div className="w-50 end_dp10 pe-1">
                           {(
@@ -1838,7 +2029,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           )?.toFixed(3)}{" "}
                           gm
                         </div>
-                      </div>
+                      </div> */}
                       {/* {processedMetalsWt?.map((e, i) => {
                         return (
                           <div
@@ -1865,7 +2056,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           </div>
                         );
                       })} */}
-                      {Object.values(
+                      {/* {Object.values(
                         [...(processedMetalsWt || []), ...(MetShpWise || [])].reduce((acc, item) => {
                           const key = item?.ShapeName || "UNKNOWN";
 
@@ -1893,7 +2084,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             {fixedValues(e.wt, 3)} gm
                           </div>
                         </div>
-                      ))}
+                      ))} */}
                       <div className="d-flex justify-content-between px-1">
                         <div className="w-50 fw-bold tb_fs_pcls">GROSS WT</div>
                         <div className="w-50 end_dp10 pe-1 tb_fs_pcls">
@@ -1952,22 +2143,26 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       </div>
                     </div>
                     <div className="w-50 bright_dp10 tb_fs_pcls">
-                      <div className="d-flex justify-content-between px-1">
+                      {MetalData?.map((e, i) => {
+                                            return (
+                                              <div key={i} className="d-flex justify-content-between px-1">
+                                                <p className="w-50 fw-bold">{e?.ShapeName}</p>
+                                                <p className="w-50 end_dp10">
+                                                  {" "}
+                                                  {NumberWithCommas(e?.TotalAmount / result?.header?.CurrencyExchRate, 2)}
+                                                </p>
+                                              </div>
+                                            )
+                                          })}
+                      {/* <div className="d-flex justify-content-between px-1">
                         <div className="w-50 fw-bold">GOLD</div>
                         <div className="w-50 end_dp10">
-                          {/* {formatAmount(
-                            totalMetalSummaryAmount - result?.mainTotal?.LossAmt
-                          )} */}
-                          {/* {formatAmount(
-                            (result?.mainTotal?.metal?.Amount -
-                              notGoldMetalTotal) /
-                            result?.header?.CurrencyExchRate
-                          )}   */}
+                          
                           {
                             formatAmount(goldTotalAmount)
                           }
                         </div>
-                      </div>
+                      </div> */}
                       {/* {processedMetalsAmount?.map((e, i) => {
                         return (
                           <div
@@ -1994,7 +2189,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           </div>
                         );
                       })} */}
-                      {Object.values(
+                      {/* {Object.values(
                         [...(processedMetalsAmount || []), ...(MetShpWise || [])].reduce((acc, item) => {
                           const key = item?.ShapeName || "UNKNOWN";
 
@@ -2022,7 +2217,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             {NumberWithCommas(e.amount, 2)}
                           </div>
                         </div>
-                      ))}
+                      ))} */}
                       <div className="d-flex justify-content-between px-1">
                         <div className="w-50 fw-bold">DIAMOND</div>
                         <div className="w-50 end_dp10">
@@ -2030,7 +2225,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   result?.mainTotal?.diamonds?.Amount
                                 )} */}
                           {formatAmount(
-                            result?.mainTotal?.diamonds?.Amount - result?.mainTotal?.solitaire?.Amount /
+                          (  result?.mainTotal?.diamonds?.Amount - result?.mainTotal?.solitaire?.Amount) /
                             result?.header?.CurrencyExchRate
                           )}
                         </div>
@@ -2063,7 +2258,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                         <div className="w-50 fw-bold">CST</div>
                         <div className="w-50 end_dp10">
                           {formatAmount(
-                            result?.mainTotal?.colorstone?.Amount - result?.mainTotal?.gemstone?.Amount/
+                           ( result?.mainTotal?.colorstone?.Amount - result?.mainTotal?.gemstone?.Amount)/
                             result?.header?.CurrencyExchRate
                           )}
                         </div>

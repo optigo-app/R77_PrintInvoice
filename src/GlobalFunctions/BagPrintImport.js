@@ -47,5 +47,7 @@ export const bagPrintConditions = [
   { printName: "stockmeltexcel", componentName: "StockMeltExcel" },
   { printName: "matpur_tag", componentName: "MatPurTag" },
   { printName: "tdsprint", componentName: "TDSPrint" },
+  { printName: "designprint", componentName: "DesignPrint" },
+  { printName: "designpdf", componentName: "DesignPrintPdf" },
  
 ];

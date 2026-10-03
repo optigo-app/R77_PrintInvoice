@@ -13,6 +13,21 @@ const AllDesignBagPrint2 = () => {
   
   console.log("TCL: printName", printName)
  
+  // const queries = {
+  //   YearCode: queryParams.YearCode,
+  //   appuserid: queryParams.appuserid,
+  //   custid: queryParams.custid,
+  //   ifid: queryParams.ifid,
+  //   pid: queryParams.pid,
+  //   printname: queryParams.printname,
+  //   version: queryParams.version,
+  //   url: queryParams.report_api_url,
+  //   pageStart: +queryParams.start_page,
+  //   report_sv: queryParams?.report_sv,
+  //   rfbag: queryParams?.rfbag,
+  //   spno: queryParams?.spno,
+  //   wip_id: queryParams?.wip_id,
+  // };
   const queries = {
     YearCode: queryParams.YearCode,
     appuserid: queryParams.appuserid,
@@ -27,6 +42,17 @@ const AllDesignBagPrint2 = () => {
     rfbag: queryParams?.rfbag,
     spno: queryParams?.spno,
     wip_id: queryParams?.wip_id,
+    DP_OrderBy1: queryParams?.DP_OrderBy1,
+    DP_PageSize1: queryParams?.DP_PageSize1,
+    DP_CurrentPage1: queryParams?.DP_CurrentPage1,
+    WhereClause1: queryParams?.WhereClause1,
+    apiurl: queryParams?.apiurl,
+    etp: queryParams?.etp,
+    companyname: queryParams?.companyname,
+    manufacturer: queryParams?.manufacturer,
+    fromdate: queryParams?.fromdate,
+    todate: queryParams?.todate,
+    cust_id: queryParams?.cust_id,
   };
   const headers = {
     "Content-Type": "application/json",

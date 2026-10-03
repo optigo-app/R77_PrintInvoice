@@ -1,0 +1,122 @@
+.dp_container {
+    width: 100%;
+    padding: 10px 4%;
+    box-sizing: border-box;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+  }
+  
+  /* ───────── Header ───────── */
+  .dp_header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .dp_header_left {
+    width: 30%;
+  }
+  
+  .dp_banner {
+    display: block;
+    width: 100px;
+    /* height: 418px; */
+    object-fit: cover;
+  }
+  
+  .dp_header_right {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    font-size: 16px;
+  }
+  
+  /* ───────── Table ───────── */
+  .dp_table {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #b5b5b5;
+    border-left: 1px solid #b5b5b5;
+    box-sizing: border-box;
+  }
+  
+  .dp_row {
+    display: flex;
+    width: 100%;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .dp_body_row {
+    min-height: 38px;
+  }
+  
+  .dp_cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px 3px;
+    box-sizing: border-box;
+    font-size: 16px;
+    border-right: 1px solid #b5b5b5;
+    border-bottom: 1px solid #b5b5b5;
+    word-break: break-word;
+    min-width: 0;
+  }
+  
+  .dp_head_cell {
+    font-weight: 700;
+  }
+  
+  /* ───────── Column widths (total = 100%) ───────── */
+  .col_srno        { width: 5%; }
+  .col_image       { width: 6%; }
+  .col_design      { width: 9%; }
+  .col_category    { width: 9%; }
+  .col_subcategory { width: 10%; }
+  .col_lab         { width: 6%; }
+  .col_grosswt     { width: 8%; }
+  .col_metal       { width: 7%; }
+  .col_dpcs        { width: 6%; }
+  .col_dctw        { width: 7%; }
+  .col_dquality    { width: 9%; }
+  .col_dcolor      { width: 8%; }
+  .col_cspcs       { width: 5%; }
+  .col_csctw       { width: 5%; }
+  
+  /* ───────── Image ───────── */
+  .dp_img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    display: block;
+  }
+  
+  .dp_img_placeholder {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+  }
+  .printbtn{
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* ───────── Print ───────── */
+  @media print {
+    .dp_container {
+      padding: 0;
+    }
+    .dp_cell{
+        font-size: 9px !important;
+    }
+    .printbtn{
+      display: none !important;
+    }
+  }

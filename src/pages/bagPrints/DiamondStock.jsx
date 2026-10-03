@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import "../../assets/css/bagprint/print20A.css";
+import "../../assets/css/bagprint/printDiamondStock.css";
 
 import Loader from "../../components/Loader";
 import { GetStockData } from "../../GlobalFunctions/GetStockData";
@@ -141,8 +141,8 @@ function DiamondStock({ queries, headers }) {
                     <div className="frow">
                       <div className="cell label" style={{ width: "13%" }}>Pol.</div>
                       <div className="cell value" style={{ width: "25%" }}>{item?.polishname}</div>
-                      <div className="cell label" style={{ width: "7%" }}>M.</div>
-                      <div className="cell value value-small" style={{ width: "55%" }}>
+                      <div className="cell label" style={{ width: "9%" }}>M.</div>
+                      <div className="cell value value-small" style={{ width: "53%" }}>
                         {item?.length && item?.width && item?.depth
                           ? `${item.length}x${item.width}x${item.depth}`
                           : [item?.length, item?.width, item?.depth].filter(Boolean).join("x")}

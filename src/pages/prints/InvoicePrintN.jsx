@@ -49,6 +49,7 @@ const InvoicePrintN = ({
 
   const [retail, setRetail] = useState(true);
   const [companyDetails, setCompanyDetails] = useState(false);
+  const [bankdetailflag, setBankDetailFlag] = useState(false);
   const [customerAddress, setCustomerAddress] = useState([]);
   const [total, setTotal] = useState({
     gwt: 0,
@@ -658,8 +659,8 @@ const InvoicePrintN = ({
           let isEmpty = isObjectEmpty(data?.Data);
           if (!isEmpty) {
             loadData(data?.Data);
-            
-             
+
+
             setLoader(false);
           } else {
             setLoader(false);
@@ -712,6 +713,10 @@ const InvoicePrintN = ({
   };
   const handleChangeCompanyDetails = (e) => {
     companyDetails ? setCompanyDetails(false) : setCompanyDetails(true);
+  };
+
+  const handleChangeBankDetailFlag = (e) => {
+    bankdetailflag ? setBankDetailFlag(false) : setBankDetailFlag(true);
   };
 
   const totalConverted =
@@ -911,8 +916,19 @@ const InvoicePrintN = ({
   );
 
 
-  
+
   console.log("TCL: PureMetalRate", PureMetalRate)
+
+  const hasBankDetails = Boolean(
+    result?.header?.bankname ||
+    result?.header?.bankaddress ||
+    result?.header?.accountname ||
+    result?.header?.accountnumber ||
+    result?.header?.rtgs_neft_ifsc
+  );
+
+  // If bank details exist, signatures share remaining space; otherwise each takes col-4
+  const signatureColClass = hasBankDetails ? "col" : "col-4";
   return (
     <>
       {loader ? (
@@ -924,10 +940,11 @@ const InvoicePrintN = ({
               {" "}
               <div
                 className={`container-fluid ${style?.jewelelryRetailInvoiceContainer} pad_60_allPrint position-relative px-1 ${style?.RetailInvoiceprint4}`}
+                style={{ marginTop: retail ? "40mm" : "0mm" }}
               >
                 <div
                   className={`btnpcl align-items-baseline position-absolute right-0 top-0 m-0 ${style?.right_retailInvoicePrintsBtn} d-flex`}
-                  style={{ right: "-400px" }}
+                  style={{ right: "-500px" }}
                 >
 
                   <div className="form-check pe-3">
@@ -961,6 +978,23 @@ const InvoicePrintN = ({
                       for="companyDetails"
                     >
                       Company Details
+                    </label>
+                  </div>
+
+                  <div className="form-check pe-3">
+                    <input
+                      className="form-check-input"
+                      id="bankdetailflag"
+                      type="checkbox"
+                      checked={bankdetailflag}
+                      onChange={handleChangeBankDetailFlag}
+                    />
+                    <label
+                      className="form-check-label pt-1"
+                      htmlFor="flexCheckDefault"
+                      for="bankdetailflag"
+                    >
+                      Bank Details
                     </label>
                   </div>
 
@@ -998,7 +1032,7 @@ const InvoicePrintN = ({
                   <Button />
                 </div>
                 <div className="pt-2 d-flex flex-column">
-                  <div className="headlineJL w-100 p-2" style={{"justifyContent": companyDetails?"flex-start":"center","marginBottom": companyDetails?"0":"10px"}}>
+                  <div className="headlineJL w-100 p-2" style={{ "justifyContent": companyDetails ? "flex-start" : "center", "marginBottom": companyDetails ? "0" : "10px" }}>
                     {" "}
                     <b style={{ fontSize: "20px" }}>
                       {" "}
@@ -1007,66 +1041,66 @@ const InvoicePrintN = ({
                     </b>{" "}
                   </div>
 
-                  {companyDetails &&(
+                  {companyDetails && (
                     <div className="d-flex w-100">
-                    <div className="col-10 p-2">
-                      <div className="fslhJL">
-                        <h5>
-                          {" "}
-                          <b style={{ fontSize: "16px", color: "black" }}>
+                      <div className="col-10 p-2">
+                        <div className="fslhJL">
+                          <h5>
                             {" "}
-                            {result?.header?.CompanyFullName}{" "}
-                          </b>{" "}
-                        </h5>
-                      </div>
-                      <div className="fslhJL">{result?.header?.CompanyAddress}</div>
-                      <div className="fslhJL">
-                        {result?.header?.CompanyAddress2}
-                      </div>
-                      <div className="fslhJL">
-                        {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode},
-                        {result?.header?.CompanyState}({result?.header?.CompanyCountry})
-                      </div>
+                            <b style={{ fontSize: "16px", color: "black" }}>
+                              {" "}
+                              {result?.header?.CompanyFullName}{" "}
+                            </b>{" "}
+                          </h5>
+                        </div>
+                        <div className="fslhJL">{result?.header?.CompanyAddress}</div>
+                        <div className="fslhJL">
+                          {result?.header?.CompanyAddress2}
+                        </div>
+                        <div className="fslhJL">
+                          {result?.header?.CompanyCity}-{result?.header?.CompanyPinCode},
+                          {result?.header?.CompanyState}({result?.header?.CompanyCountry})
+                        </div>
 
-                      <div className="fslhJL">
-                        {result?.header?.CompanyEmail} |{result?.header?.CompanyWebsite}
-                      </div>
-                      {/* <div className='fslhpcl3'>{result?.header?.Company_VAT_GST_No} | {result?.header?.Cust_CST_STATE}-{result?.header?.Company_CST_STATE_No} | PAN-EDJHF236D</div> */}
-                      <div className="fslhJL">
-                        {result?.header?.Company_VAT_GST_No}
-                        {result?.header?.Company_CST_STATE_No !== "" &&
-                          result?.header?.Company_CST_STATE !== "" &&
-                          `| ${result?.header?.Company_CST_STATE}-${result?.header?.Company_CST_STATE_No}`}
-                        {result?.header?.Com_pannumber !== "" &&
-                          ` | PAN-${result?.header?.Com_pannumber}`}
-                      </div>
-                      <div className="fslhJL">
-                        T {result?.header?.CompanyTellNo}
-                        {/* | TOLL FREE{" "}
+                        <div className="fslhJL">
+                          {result?.header?.CompanyEmail} |{result?.header?.CompanyWebsite}
+                        </div>
+                        {/* <div className='fslhpcl3'>{result?.header?.Company_VAT_GST_No} | {result?.header?.Cust_CST_STATE}-{result?.header?.Company_CST_STATE_No} | PAN-EDJHF236D</div> */}
+                        <div className="fslhJL">
+                          {result?.header?.Company_VAT_GST_No}
+                          {result?.header?.Company_CST_STATE_No !== "" &&
+                            result?.header?.Company_CST_STATE !== "" &&
+                            `| ${result?.header?.Company_CST_STATE}-${result?.header?.Company_CST_STATE_No}`}
+                          {result?.header?.Com_pannumber !== "" &&
+                            ` | PAN-${result?.header?.Com_pannumber}`}
+                        </div>
+                        <div className="fslhJL">
+                          T {result?.header?.CompanyTellNo}
+                          {/* | TOLL FREE{" "}
                         {result?.header?.CompanyTollFreeNo} */}
+                        </div>
                       </div>
-                    </div>
-                    <div className="col-2 d-flex align-items-center justify-content-center">
-                      {/* <img
+                      <div className="col-2 d-flex align-items-center justify-content-center">
+                        {/* <img
                       src={result?.header?.PrintLogo}
                       alt="#"
                       className={`w-100 d-block ms-auto ${style?.imgJewelleryRetailinovicePrint3}`}
                     /> */}
-                      {isImageWorking && result?.header?.PrintLogo !== "" && (
-                        <img
-                          src={result?.header?.PrintLogo}
-                          alt=""
-                          className={`w-100 d-block ms-auto ${style?.imgJewelleryRetailinovicePrint3}`}
-                          onError={handleImageErrors}
-                          height={120}
-                          width={150}
-                        />
-                      )}
+                        {isImageWorking && result?.header?.PrintLogo !== "" && (
+                          <img
+                            src={result?.header?.PrintLogo}
+                            alt=""
+                            className={`w-100 d-block ms-auto ${style?.imgJewelleryRetailinovicePrint3}`}
+                            onError={handleImageErrors}
+                            height={120}
+                            width={150}
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                   )}
-                  
+
                   {/* header data */}
                   <div className="d-flex border w-100 no_break">
                     <div className={`col-${!retail ? 4 : 8} p-2 b border-end`}>
@@ -1099,7 +1133,7 @@ const InvoicePrintN = ({
                         ""
                       )}
                       <div className="fslhJL">{result?.header?.CompanyCountry}</div>
-                      <div className="fslhJL">{result?.header?.customeremail1}</div>
+                      {/* <div className="fslhJL">{result?.header?.customeremail1}</div> */}
                       <div className="fslhJL">
                         Phno: {result?.header?.customermobileno}
                       </div>
@@ -1130,7 +1164,7 @@ const InvoicePrintN = ({
                     )}
 
 
-                    <div className="col-4 p-2 position-relative">
+                    <div className="col-4 p-2 position-relative min-height-info">
                       {result?.header?.Company_VAT_GST_No !== "" && (
                         <div className="d-flex">
                           <div className="col-6">
@@ -1201,20 +1235,20 @@ const InvoicePrintN = ({
                         {result?.header?.aadharno}
                       </div>
                     </div>} */}
-                     <div className="position-absolute bottom-0" style={{marginTop:"10px"}}>
-                     <div className="d-flex    w-100 bottom-0 font-bill">
-                      <div className="d-flex">
-                        <b className="JL13 lable  pe-2" style={{width:"40px",fontSize:"15px"}}>Gold</b>
-                        <b className="" style={{fontSize:"15px"}}> {NumberWithCommas( PureMetalRate?.[0]?.Price, 2)}</b>
+                      <div className="position-absolute bottom-0" style={{ marginTop: "10px" }}>
+                        <div className="d-flex    w-100 bottom-0 font-bill">
+                          <div className="d-flex">
+                            <b className="JL13 lable  pe-2" style={{ width: "40px", fontSize: "15px" }}>Gold</b>
+                            <b className="" style={{ fontSize: "15px" }}> {NumberWithCommas(PureMetalRate?.[0]?.Price, 2)}</b>
+                          </div>
+                        </div>
+                        <div className="d-flex  w-100  bottom-0 font-bill">
+                          <div className="d-flex">
+                            <b className="JL13 label " style={{ width: "40px", fontSize: "15px" }}>Silver</b>
+                            <b className="" style={{ fontSize: "15px" }}> {NumberWithCommas(PureMetalRate?.[1]?.Price, 2)}</b>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="d-flex  w-100  bottom-0 font-bill">
-                      <div className="d-flex">
-                        <b className="JL13 label " style={{width:"40px",fontSize:"15px"}}>Silver</b>
-                        <b className="" style={{fontSize:"15px"}}> {NumberWithCommas( PureMetalRate?.[1]?.Price, 2)}</b>
-                      </div>
-                    </div>
-                     </div>
                     </div>
                   </div>
                   {/* Table Heading */}
@@ -2512,54 +2546,71 @@ const InvoicePrintN = ({
                     ></div>
                   </div>
                   {/* bank detail */}
+
                   <div className="border-start border-end border-bottom d-flex no_break">
-                    {/* Render the outer div only if at least one bank detail value exists */}
-                    {(result?.header?.bankname ||
-                      result?.header?.bankaddress ||
-                      result?.header?.accountname ||
-                      result?.header?.accountnumber ||
-                      result?.header?.rtgs_neft_ifsc) && (
-                        <div className="col-4 p-2 border-end">
-                          <p className="fw-bold">Bank Detail</p>
+                    {/* 1. Bank Details Column (Fixed at col-4 if present) */}
+                    {hasBankDetails && bankdetailflag && (
+                      <div className={`col-4 p-2  ${companyDetails?"border-end":""}`}>
+                        <p className="fw-bold">Bank Detail</p>
 
-                          {result?.header?.bankname && (
-                            <p>Bank name: {result.header.bankname}</p>
-                          )}
+                        {result?.header?.bankname && (
+                          <p>Bank name: {result.header.bankname}</p>
+                        )}
 
-                          {result?.header?.bankaddress && (
-                            <p style={{ wordBreak: "normal" }}>
-                              Branch: {result.header.bankaddress}
-                            </p>
-                          )}
+                        {result?.header?.bankaddress && (
+                          <p style={{ wordBreak: "normal" }}>
+                            Branch: {result.header.bankaddress}
+                          </p>
+                        )}
 
-                          {/* {result?.header?.PinCode && <p>{result.header.PinCode}</p>} */}
+                        {/* {result?.header?.PinCode && <p>{result.header.PinCode}</p>} */}
 
-                          {result?.header?.accountname && (
-                            <p>Account Name: {result.header.accountname}</p>
-                          )}
+                        {result?.header?.accountname && (
+                          <p>Account Name: {result.header.accountname}</p>
+                        )}
 
-                          {result?.header?.accountnumber && (
-                            <p>Account No: {result.header.accountnumber}</p>
-                          )}
+                        {result?.header?.accountnumber && (
+                          <p>Account No: {result.header.accountnumber}</p>
+                        )}
 
-                          {result?.header?.rtgs_neft_ifsc && (
-                            <p>RTGS NEFT IFSC: {result.header.rtgs_neft_ifsc}</p>
-                          )}
-                        </div>
-                      )}
-                    <div className={`${result?.header?.bankname ||
-                      result?.header?.bankaddress ||
-                      result?.header?.accountname ||
-                      result?.header?.accountnumber ||
-                      result?.header?.rtgs_neft_ifsc? "col-4": "col-6"} p-2 border-end d-flex justify-content-between flex-column min-signature-height`} style={{alignItems:"center"}}>
+                        {result?.header?.rtgs_neft_ifsc && (
+                          <p>RTGS NEFT IFSC: {result.header.rtgs_neft_ifsc}</p>
+                        )}
+                      </div>
+                    )}
+    
+                        {/* 2. Customer Signature Column */}
+                    <div
+                      className={`${signatureColClass} p-2 border-end d-flex justify-content-between flex-column min-signature-height`}
+                      style={{ alignItems: "center" }}
+                    >
                       <p>Signature</p>
                       <p className="fw-bold">{result?.header?.CustName}</p>
                     </div>
-                    <div className="col-4 p-2 d-flex justify-content-between flex-column" style={{alignItems:"center"}}>
+
+                    {/* 3. Company Signature Column */}
+                    <div
+                      className={`${signatureColClass} p-2 border-end d-flex justify-content-between flex-column`}
+                      style={{ alignItems: "center" }}
+                    >
                       <p>Signature</p>
-                      <p className="fw-bold">{result?.header?.CompanyFullName}</p>
+                      <p className="fw-bold">{result?.header?.SalesRepName}</p>
                     </div>
+
+                    {/* 4. Checked By Column */}
+                    <div
+                      className={`${signatureColClass} p-2 d-flex justify-content-between flex-column`}
+                      style={{ alignItems: "center" }}
+                    >
+                      <p></p>
+                      <p className="fw-bold">Checked By</p>
+                    </div>
+           
+         
+
+                  
                   </div>
+
                 </div>
               </div>
             </>

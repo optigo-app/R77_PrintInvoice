@@ -496,6 +496,18 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                         // Base (common) job  -> same rows as the DCF card (family rows, without the base total row)
                                         // Split jobs S1/S2/S3 -> nothing, so it shows only on the common job
                                         const pcfMetalRows = isBaseJob ? rd2RowsForThisCard.slice(1) : [];
+                                        const rd2DataPurity = isBaseJob ? rd2RowsForThisCard : [];
+                                       
+
+                                        
+                                         
+                                        const purityList = [
+                                            ...new Set(
+                                              rd2DataPurity
+                                                ?.map(item => item?.Metal_Type_Color?.split(" ")[1])
+                                                .filter(Boolean)
+                                            )
+                                          ];
 
                                         return (
                                             <div style={{ width: '50%' }} className="pcf-page" key={cardKey}>
@@ -724,7 +736,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="pcf-cell pcf-col-wrkr"></div>
                                                         <div className="pcf-cell pcf-col-inwt"></div>
                                                         <div className="pcf-cell pcf-col-outwt"></div>
-                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">UIN No -</div>
                                                     </div>
 
                                                     <div className="pcf-row">
@@ -732,7 +744,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="pcf-cell pcf-col-wrkr"></div>
                                                         <div className="pcf-cell pcf-col-inwt"></div>
                                                         <div className="pcf-cell pcf-col-outwt"></div>
-                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                        <div className="pcf-cell pcf-col-scrap"> Stamping - {purityList?.join(",")}</div>
                                                     </div>
 
                                                     <div className="pcf-row">

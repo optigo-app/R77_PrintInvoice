@@ -1,0 +1,102 @@
+.pd1_wrapper {
+    display: flex;
+    flex-direction: column;   /* multiple cards: top to bottom */
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    font-family: Calibri, Arial, sans-serif;
+    color: #000;
+}
+
+.pd1_card {
+    width: 400px;
+    height: 200px;
+    box-sizing: border-box;
+    padding: 1.5mm;
+    overflow: hidden;
+}
+
+.pd1_col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: 100%;
+    min-width: 0;
+}
+
+/* every row: label 30% | colon 7% | value 63% */
+.pd1_row {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.pd1_label {
+    width: 15%;
+    flex: 0 0 30%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.pd1_colon {
+    width: 7%;
+    flex: 0 0 7%;
+    box-sizing: border-box;
+    text-align: center;   /* keeps all colons on one vertical line */
+    font-weight: bold;
+}
+
+.pd1_value {
+    width: 78%;
+    flex: 0 0 63%;
+    box-sizing: border-box;
+    min-width: 0;
+ 
+    word-break: break-word;
+    font-weight: bold;
+}
+
+.button-print{
+    margin-right: 20px;
+}
+
+ 
+@page {
+    size: 50mm 38mm;
+    margin: 0;
+}
+
+@media print {
+   
+    .pd1_wrapper {
+        display: block;
+        padding: 0;
+        gap: 0;
+    }
+    .button-print {
+        display: none !important;
+    }
+
+    .pd1_card {
+        width: 50mm !important;
+        height: 38mm !important;
+        border: none;
+        margin: 0;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .pd1_row {
+        font-size: 9px !important;
+    }
+
+    .pd1_card:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+}
