@@ -3,7 +3,7 @@
     font-family: Calibri;
 }
 
-.containerEstimate *{
+.containerEstimate * {
     font-size: 14px;
 }
 
@@ -33,11 +33,11 @@
     min-width: 24%;
 }
 
-.border_color_estimate{
-    border: 1px solid #BDBDBD !important; 
+.border_color_estimate {
+    border: 1px solid #BDBDBD !important;
 }
 
-.border_color_estimates{
+.border_color_estimates {
     border-color: #BDBDBD !important;
 }
 
@@ -56,7 +56,7 @@
     min-width: 6%;
 }
 
-.OtherAmountEstimatePrint{
+.OtherAmountEstimatePrint {
     width: 5%;
     min-width: 5%;
 }
@@ -69,7 +69,7 @@
 }
 
 
-.estimatePrintFont_14{
+.estimatePrintFont_14 {
     font-size: 14px
 }
 
@@ -100,13 +100,14 @@
     height: 48px;
 }
 
-.height_20_estimatePrint{
+.height_20_estimatePrint {
     height: 20px;
 }
 
 .width_38_estimatePrint {
     width: 38px;
 }
+
 .totalEstimatePrint {
     /* width: 135px;
     min-width: 135px; */
@@ -143,27 +144,27 @@
     height: calc(100% + 3rem) !important;
 }
 
-.min_height_24_estimatePrint{
+.min_height_24_estimatePrint {
     min-height: 15px;
 }
 
-.min_height_100EstimatePrint{
+.min_height_100EstimatePrint {
     min-height: 100px;
 }
 
-.height_30_estimatePrint{
+.height_30_estimatePrint {
     height: 30px;
 }
 
-.pad_bot_30_estimatePrint{
+.pad_bot_30_estimatePrint {
     padding-bottom: 30px;
 }
 
-.pad_bot_25_estimatePrint{
+.pad_bot_25_estimatePrint {
     padding-bottom: 25px;
 }
 
-.pad_bot_29_estimatePrint{
+.pad_bot_29_estimatePrint {
     padding-bottom: 21.5px;
 }
 
@@ -175,7 +176,7 @@
     height: 18px;
 }
 
-.heiht_18_8_estimatePrint{
+.heiht_18_8_estimatePrint {
     height: 18.8px;
 }
 
@@ -186,29 +187,30 @@
 .height_28_5_estimatePrint {
     min-height: 14.5px;
 }
+
 .height_29_5_estimatePrint {
     height: 14.5px;
 }
 
-.width_40_estimatePrint{
+.width_40_estimatePrint {
     min-width: 20%;
     width: 20%;
 }
 
-.width_45_estimatePrint{
+.width_45_estimatePrint {
     min-width: 45px;
     width: 45px;
 }
 
-.pad_bot_40_estimatePrint{
-    padding-bottom: 40px ;
+.pad_bot_40_estimatePrint {
+    padding-bottom: 40px;
 }
 
-.p_1Estimate{
+.p_1Estimate {
     padding: 1px;
 }
 
-.estimate_img{
+.estimate_img {
     max-height: 50px;
     object-fit: contain;
     object-position: left;
@@ -219,7 +221,7 @@
     word-break: break-all;
 } */
 
-.word_break_estimatePrint *{
+.word_break_estimatePrint * {
     word-break: break-all;
 }
 
@@ -227,11 +229,12 @@
     .recordEstimatePrint {
         page-break-inside: avoid;
     }
+
     .print_sec_sum4 {
         display: none !important;
-      }
+    }
 
-      .recordEstimatePrint * {
+    .recordEstimatePrint * {
         font-weight: 400;
     }
 }

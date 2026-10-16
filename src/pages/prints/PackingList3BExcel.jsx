@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { apiCall, checkMsg, formatAmount, handleGlobalImgError, isObjectEmpty, handleImageError, NumberWithCommas } from '../../GlobalFunctions';
+import {
+  apiCall,
+  checkMsg,
+  formatAmount,
+  handleGlobalImgError,
+  isObjectEmpty,
+  handleImageError,
+  NumberWithCommas,
+  mergeMetals,
+  mergeFindings
+} from '../../GlobalFunctions';
 import Loader from '../../components/Loader';
 import ReactHTMLTableToExcel from 'react-html-table-to-excel';
 import { OrganizeDataPrint } from '../../GlobalFunctions/OrganizeDataPrint';
@@ -188,7 +198,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
       let dia = [];
       el?.diamonds?.forEach((a) => {
         let obj = cloneDeep(a);
-        let findrec = dia?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate)
+        let findrec = dia?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate && ele?.isRateOnPcs === obj?.isRateOnPcs)
         if (findrec === -1) {
           dia.push(obj);
         } else {
@@ -203,7 +213,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
       let clr = [];
       el?.colorstone?.forEach((a) => {
         let obj = cloneDeep(a);
-        let findrec = clr?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.isRateOnPcs === obj?.isRateOnPcs && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate)
+        let findrec = clr?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.isRateOnPcs === obj?.isRateOnPcs && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate && ele?.IsSolGem === obj?.IsSolGem)
         if (findrec === -1) {
           clr.push(obj);
         } else {
@@ -218,7 +228,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
       let miscAr = [];
       el?.misc?.forEach((a) => {
         let obj = cloneDeep(a);
-        let findrec = miscAr?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.isRateOnPcs === obj?.isRateOnPcs && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate)
+        let findrec = miscAr?.findIndex((ele) => ele?.ShapeName === obj?.ShapeName && ele?.QualityName === obj?.QualityName && ele?.Colorname === obj?.Colorname && ele?.isRateOnPcs === obj?.isRateOnPcs && ele?.SizeName === obj?.SizeName && ele?.Rate === obj?.Rate && ele?.IsSolGem === obj?.IsSolGem)
         if (findrec === -1) {
           miscAr.push(obj);
         } else {
@@ -656,9 +666,9 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
   const mergeByShapeName = (stoneList) => {
     return Object.values(
       (stoneList ?? []).reduce((acc, current) => {
-        const shapeKey = current?.ShapeName?.toLowerCase() || "";
+        const shapeKey = current?.ShapeName?.toLowerCase() + "_" + current?.isRateOnPcs || "";
         if (!acc[shapeKey]) {
-          acc[shapeKey] = { ...current };
+          acc[shapeKey] = { ...current, isRateOnPcs: current?.isRateOnPcs };
         } else {
           acc[shapeKey].Pcs = (acc[shapeKey].Pcs || 0) + (current.Pcs || 0);
           acc[shapeKey].Wt = (acc[shapeKey].Wt || 0) + (current.Wt || 0);
@@ -743,11 +753,24 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
     90,   // Total Amount
   ];
 
-  const SolCertNo = (json2data || [])
-  .filter(x => x?.MasterManagement_DiamondStoneTypeid === 1)
-  .map(x => x?.certno)
-  .filter(Boolean)
-  .join(",");
+  // const SolCertNo = (json2data || [])
+  // .filter(x => x?.MasterManagement_DiamondStoneTypeid === 1)
+  // .map(x => x?.certno)
+  // .filter(Boolean)
+  // .join(",");
+
+  const SolCertNo = (jobNo, stoneTypeId) => {
+    return json2data
+      .filter(
+        x =>
+          x?.StockBarcode === jobNo &&
+          x?.MasterManagement_DiamondStoneTypeid === stoneTypeId
+      )
+      .map(x => x?.certno)
+      .filter(Boolean)
+      .join(", ");
+  };
+
 
 
 
@@ -821,6 +844,10 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                       const diamonddata = mergeDiadetails(e?.diamonds);
                       const colorstonedata = mergeDiadetails(e?.colorstone);
 
+                      // Same merge flow as the print file
+                      const mergedFindings = mergeFindings(e?.finding);
+                      const mergedMetals = mergeMetals(e?.metal);
+
                       const labourTotal =
                         e?.GroupJob !== ""
                           ? result?.labour
@@ -851,24 +878,26 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           const shapeName = current?.ShapeName?.toLowerCase() || "";
                           const isSolGem = String(current?.IsSolGem ?? "0");
                           const typename = String(current?.MaterialTypeName || "");
-                          let key = `${shapeName}_${isSolGem}`;
+                          const isRateOnPcs = String(current.isRateOnPcs ?? current.IsRateOnPcs ?? "0");
+                          let key = `${shapeName}_${isSolGem}_${isRateOnPcs}`;
                           if (typename !== "") {
                             key += `_${typename}`;
                           }
-                      
+
                           if (!acc[key]) {
-                            acc[key] = { ...current };
+                            acc[key] = { ...current, isRateOnPcs: isRateOnPcs };
                           } else {
                             acc[key].Pcs += current.Pcs || 0;
                             acc[key].Wt += current.Wt || 0;
                             acc[key].Amount += current.Amount || 0;
                             acc[key].Rate += current.Rate || 0;
-                      
+                            acc[key].isRateOnPcs = isRateOnPcs;
+
                             if (acc[key].SizeName !== current.SizeName) {
                               acc[key].SizeName = "Mixed";
                             }
                           }
-                      
+
                           return acc;
                         }, {})
                       ).sort((a, b) => {
@@ -884,7 +913,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         return getNum(b?.CustomSize) - getNum(a?.CustomSize);
                       });
 
-                      const sortedMetal = e?.metal
+                      const sortedMetal = mergedMetals
                         ?.slice()
                         ?.sort((a, b) => {
                           const aGJ = a?.StockBarcode === e?.GroupJob ? 1 : 0;
@@ -898,7 +927,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                       const dRows = mergedDiamonds;
                       const mRows = [
                         ...sortedMetal.map((el) => ({ type: "metal", el })),
-                        ...(e?.finding ?? []).map((data) => ({ type: "finding", data })),
+                        ...(mergedFindings ?? []).map((data) => ({ type: "finding", data })),
                       ];
                       const sRows = [
                         ...(mergeByShapeName(e?.colorstone) ?? []).map((el) => ({ type: "cs", el })),
@@ -919,7 +948,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                               : e?.GroupJob === el?.StockBarcode ? e?.grosswt?.toFixed(3) : "";
                           const net =
                             el?.IsPrimaryMetal === 1
-                              ? (el?.Wt - e?.totals?.finding?.Wt - e?.LossWt)?.toFixed(3)
+                              ? (el?.Weight - e?.LossWt)?.toFixed(3)
                               : el?.Wt?.toFixed(3);
                           const loss =
                             e?.LossWt > 0 && el?.IsPrimaryMetal === 1
@@ -973,6 +1002,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                             pcs: el?.Pcs,
                             wt: el?.Wt,
                             rate: formatAmount(el?.Rate),
+                            isRateOnPcs: el?.isRateOnPcs,
                             amount: el?.Amount / result?.header?.CurrencyExchRate,
                           };
                         }
@@ -987,6 +1017,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           pcs: el?.Pcs,
                           wt: el?.Wt?.toFixed(3),
                           rate: formatAmount(el?.Rate),
+                          isRateOnPcs: el?.isRateOnPcs,
                           amount: el?.Amount / result?.header?.CurrencyExchRate,
                         };
                       };
@@ -998,7 +1029,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           const am = Number(e[disAmount])
                           const decimals = e[isAmountKey] === 1 ? 3 : 2;
                           const val = num.toFixed(decimals);
-                          return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${(val / result?.header?.CurrencyExchRate)?.toFixed(2) } @${label} Amount`;
+                          return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${(val / result?.header?.CurrencyExchRate)?.toFixed(2)} @${label} Amount`;
                         })
                         .join(', ');
 
@@ -1011,6 +1042,18 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                         const mCell = !isTotalRow ? metalCell(rowIdx) : null;
                         const sCell = !isTotalRow ? stoneCell(rowIdx) : null;
                         const lCell = !isTotalRow ? lRows[rowIdx] ?? null : null;
+                        
+                        console.log("TCL: mergeByShapeName ->dCell ", dCell)
+
+                        const jobNos =
+                          e?.GroupJob !== ""
+                            ? [e?.GroupJob, e?.SrJobno]
+                            : [e?.SrJobno];
+
+                        const cirtiFinding = jobNos
+                          .map(jobNo => SolCertNo(jobNo, 1))
+                          .filter(Boolean)
+                          .join(",");
 
                         return (
                           <tr key={`${i}-${rowIdx}`} style={{ verticalAlign: isTotalRow ? "middle" : "top" }}>
@@ -1107,11 +1150,11 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
 
                                 {[
                                   e?.CertificateNo && `Cert#: ${e.CertificateNo}`,
-                                  SolCertNo !== "" && `Sol.Cert#: ${SolCertNo}`,
+                                  cirtiFinding !== "" && `Sol.Cert#: ${cirtiFinding}`,
                                   e?.HUID && `HUID: ${e.HUID}`,
                                   e?.Size && `Size: ${e.Size}`,
                                 ].filter(Boolean).join("  |  ")}
-                                {(e?.CertificateNo || e?.HUID || e?.Size) && <br />}
+                                {(e?.CertificateNo || e?.HUID || e?.Size || cirtiFinding) && <br />}
 
                                 {e?.grosswt !== "" && (
                                   <>
@@ -1147,12 +1190,12 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle()}>{dCell?.shape ?? ""}</td>
                                 <td style={tdStyle("right")}>{dCell?.pcs ?? ""}</td>
                                 <td style={tdStyle("right")}>{dCell?.wt ?? ""}</td>
-                                <td style={tdStyle("right")}>
-                                  {dCell?.amount && dCell?.wt > 0
-                                    ? ((dCell.amount / dCell.wt)  / result?.header?.CurrencyExchRate).toFixed(2)
-                                    : ""}
+                                <td style={{...tdStyle("right"),width:"75px"}}>
+                                  {dCell?.amount && (dCell?.isRateOnPcs == 1 ? dCell?.pcs > 0 : dCell?.wt > 0)
+                                    ? ((dCell.amount / (dCell?.isRateOnPcs == 1 ? dCell.pcs : dCell.wt)) / result?.header?.CurrencyExchRate).toFixed(2)
+                                    : ""}{dCell?.isRateOnPcs == 1 ?"/PC":""}
                                 </td>
-                                <td style={tdStyle("right")}><b>{formatAmount(dCell?.amount / result?.header?.CurrencyExchRate) ?? ""}</b></td>
+                                <td style={tdStyle("right")}><b>{dCell?.wt > 0 ? formatAmount(dCell?.amount / result?.header?.CurrencyExchRate) : ""}</b></td>
                               </>
                             )}
 
@@ -1183,7 +1226,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle("right")}>{mCell?.net ?? ""}</td>
                                 <td style={tdStyle()}>{mCell?.loss ?? ""}</td>
                                 <td style={tdStyle("right")}>{mCell?.rate}</td>
-                                <td style={tdStyle("right")}><b>{formatAmount(mCell?.amount / result?.header?.CurrencyExchRate) ?? ""}</b></td>
+                                <td style={tdStyle("right")}><b>{ mCell?.amount ? formatAmount(mCell?.amount / result?.header?.CurrencyExchRate) : ""}</b></td>
                               </>
                             )}
 
@@ -1214,11 +1257,11 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 <td style={tdStyle()}>{sCell?.shape ?? ""}</td>
                                 <td style={tdStyle("right")}>{sCell?.pcs ?? ""}</td>
                                 <td style={tdStyle("right")}>{sCell?.wt ?? ""}</td>
-                                <td style={tdStyle("right")}>
-                                  {sCell?.amount && sCell?.wt > 0
-                                    ? ((sCell.amount / sCell.wt)  / result?.header?.CurrencyExchRate).toFixed(2)
-                                    : sCell?.shape ? "0" : ""}
-                                  
+                                <td style={{...tdStyle("right"),width:"75px"}}>
+                              {  sCell?.amount && (sCell?.isRateOnPcs == 1 ? sCell?.pcs > 0 : sCell?.wt > 0)
+  ? ((sCell.amount / (sCell?.isRateOnPcs == 1 ? sCell.pcs : sCell.wt)) / result?.header?.CurrencyExchRate).toFixed(2)
+  : sCell?.shape ? "0" : ""}{sCell?.isRateOnPcs == 1 ?"/PC":""}
+
                                 </td>
                                 <td style={tdStyle("right")}><b>{sCell?.wt > 0 ? formatAmount(sCell?.amount) : ""}</b></td>
                               </>
@@ -1255,7 +1298,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                             {isTotalRow ? (
                               <td style={{ ...tdTotalStyle("right"), borderTop: "1px solid #ccc" }}>
                                 {formatAmount(
-                                 ( e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                                  (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
                                 )}
                               </td>
                             ) : isFirstRow ? (
@@ -1264,7 +1307,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                 style={{ ...tdStyle("right"), borderTop: "1px solid black", verticalAlign: "top", paddingTop: 4 }}
                               >
                                 {formatAmount(
-                                 ( e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                                  (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
                                 )}
                               </td>
                             ) : null /* rowSpan from isFirstRow covers this row — no <td> needed */}
@@ -1290,7 +1333,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                           <td className="discountCol" style={{ ...tdStyle("right"), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}> {formatAmount(e?.DiscountAmt / result?.header?.CurrencyExchRate, 2)}</td>
                           <td className="discountCol" style={{ ...tdStyle("right"), borderBottom: "1px solid black", borderLeft: "1px solid black", borderTop: "1px solid black" }}>
                             {formatAmount(
-                              (result?.mainTotal?.TotalAmount) /
+                              (e?.UnitCost + e?.CustomDuty_Amount - e?.DiscountAmt) /
                               result?.header?.CurrencyExchRate
                             )}
                           </td>

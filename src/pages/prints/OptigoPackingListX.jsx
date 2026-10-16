@@ -10,7 +10,7 @@ import {
     isObjectEmpty,
     NumberWithCommas,
     mergeMetals,
-    mergeFindings
+    mergeFindings, mergeFindingsIntoPrimaryMetal
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import "../../assets/css/prints/optigoPackingListX.css";
@@ -756,12 +756,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             dataArray.reduce((accumulator, currentItem) => {
                 const shapeName = currentItem.Shape_Code?.toLowerCase() || "";
                 const QualityName = currentItem.Quality_Code?.toLowerCase() || "";
+                const isRateOnPcs = currentItem.isRateOnPcs ?? currentItem.IsRateOnPcs ?? "0";
                 const ColorName = currentItem.Color_Code?.toLowerCase() || "";
                 const SizeName = currentItem.SizeName?.toLowerCase() || "";
                 const Rate = currentItem.Rate || 0;
-                
-    
-                const key = [shapeName, QualityName, ColorName, SizeName, Rate]
+
+
+                const key = [shapeName, QualityName, ColorName, SizeName, Rate, isRateOnPcs]
                     .filter(Boolean)
                     .join("_");
                 // const key = currentItem.ShapeName;
@@ -796,13 +797,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             // const key = current.ShapeName?.toLowerCase() || "unknown";
             const shapeName = current.Shape_Code?.toLowerCase() || "";
             const QualityName = current.Quality_Code?.toLowerCase() || "";
+            const isRateOnPcs = current.isRateOnPcs ?? current.IsRateOnPcs ?? "0";
             const ColorName = current.Color_Code?.toLowerCase() || "";
             const SizeName = current.SizeName?.toLowerCase() || "";
             const Rate = current.Rate || 0;
             const isSolGem = String(current.IsSolGem ?? "0");
             const typename = String(current?.MaterialTypeName || "").toLowerCase();
 
-            const key = [shapeName, QualityName, ColorName, SizeName, Rate, isSolGem, typename]
+            const key = [shapeName, QualityName, ColorName, SizeName, Rate, isSolGem, typename, isRateOnPcs]
                 .filter(Boolean)
                 .join("_");
 
@@ -909,52 +911,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     console.log("TCL: mergeDiadetails -> metalType", metalType)
 
 
-    const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
-        let remainingFindings = [...findings];
 
-        const updatedMetals = metals.map((metal) => {
-            if (metal.IsPrimaryMetal !== 1) return metal;
-
-            // findings that match this primary metal on Quality + Size + Rate
-            const matched = remainingFindings.filter(
-                (f) =>
-                    f?.QualityName === metal?.QualityName &&
-                    f?.SizeName === metal?.SizeName &&
-                    f?.Rate === metal?.Rate &&
-                    f?.Supplier === metal?.Supplier
-            );
-
-            if (matched.length === 0) return metal;
-
-            // remove the matched findings from the pool so they aren't reused
-            // by another primary metal row and won't appear in the final findings list
-            remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
-
-            const totals = matched.reduce(
-                (acc, f) => ({
-                    Pcs: acc.Pcs + (f.Pcs || 0),
-                    Wt: acc.Wt + (f.Wt || 0),
-                    FineWt: acc.FineWt + (f.FineWt || 0),
-                    Amount: acc.Amount + (f.Amount || 0),
-                    RMwt: acc.RMwt + (f.RMwt || 0),
-                    Weight: acc.Weight + (f.Weight || 0),
-                }),
-                { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
-            );
-
-            return {
-                ...metal,
-                Pcs: (metal.Pcs || 0) + totals.Pcs,
-                Wt: (metal.Wt || 0) + totals.Wt,
-                FineWt: (metal.FineWt || 0) + totals.FineWt,
-                Amount: (metal.Amount || 0) + totals.Amount,
-                RMwt: (metal.RMwt || 0) + totals.RMwt,
-                Weight: (metal.Weight || 0) + totals.Weight,
-            };
-        });
-
-        return { findings: remainingFindings, metals: updatedMetals };
-    };
 
     const calcFinalAmount = (e) => {
         const secondaryMetals = e?.metal?.filter((m) => m?.IsPrimaryMetal === 0) || [];
@@ -1049,7 +1006,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     id="metalLossFlag"
                                 />
                                 <label htmlFor="metalLossFlag" className="user-select-none mx-1">
-                                    Metal Loss
+                                    Metal Pure
                                 </label>
                             </div>
                             <div className="px-2">
@@ -1313,9 +1270,12 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         </div>
                                         {metalLossFlag && (
                                             <div className="mcol1_pcls centerall_pcls bright_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
-                                                Loss
+                                                Pure
                                             </div>
                                         )}
+                                        <div className="mcol1_pcls centerall_pcls bright_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
+                                            Loss
+                                        </div>
 
                                         <div className="mcol1_pcls centerall_pcls bright_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
                                             Rate
@@ -1620,7 +1580,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                 </div>
 
                                                                 <div className="dcol5_pcls end_pcls pdr_pcls" style={{ textAlign: "right" }}>
-                                                                    {formatAmount(((el?.Amount / el?.Wt) / result?.header?.CurrencyExchRate)?.toFixed(2))}
+                                                                    {/* {formatAmount(((el?.Amount / el?.Wt) / result?.header?.CurrencyExchRate)?.toFixed(2))} */}
+                                                                    {formatAmount(((el?.Amount / (el?.isRateOnPcs == "1" ? el?.Pcs : el?.Wt)) / result?.header?.CurrencyExchRate)?.toFixed(2))}{el?.isRateOnPcs == "1" ? "/PC" : ""}
                                                                     {/* {formatAmount((el?.Rate)?.toFixed(2))} */}
                                                                 </div>
 
@@ -1706,16 +1667,23 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                     {metalLossFlag && (
                                                                         <div className="mcol3_pcls end_pcls pdr_pcls " style={{ width: metalLossFlag ? "20%" : "25%" }}>
                                                                             {/* {el?.IsPrimaryMetal == 1 ? fixedValues(e?.LossWt, 3) : ""} */}
-                                                                            {e?.LossWt > 0 && (
+                                                                            {/* {e?.LossWt > 0 && (
                                                                                 <>
                                                                                     {el?.IsPrimaryMetal == 1 ? e?.LossPer + "%" : ""} <br />
                                                                                     {el?.IsPrimaryMetal == 1 ? e?.LossWt?.toFixed(3) : ""}
                                                                                 </>
-                                                                            )}
+                                                                            )} */}
+                                                                            {(
+                                                                                (Number(el?.Weight || 0) * Number(el?.SizeName || 0)) / 100
+                                                                            ).toFixed(3)}
 
 
                                                                         </div>
                                                                     )}
+                                                                    <div className="mcol4_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
+                                                                        {el?.IsPrimaryMetal == 1 ? el?.LossWt?.toFixed(2) : ""}
+
+                                                                    </div>
 
                                                                     <div className="mcol4_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
                                                                         {el?.Rate?.toFixed(2)}
@@ -1856,10 +1824,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                     </div>
                                                     {metalLossFlag && (
                                                         <div className="mcol3_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
-                                                            {e?.LossWt !== 0 &&
-                                                                (e?.LossWt)?.toFixed(3)}
+
                                                         </div>
                                                     )}
+                                                    <div className="mcol3_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
+                                                        {e?.LossWt !== 0 &&
+                                                            (e?.LossWt)?.toFixed(3)}
+                                                    </div>
+
                                                     <div className="mcol3_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
 
                                                     </div>
@@ -1903,7 +1875,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                     {el?.Wt?.toFixed(3)}
                                                                 </div>
                                                                 <div className="dcol5_pcls end_pcls pdr_pcls">
-                                                                    {formatAmount(((el?.Amount / el?.Wt) / result?.header?.CurrencyExchRate)?.toFixed(2))}
+                                                                    {/* {formatAmount(((el?.Amount / el?.Wt) / result?.header?.CurrencyExchRate)?.toFixed(2))} */}
+                                                                    {formatAmount(((el?.Amount / (el?.isRateOnPcs == "1" ? el?.Pcs : el?.Wt)) / result?.header?.CurrencyExchRate)?.toFixed(2))}{el?.isRateOnPcs == "1" ? "/PC" : ""}
                                                                     {/* {formatAmount((el?.Rate)?.toFixed(2))} */}
                                                                 </div>
                                                                 <div className="dcol6_pcls end_pcls pdr_pcls fw-bold">
@@ -1935,7 +1908,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                 </div>
                                                                 <div className="dcol5_pcls end_pcls pdr_pcls">
                                                                     {/* {formatAmount((el?.Amount/el?.Wt)?.toFixed(2))} */}
-                                                                    {formatAmount((el?.Rate)?.toFixed(2))}
+                                                                    {/* {formatAmount((el?.Rate)?.toFixed(2))} */}
+                                                                    {formatAmount(((el?.Amount / (el?.isRateOnPcs == "1" ? el?.Pcs : el?.Wt)) / result?.header?.CurrencyExchRate)?.toFixed(2))}{el?.isRateOnPcs == "1" ? "/PC" : ""}
                                                                 </div>
                                                                 <div className="dcol6_pcls end_pcls pdr_pcls fw-bold">
                                                                     {formatAmount(
@@ -2328,12 +2302,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         </div>
                                         {metalLossFlag && (
                                             <div className="mcol3_pcls end_pcls pdr_pcls " style={{ width: metalLossFlag ? "20%" : "25%" }}>
-                                                {(
+                                                {/* {(
                                                     result?.mainTotal?.LossWt
-                                                )?.toFixed(3)}
+                                                )?.toFixed(3)} */}
                                             </div>
 
-                                        )}
+                                        )}<div className="mcol3_pcls end_pcls pdr_pcls " style={{ width: metalLossFlag ? "20%" : "25%" }}>
+
+                                        </div>
 
                                         <div className="end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
 
@@ -2366,8 +2342,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                             style={{ width: "45%" }}
                                         >
                                             {formatAmount(
-                                                (result?.mainTotal?.misc?.IsHSCODE_0_amount +
-                                                    result?.mainTotal?.colorstone?.Amount) /
+                                                (result?.mainTotal?.misc?.IsHSCODE_0_amount + result?.mainTotal?.colorstone?.Amount) /
                                                 result?.header?.CurrencyExchRate
                                             )}
                                         </div>

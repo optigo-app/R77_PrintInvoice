@@ -327,26 +327,26 @@ const DetailPrint10 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 <div className="d-flex justify-content-end align-items-center hidebtndp10 mb-4">
                 <input
                     type="checkbox"
-                    id="imghideshow"
+                    id="Remarks"
                     className="mx-1"
                     checked={remarksFlag}
                     onChange={handleCheckboxRemarks}
                   />
                   <label
-                    htmlFor="imghideshow"
+                    htmlFor="Remarks"
                     className="me-3 user-select-none"
                   >
                    Remarks
                   </label>
                   <input
                     type="checkbox"
-                    id="imghideshow"
+                    id="FindingRate"
                     className="mx-1"
                     checked={findingRateFlag}
                     onChange={handleCheckboxFindingRate}
                   />
                   <label
-                    htmlFor="imghideshow"
+                    htmlFor="FindingRate"
                     className="me-3 user-select-none"
                   >
                     Find. Rate

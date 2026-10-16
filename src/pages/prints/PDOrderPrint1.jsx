@@ -77,7 +77,9 @@ const PDOrderPrint1 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     return (
 
         <div>
+            <div className="pd1_btn">
             <Button />
+            </div>
 
             <div className="pd1_wrapper">
 

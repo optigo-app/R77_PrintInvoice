@@ -11,7 +11,7 @@ import {
     handlePrint,
     isObjectEmpty,
     otherAmountDetail,
-    taxGenrator,
+    taxGenrator,mergeFindingsIntoPrimaryMetal
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import { cloneDeep } from "lodash";
@@ -561,54 +561,7 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     // console.log('json0Data', json0Data);
     // console.log('address', address);
     // console.log('total', total);
-
-    const mergeFindingsIntoPrimaryMetal = (findings = [], metals = []) => {
-        let remainingFindings = [...findings];
-      
-        const updatedMetals = metals.map((metal) => {
-          if (metal.IsPrimaryMetal !== 1) return metal;
-      
-          // findings that match this primary metal on Quality + Size + Rate
-          const matched = remainingFindings.filter(
-            (f) =>
-              f?.QualityName === metal?.QualityName &&
-              f?.SizeName === metal?.SizeName &&
-              f?.Rate === metal?.Rate &&
-              f?.Supplier === metal?.Supplier
-          );
-      
-          if (matched.length === 0) return metal;
-      
-          // remove the matched findings from the pool so they aren't reused
-          // by another primary metal row and won't appear in the final findings list
-          remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
-      
-          const totals = matched.reduce(
-            (acc, f) => ({
-              Pcs: acc.Pcs + (f.Pcs || 0),
-              Wt: acc.Wt + (f.Wt || 0),
-              FineWt: acc.FineWt + (f.FineWt || 0),
-              Amount: acc.Amount + (f.Amount || 0),
-              RMwt: acc.RMwt + (f.RMwt || 0),
-              Weight: acc.Weight + (f.Weight || 0),
-            }),
-            { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
-          );
-      
-          return {
-            ...metal,
-            Pcs: (metal.Pcs || 0) + totals.Pcs,
-            Wt: (metal.Wt || 0) + totals.Wt,
-            FineWt: (metal.FineWt || 0) + totals.FineWt,
-            Amount: (metal.Amount || 0) + totals.Amount,
-            RMwt: (metal.RMwt || 0) + totals.RMwt,
-            Weight: (metal.Weight || 0) + totals.Weight,
-          };
-        });
-      
-        return { findings: remainingFindings, metals: updatedMetals };
-      };
-
+ 
 
       
       

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useMemo  } from "react";
 import "../../assets/css/prints/jewellaryinvoiceprint.css";
 import style from "../../assets/css/prints/jewelleryRetailinvoicePrint3.module.css";
 import {
@@ -34,7 +34,7 @@ const InvoicePrintN = ({
   const [msg, setMsg] = useState("");
   const [datas, setDatas] = useState([]);
   const [loader, setLoader] = useState(true);
-  const [summary, setSummary] = useState([]);
+  // const [summary, setSummary] = useState([]);
   const toWords = new ToWords();
   const [image, setImage] = useState(true);
   const [summ, setSummy] = useState(true);
@@ -45,9 +45,12 @@ const InvoicePrintN = ({
   const [diamondDetails, setDiamondDetails] = useState([]);
   const [json1, setJson1] = useState([]);
   const [PureMetalRate, setPureMetalRate] = useState([]);
+  const [summaryExtras, setSummaryExtras] = useState([]);
 
 
   const [retail, setRetail] = useState(true);
+  const [loss, setLoss] = useState(true);
+  const [findingflag, setFindingFlag] = useState(false);
   const [companyDetails, setCompanyDetails] = useState(false);
   const [bankdetailflag, setBankDetailFlag] = useState(false);
   const [customerAddress, setCustomerAddress] = useState([]);
@@ -94,7 +97,7 @@ const InvoicePrintN = ({
 
         metalArr.push({
           label: e?.MetalTypePurity,
-          value: e?.NetWt * e?.Quantity + e?.LossWt,
+          value: e?.NetWt * e?.Quantity + (loss ? 0 : (e?.LossWt || 0)),
           gm: true,
         });
       } else {
@@ -190,10 +193,15 @@ const InvoicePrintN = ({
 
     });
 
-    metalArr.push({ label: "Diamond Wt", value: diamondWt, gm: false });
-    metalArr.push({ label: "Stone Wt", value: colorStoneWt, gm: false });
-    metalArr.push({ label: "Gross Wt", value: grossWt, gm: true });
-    setSummary(metalArr);
+    // metalArr.push({ label: "Diamond Wt", value: diamondWt, gm: false });
+    // metalArr.push({ label: "Stone Wt", value: colorStoneWt, gm: false });
+    // metalArr.push({ label: "Gross Wt", value: grossWt, gm: true });
+    // setSummary(metalArr);
+    setSummaryExtras([
+      { label: "Diamond Wt", value: diamondWt, gm: false },
+      { label: "Stone Wt", value: colorStoneWt, gm: false },
+      { label: "Gross Wt", value: grossWt, gm: true },
+    ]);
 
 
     const datas = OrganizeDataPrint(
@@ -711,6 +719,12 @@ const InvoicePrintN = ({
   const handleChangeRetail = (e) => {
     retail ? setRetail(false) : setRetail(true);
   };
+  const handleChangeFinding = (e) => {
+    findingflag ? setFindingFlag(false) : setFindingFlag(true);
+  };
+  const handleChangeLoss = (e) => {
+    loss ? setLoss(false) : setLoss(true);
+  };
   const handleChangeCompanyDetails = (e) => {
     companyDetails ? setCompanyDetails(false) : setCompanyDetails(true);
   };
@@ -928,7 +942,21 @@ const InvoicePrintN = ({
   );
 
   // If bank details exist, signatures share remaining space; otherwise each takes col-4
-  const signatureColClass = hasBankDetails ? "col" : "col-4";
+  const signatureColClass = hasBankDetails ? "col " : "col-4";
+
+
+  const metalSummary = useMemo(() => {
+    const arr = [];
+    (json1 || []).forEach((e) => {
+      const wt = e?.NetWt * e?.Quantity + (loss ? 0 : (e?.LossWt || 0));
+      const rec = arr.find((x) => x.label === e?.MetalTypePurity);
+      if (rec) rec.value += wt;
+      else arr.push({ label: e?.MetalTypePurity, value: wt, gm: true });
+    });
+    return arr;
+  }, [json1, loss]);
+  
+  const summary = [...metalSummary, ...summaryExtras];
   return (
     <>
       {loader ? (
@@ -940,12 +968,45 @@ const InvoicePrintN = ({
               {" "}
               <div
                 className={`container-fluid ${style?.jewelelryRetailInvoiceContainer} pad_60_allPrint position-relative px-1 ${style?.RetailInvoiceprint4}`}
-                style={{ marginTop: retail ? "40mm" : "0mm" }}
+                // style={{ marginTop: retail ? "40mm" : "0mm" }}
               >
                 <div
-                  className={`btnpcl align-items-baseline position-absolute right-0 top-0 m-0 ${style?.right_retailInvoicePrintsBtn} d-flex`}
-                  style={{ right: "-500px" }}
+                  className={`btnpcl align-items-baseline  right-0 m-0 ${style?.right_retailInvoicePrintsBtn} d-flex `}
+                   style={{justifyContent: "flex-end"}}
                 >
+                  <div className="form-check pe-3">
+                    <input
+                      className="form-check-input"
+                      id="finding"
+                      type="checkbox"
+                      checked={findingflag}
+                      onChange={handleChangeFinding}
+                    />
+                    <label
+                      className="form-check-label pt-1"
+                      htmlFor="flexCheckDefault"
+                      for="finding"
+                    >
+                      Finding
+                    </label>
+                  </div>
+
+                  <div className="form-check pe-3">
+                    <input
+                      className="form-check-input"
+                      id="loss"
+                      type="checkbox"
+                      checked={loss}
+                      onChange={handleChangeLoss}
+                    />
+                    <label
+                      className="form-check-label pt-1"
+                      htmlFor="flexCheckDefault"
+                      for="loss"
+                    >
+                      Loss
+                    </label>
+                  </div>
 
                   <div className="form-check pe-3">
                     <input
@@ -1212,8 +1273,7 @@ const InvoicePrintN = ({
                       </div>
                       <div className="d-flex">
                         <div className="col-6">
-                          <b className="JL13">PLACE OF SUPPLY
-                          </b>
+                          <b className="JL13">PLACE OF SUPPLY </b>
                         </div>
                         <div className="col-6">{result?.header?.customerstate}</div>
                       </div>
@@ -1309,13 +1369,13 @@ const InvoicePrintN = ({
                           </div>
                           <div
                             className={`col-2 d-flex align-items-center justify-content-center `}
-                            style={{ width: "15%" }}
+                            style={{ width: "12%" }}
                           >
                             <p className="fw-bold p-1">Wt.</p>
                           </div>
                           <div
                             className={`col-2 d-flex align-items-center justify-content-center`}
-                            style={{ width: "17%" }}
+                            style={{ width: "16%" }}
                           >
                             <p className="fw-bold p-1">Rate</p>
                           </div>
@@ -1323,19 +1383,19 @@ const InvoicePrintN = ({
                       </div>
                       <div
                         className={`${style?.othersJewerryRetailInvoicePrint}   d-flex align-items-center justify-content-center`}
-                        style={{ width: "5%" }}
+                        style={{ width: "6%" }}
                       >
                         <p className="fw-bold"> V.A</p>
                       </div>
                       <div
                         className={`${style?.othersJewerryRetailInvoicePrint}   d-flex align-items-center justify-content-center`}
-                        style={{ width: "9%" }}
+                        style={{ width: "7%" }}
                       >
                         <p className="fw-bold"> V.A</p>
                       </div>
                       <div
                         className={`${style?.othersJewerryRetailInvoicePrint}  d-flex align-items-center justify-content-center`}
-                        style={{ width: "8%" }}
+                        style={{ width: "6%" }}
                       >
                         <p className="fw-bold">Handling</p>
                       </div>
@@ -1537,12 +1597,17 @@ const InvoicePrintN = ({
                                         {/* Net Wt (minus findings) */}
                                         <div className="col-2 d-flex align-items-start justify-content-end" style={{ width: "11%" }}>
                                           <p className="p-1 text-end lh-1">
-                                            {NumberWithCommas(
-                                              d?.IsPrimaryMetal === 1
-                                                ? d?.RMwt - totalFindingRMwt
-                                                : d?.RMwt,
-                                              3
-                                            )}
+
+                                            {findingflag ?(
+                                              NumberWithCommas(
+                                                d?.IsPrimaryMetal === 1
+                                                  ? d?.RMwt - totalFindingRMwt
+                                                  : d?.RMwt,
+                                                3
+                                              )
+
+                                            ):NumberWithCommas(e?.NetWt, 3)}
+                                            
                                           </p>
                                         </div>
 
@@ -1551,12 +1616,12 @@ const InvoicePrintN = ({
                                           <p className="fw-bold p-1"></p>
                                         </div>
 
-                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "15%" }}>
+                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "12%" }}>
                                           <p className="fw-bold p-1"></p>
                                         </div>
 
                                         {/* Rate */}
-                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "17%" }}>
+                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "16%" }}>
                                           <p className="p-1 text-end lh-1">
                                             {NumberWithCommas(
                                               d?.Rate / result?.header?.CurrencyExchRate,
@@ -1566,16 +1631,21 @@ const InvoicePrintN = ({
                                         </div>
 
                                         {/* Wastage */}
-                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "8%" }}>
+                                        <div className="col-2 d-flex align-items-start justify-content-center" style={{ width: "16%" }}>
                                           {/* <p className="p-1">{NumberWithCommas(e?.Wastage, 2)}</p> */}
                                           <p className="p-1">
                                             {
-                                              d.IsPrimaryMetal === 1
-                                                ? NumberWithCommas(
-                                                  (d?.metalWastage1), // convert array → string
-                                                  2
-                                                )
-                                                : NumberWithCommas(d?.metalWastage, 2)
+
+                                              loss ?
+                                                NumberWithCommas(e?.LossAmt || 0, 2)
+
+                                                :
+                                                d.IsPrimaryMetal === 1
+                                                  ? NumberWithCommas(
+                                                    (d?.metalWastage1), // convert array → string
+                                                    2
+                                                  )
+                                                  : NumberWithCommas(d?.metalWastage, 2)
                                             }
                                           </p>
                                         </div>
@@ -1786,184 +1856,95 @@ const InvoicePrintN = ({
                                   ))
                                 )}
 
-                                {Array.isArray(e?.finding) && e.finding.length > 0 && (
+
+                     
+                      {findingflag && (
+                          Array.isArray(e?.finding) && e.finding.length > 0 && (
 
 
-                                  e?.finding?.map((d, i) => (
+                            e?.finding?.map((d, i) => (
 
 
-                                    <div className={`d-flex `}>
-                                      <div
-                                        className={`col-2  d-flex align-items-center`}
-                                      >
-                                        <p className="p-1 lh-1">FINDING <br /> {d?.ShapeName + " " + d?.QualityName}</p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex align-items-center`}
-                                        style={{ width: "10%" }}
-                                      >
-                                        <p className="p-1 lh-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2 d-flex  justify-content-center `}
-                                        style={{ width: "7%" }}
-                                      >
-                                        <p className="fw-bold p-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex  justify-content-end`}
-                                        style={{ width: "14%" }}
-                                      >
-                                        <p className=" p-1 text-end lh-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2  p-1 d-flex  justify-content-end`}
-                                        style={{ width: "11%" }}
-                                      >
-                                        <p className=" text-end lh-1">
+                              <div className={`d-flex `}>
+                                <div
+                                  className={`col-2  d-flex align-items-center`}
+                                >
+                                  <p className="p-1 lh-1">FINDING <br /> {d?.ShapeName + " " + d?.QualityName}</p>
+                                </div>
+                                <div
+                                  className={`col-2  d-flex align-items-center`}
+                                  style={{ width: "10%" }}
+                                >
+                                  <p className="p-1 lh-1"></p>
+                                </div>
+                                <div
+                                  className={`col-2 d-flex  justify-content-center `}
+                                  style={{ width: "7%" }}
+                                >
+                                  <p className="fw-bold p-1"></p>
+                                </div>
+                                <div
+                                  className={`col-2  d-flex  justify-content-end`}
+                                  style={{ width: "14%" }}
+                                >
+                                  <p className=" p-1 text-end lh-1"></p>
+                                </div>
+                                <div
+                                  className={`col-2  p-1 d-flex  justify-content-end`}
+                                  style={{ width: "11%" }}
+                                >
+                                  <p className=" text-end lh-1">
 
-                                        </p>
-                                      </div>
+                                  </p>
+                                </div>
 
-                                      <div
-                                        className={`col-2 d-flex  justify-content-center `}
-                                        style={{ width: "11%" }}
-                                      >
-                                        <p className="p-1">{NumberWithCommas(Number(d?.Pcs) || 0)}</p>
-                                      </div>
-                                      <div
-                                        className={`col-2 d-flex  justify-content-center `}
-                                        style={{ width: "15%" }}
-                                      >
-                                        <p className="p-1">{NumberWithCommas(Number(d?.RMwt) || 0, 2)} gm</p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex  justify-content-center`}
-                                        style={{ width: "17%" }}
-                                      >
-                                        {/* <p className="p-1 text-end lh-1">{NumberWithCommas(Number(d?.Rate) || 0, 2)}</p>                 */}
-                                        <p className="p-1 text-end lh-1">{NumberWithCommas(Number(e?.primary_metal_rate) || 0, 2)}</p>
-                                      </div>
-                                      <div
-                                        className={"col-2  d-flex  justify-content-center"}
-                                        style={{ width: "8%" }}
-                                      >
-                                        <p className="p-1"> {NumberWithCommas(d.metalWastage, 2)}</p>
-                                      </div>
-                                    </div>
-                                  ))
-                                )}
+                                <div
+                                  className={`col-2 d-flex  justify-content-center `}
+                                  style={{ width: "11%" }}
+                                >
+                                  <p className="p-1">{NumberWithCommas(Number(d?.Pcs) || 0)}</p>
+                                </div>
+                                <div
+                                  className={`col-2 d-flex  justify-content-center `}
+                                  style={{ width: "15%" }}
+                                >
+                                  <p className="p-1">{NumberWithCommas(Number(d?.RMwt) || 0, 2)} gm</p>
+                                </div>
+                                <div
+                                  className={`col-2  d-flex  justify-content-center`}
+                                  style={{ width: "17%" }}
+                                >
+                                  {/* <p className="p-1 text-end lh-1">{NumberWithCommas(Number(d?.Rate) || 0, 2)}</p>                 */}
+                                  <p className="p-1 text-end lh-1">{NumberWithCommas(Number(e?.primary_metal_rate) || 0, 2)}</p>
+                                </div>
+                                <div
+                                  className={"col-2  d-flex  justify-content-center"}
+                                  style={{ width: "8%" }}
+                                >
+                                  <p className="p-1"> {NumberWithCommas(d.metalWastage, 2)}</p>
+                                </div>
+                              </div>
+                            ))
+                          )
 
+                      )}
 
-
-
-
-
-
+                              
 
 
 
-                                {/* {e?.otherMetals.length !== 0 && (() => {
-                                  const mergedOther = mergeByKey({
-                                    data: e?.otherMetals,
-                                    groupKey: "Rate",
-                                    sumFields: ["Pcs", "RMwt", "Amount"],
-                                    stringFields: ["ShapeName", "QualityName"]
-                                  });
-
-                                  return mergedOther.map((m, i) => (
-                                    <div className={`d-flex `}>
-                                      <div
-                                        className={`col-2  d-flex align-items-center`}
-                                      >
-                                        <p className="p-1 lh-1">{m.ShapeName + " " + m.QualityName}</p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex align-items-center`}
-                                        style={{ width: "10%" }}
-                                      >
-                                        <p className="p-1 lh-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2 d-flex align-items-center justify-content-center `}
-                                        style={{ width: "7%" }}
-                                      >
-                                        <p className="fw-bold p-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex align-items-center justify-content-end`}
-                                        style={{ width: "14%" }}
-                                      >
-                                        <p className=" p-1 text-end lh-1"></p>
-                                      </div>
-                                      <div
-                                        className={`col-2  p-1 d-flex align-items-center justify-content-end`}
-                                        style={{ width: "11%" }}
-                                      >
-                                        <p className=" text-end lh-1">
-
-                                        </p>
-                                      </div>
-
-                                      <div
-                                        className={`col-2 d-flex align-items-center justify-content-center `}
-                                        style={{ width: "11%" }}
-                                      >
-                                        <p className=" p-1">{NumberWithCommas(m.Pcs)}{" "}</p>
-                                      </div>
-                                      <div
-                                        className={`col-2 d-flex align-items-center justify-content-center `}
-                                        style={{ width: "15%" }}
-                                      >
-                                        <p className=" p-1">{NumberWithCommas(m.RMwt, 2)}{" gm"}</p>
-                                      </div>
-                                      <div
-                                        className={`col-2  d-flex align-items-center justify-content-center`}
-                                        style={{ width: "17%" }}
-                                      >
-                                        <p className=" p-1 text-end lh-1" >{NumberWithCommas(m.Rate, 2)}{" "}</p>
-                                      </div>
-
-                                    </div>
-                                  ));
-                                })()} */}
-                                {/* {e?.primaryMetal?.length === 0 &&
-                                  e?.diamondWt === 0 &&
-                                  e?.colorStoneWt === 0 &&
-                                  e?.miscsWt === 0 &&
-                                  e?.findingWt !== 0 && (
-                                    <div className="d-flex">
-                                      <div className={` border-end`}>
-                                        <p className="p-1 lh-1"></p>
-                                      </div>
-                                      <div className={` border-end`}>
-                                        <p className="p-1 lh-1"></p>
-                                      </div>
-                                      <div className={` border-end`}>
-                                        <p className="p-1 text-end lh-1"></p>
-                                      </div>
-                                      <div className={` border-end p-1 `}>
-                                        <p className="text-end lh-1"></p>
-                                      </div>
-                                      <div className={`border-end `}>
-                                        <p className="p-1 text-end lh-1"></p>
-                                      </div>
-                                      <div className={` `}>
-                                        <p className="p-1 text-end lh-1"></p>
-                                      </div>
-                                    </div>
-                                  )}  */}
+ 
                               </div>
                             </div>
                             <div
                               className={`${style?.metalMakingJewerryRetailInvoicePrint}  align-items-start d-flex justify-content-center`}
-                              style={{ width: "5%" }}
+                              style={{ width: "6%" }}
                             >
 
                             </div>
                             <div
                               className={`${style?.othersJewerryRetailInvoicePrint}  align-items-start d-flex justify-content-center`}
-                              style={{ width: "9%" }}
+                              style={{ width: "7%" }}
                             >
                               <p className=" text-end p-1">
                                 {
@@ -1982,7 +1963,7 @@ const InvoicePrintN = ({
                             </div>
                             <div
                               className={`${style?.othersJewerryRetailInvoicePrint}  align-items-start d-flex justify-content-center`}
-                              style={{ width: "8%" }}
+                              style={{ width: "6%" }}
                             >
                               <p className=" text-end p-1">
                                 {/* {NumberWithCommas(e?.OtherCharges, 2)} */}
@@ -2015,28 +1996,33 @@ const InvoicePrintN = ({
                                 ))
                               )} */}
 
-                              {Array.isArray(e?.metal) && e.metal.length > 0 && (() => {
+                              {findingflag?(
+                                Array.isArray(e?.metal) && e.metal.length > 0 && (() => {
 
-                                const totalFindingRMwt = (e?.finding || []).reduce(
-                                  (sum, f) => sum + Number(f?.RMwt || 0),
-                                  0
-                                );
+                                  const totalFindingRMwt = (e?.finding || []).reduce(
+                                    (sum, f) => sum + Number(f?.RMwt || 0),
+                                    0
+                                  );
+  
+                                  return mergeByKey({
+                                    data: e.metal,
+                                    groupKey: "Rate",
+                                    sumFields: ["Pcs", "RMwt", "Amount"]
+                                  })
+                                    ?.map((d, i) => (
+                                      <p className=" text-end p-1">
+                                        {NumberWithCommas(
+                                          ((d?.IsPrimaryMetal === 1 ? (d?.RMwt - totalFindingRMwt) - (loss ? e?.LossWt || 0 : 0) : d?.RMwt) * d?.Rate),
+                                          2
+                                        )}
+                                      </p>
+                                    ))
+  
+                                })()
 
-                                return mergeByKey({
-                                  data: e.metal,
-                                  groupKey: "Rate",
-                                  sumFields: ["Pcs", "RMwt", "Amount"]
-                                })
-                                  ?.map((d, i) => (
-                                    <p className=" text-end p-1">
-                                      {NumberWithCommas(
-                                        ((d?.IsPrimaryMetal === 1 ? (d?.RMwt - totalFindingRMwt) : d?.RMwt) * d?.Rate),
-                                        2
-                                      )}
-                                    </p>
-                                  ))
+                              ):  <p className=" text-end p-1">{NumberWithCommas(e?.MetalAmount-e?.LossAmt, 2)}</p>}
 
-                              })()}
+                              
 
 
                               {Array.isArray(e?.diamonds) && e.diamonds.length > 0 && (
@@ -2083,15 +2069,19 @@ const InvoicePrintN = ({
                               )}
 
 
+                              {findingflag && (
+                                Array.isArray(e?.finding) && e.finding.length > 0 && (
+                                  e?.finding?.map((d, i) => (
+                                    <p className=" text-end p-1">
+                                      {/* {NumberWithCommas(d?.RMwt * d?.Rate, 2)} */}
+                                      {/* {NumberWithCommas(d?.RMwt - (loss ? e?.LossWt || 0 : 0)* e?.primary_metal_rate, 2)} */}
+                                      {NumberWithCommas(d?.RMwt * e?.primary_metal_rate, 2)}
+                                    </p>
+                                  ))
+                                )
 
-                              {Array.isArray(e?.finding) && e.finding.length > 0 && (
-                                e?.finding?.map((d, i) => (
-                                  <p className=" text-end p-1">
-                                    {/* {NumberWithCommas(d?.RMwt * d?.Rate, 2)} */}
-                                    {NumberWithCommas(d?.RMwt * e?.primary_metal_rate, 2)}
-                                  </p>
-                                ))
                               )}
+                              
                             </div>
                           </div>
 
@@ -2110,7 +2100,7 @@ const InvoicePrintN = ({
                             </div>
                             <div
                               className={`${style?.materialJewerryRetailInvoicePrint}`}
-                              style={{ width: "55%" }}
+                              style={{ width: "52%" }}
                             >
 
                               <div className="d-flex">
@@ -2213,6 +2203,7 @@ const InvoicePrintN = ({
                     </div>
                     <div
                       className={`${style?.productJewerryRetailInvoicePrint}   p-1 fw-bold d-flex align-items-center`}
+                      style={{ width: "16%" }}
                     >
                       <p className="fw-bold" style={{ fontSize: "17px" }}>
                         TOTAL
@@ -2405,7 +2396,7 @@ const InvoicePrintN = ({
                             <p className="pb-1 px-1 text-end">Net Bal. Amount</p>
                           </>
                         }
-                        <p className="fw-bold p-1 border-top text-end">
+                        <p className="fw-bold p-1 border-top text-end" style={{ borderColor: "#000" }}>
                           GRAND TOTAL
                         </p>
                       </div>
@@ -2550,7 +2541,7 @@ const InvoicePrintN = ({
                   <div className="border-start border-end border-bottom d-flex no_break">
                     {/* 1. Bank Details Column (Fixed at col-4 if present) */}
                     {hasBankDetails && bankdetailflag && (
-                      <div className={`col-4 p-2  ${companyDetails?"border-end":""}`}>
+                      <div className={`col-4 p-2  ${companyDetails ? "border-end" : ""}`}>
                         <p className="fw-bold">Bank Detail</p>
 
                         {result?.header?.bankname && (
@@ -2578,10 +2569,11 @@ const InvoicePrintN = ({
                         )}
                       </div>
                     )}
-    
-                        {/* 2. Customer Signature Column */}
+
+
+                    {/* 2. Customer Signature Column */}
                     <div
-                      className={`${signatureColClass} p-2 border-end d-flex justify-content-between flex-column min-signature-height`}
+                      className={`${signatureColClass} p-2 border-end d-flex justify-content-between flex-column min-signature-height ${bankdetailflag ? "border-start" : ""}`}
                       style={{ alignItems: "center" }}
                     >
                       <p>Signature</p>
@@ -2605,10 +2597,9 @@ const InvoicePrintN = ({
                       <p></p>
                       <p className="fw-bold">Checked By</p>
                     </div>
-           
-         
 
-                  
+
+
                   </div>
 
                 </div>

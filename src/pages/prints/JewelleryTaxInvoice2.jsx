@@ -370,14 +370,15 @@ const JewelleryTaxInvoice2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                                                         </div>
                                                         {/* {(result?.header?.CompanyTellNo || result?.header?.CompanyTollFreeNo) && (
                                                             <div className="fslhJL">
-                                                                {result?.header?.CompanyTellNo && `PH ${result?.header?.CompanyTellNo}`}
+                                                                {result?.header?.CompanyTellNo && `TH ${result?.header?.CompanyTellNo}`}
                                                                 {result?.header?.CompanyTellNo && result?.header?.CompanyTollFreeNo && " | "}
                                                                 {result?.header?.CompanyTollFreeNo && `TOLL FREE ${result?.header?.CompanyTollFreeNo}`}
                                                             </div>
                                                         )} */}
-                                                       {(result?.header?.CompanyTellNo) && (
+                                                         {(result?.header?.CompanyTellNo) && (
                                                             <div className="fslhJL">
-                                                                {result?.header?.CompanyTellNo && `PH ${result?.header?.CompanyTellNo}`}
+                                                                {result?.header?.CompanyTellNo && `TH ${result?.header?.CompanyTellNo}`}
+                                                        
                                                             </div>
                                                         )}
                                                         <div className="fslhJL">
@@ -617,7 +618,13 @@ const JewelleryTaxInvoice2 = ({ token, invoiceNo, printName, urls, evn, ApiVer }
                                     <div className='col2_jti2 start_jti2 pe-1 brr_jti2'></div>
                                     <div className='col3_jti2 end_jti2 brr_jti2' style={{ width: '67%', paddingRight: '12.5%' }}>GRAND TOTAL</div>
                                     {/* <div className='col4_jti2 center_jti2 brr_jti2'></div> */}
-                                    <div className='col5_jti2 end_jti2 pe-1 '><span dangerouslySetInnerHTML={{ __html: result?.header?.Currencysymbol }} className='pe-1'></span>{formatAmount((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))}</div>
+                                    <div className='col5_jti2 end_jti2 pe-1 '><span dangerouslySetInnerHTML={{ __html: result?.header?.Currencysymbol }} className='pe-1'></span>{formatAmount(( result?.mainTotal?.total_amount /
+                              result?.header?.CurrencyExchRate +
+                              result?.allTaxesTotal +
+                              result?.header?.FreightCharges /
+                              result?.header?.CurrencyExchRate +
+                              result?.header?.AddLess /
+                              result?.header?.CurrencyExchRate))}</div>
                                 </div>
                                 <div className='static_jti2  py-2 text-break'>**   THIS IS A COMPUTER GENERATED INVOICE AND KINDLY NOTIFY US IMMEDIATELY IN CASE YOU FIND ANY DISCREPANCY IN THE DETAILS OF TRANSACTIONS</div>
                                 <div className='mt-1 brall_jti2 dec_jti2 p-2 pbia_jti2 text-break'><div dangerouslySetInnerHTML={{ __html: result?.header?.Declaration }}></div></div>

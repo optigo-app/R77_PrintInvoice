@@ -156,13 +156,13 @@ export default function WIPReport({ queries, headers }) {
                                 <div>
                                         <input
                                             type="checkbox"
-                                            id="companyid"
+                                            id="DIaType"
                                             className="mx-1"
                                             checked={materialflag}
                                             onChange={handleMaterialCheckbox}
                                         />
                                         <label
-                                            htmlFor="companyid"
+                                            htmlFor="DIaType"
                                             className="me-3 user-select-none"
                                         >
                                             Dia. Type
@@ -389,7 +389,7 @@ export default function WIPReport({ queries, headers }) {
                                             marginBottom: lineflag && diaflag
                                                 ? "4px"
                                                 : diaflag
-                                                    ? "0px"
+                                                    ? "5px"
                                                     : lineflag
                                                         ? "38px"
                                                         : "39px"

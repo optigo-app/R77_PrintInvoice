@@ -17,6 +17,8 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const [taxes, setTaxes] = useState([]);
     const [finalD, setFinalD] = useState({});
     const [netWt, setNetWt] = useState(false);
+    const [diasCsMiscPcs, setDiasCsMiscPcs] = useState(false);
+    const [tunchFlag, setTunchFlag] = useState(true);
 
     const [resultArrayC, setResultArryC] = useState();
     let pName = atob(printName).toLowerCase();
@@ -328,12 +330,42 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     // console.log("total", total);
     console.log("finalD", finalD);
     // console.log("taxes", taxes);
+    const SUM_KEYS = ['Pcs', 'Wt', 'ServWt', 'Rate', 'Amount', 'FineWt', 'Weight', 'RMwt'];
 
+// Merges a list into ONE row. Returns a new array, never changes the original.
+const mergeList = (list, nameKey) => {
+    if (!Array.isArray(list) || list.length === 0) return list;
+
+    const merged = { ...list[0] };
+
+    SUM_KEYS.forEach((k) => {
+        merged[k] = list.reduce((sum, x) => sum + (Number(x[k]) || 0), 0);
+    });
+
+    merged[nameKey] = [...new Set(
+        list.map((x) => String(x[nameKey] ?? '').trim()).filter(Boolean)
+    )].join(', ');
+
+    return [merged];
+};
+   
     return (
         <>
             {loader ? <Loader /> : msg === "" ? <div className='container containerRetailPrint mt-5 pad_60_allPrint'>
                 {/* print button */}
                 <div className="d-flex w-100 justify-content-end align-items-baseline print_sec_sum4 no_break position-relative">
+                <div className="form-check pe-3 mb-0">
+                        <input className="form-check-input border-dark" type="checkbox" id='hsn' checked={tunchFlag} onChange={e => setTunchFlag(e.target.checked)} />
+                        <label className="form-check-label h6 mb-0 ratePara pt-1" htmlFor='hsn'>
+                            Tunch
+                        </label>
+                    </div>
+                <div className="form-check pe-3 mb-0">
+                        <input className="form-check-input border-dark" type="checkbox" id='diasCsMiscPcs' checked={diasCsMiscPcs} onChange={e => setDiasCsMiscPcs(e.target.checked)} />
+                        <label className="form-check-label h6 mb-0 ratePara pt-1" htmlFor='diasCsMiscPcs'>
+                            Dia Cs Misc
+                        </label>
+                    </div>
                     <div className="form-check pe-3 mb-0">
                         <input className="form-check-input border-dark" type="checkbox" id='NetLoss' checked={netWt} onChange={e => setNetWt(e.target.checked)} />
                         <label className="form-check-label h6 mb-0 ratePara pt-1" htmlFor='NetLoss'>
@@ -445,7 +477,7 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <p className='fw-bold'>Material</p>
                             </div>
                             <div className={`${styles.Qty} ${netWt ? "lossqtyRetailPrint" : ""} border-end d-flex justify-content-center align-items-center`}>
-                                <p className='fw-bold'>Qty</p>
+                                <p className='fw-bold'>Quality</p>
                             </div>
                             <div className={`${styles.Pcs} border-end d-flex justify-content-center align-items-center`}>
                                 <p className='fw-bold'>Pcs</p>
@@ -486,7 +518,16 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </div>
 
                 {/* data */}
-                {dataFill.map((e, i) => {
+                {dataFill.map((item, i) => {
+                   const e = diasCsMiscPcs
+                   ? {
+                       ...item,
+                       diamonds:   mergeList(item.diamonds,   'QualityName'),
+                       colorstone: mergeList(item.colorstone, 'QualityName'),
+                       misc:       mergeList(item.misc,       'ShapeName'),
+                   }
+                   : item;
+                    // console.log("TCL: e", e)
                     return (<> <div className="d-flex border-start border-end no_break ft_12_retailPrint" key={i}>
                         <div className="srNoRetailPrint border-end p-1 d-flex justify-content-center align-items-center border-bottom ">
                             <p className='fw-bold'>{NumberWithCommas(i + 1, 0)}</p>
@@ -495,7 +536,11 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <p style={{ wordBreak: "normal" }}>{e?.SubCategoryname} {e?.Categoryname} </p>
                             <p>{e?.designno} | {e?.SrJobno}</p>
                             <img src={e?.DesignImage} alt="" className='w-100 product_image_retailPrint' onError={handleImageError} />
+                        
+                        {tunchFlag &&(
                             <p className='text-center fw-bold pt-1 ft_13_retailPrint'>Tunch: {NumberWithCommas(e?.Tunch, 3)}</p>
+
+                        )}    
                             {e?.HUID !== "" && <p className='text-center pt-1'>HUID- {e?.HUID}</p>}
                             <p className='text-center fw-bold pt-1'>{fixedValues(e?.grosswt, 3)}gm <span className='fw-normal'>Gross</span></p>
                         </div>
@@ -546,7 +591,7 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                 <p>{ele?.MasterManagement_DiamondStoneTypeName}</p>
                                             </div>
                                             <div className={`${styles.Qty} ${netWt ? "lossqtyRetailPrint" : ""} border-end p-1 d-flex align-items-center`}>
-                                                <p>{ele?.QualityName}</p>
+                                                <p>{ diasCsMiscPcs?"":ele?.QualityName}</p>
                                             </div>
                                             <div className={`${styles.Pcs} border-end p-1 d-flex align-items-center justify-content-end`}>
                                                 <p className='text-end'>{NumberWithCommas(ele?.Pcs, 0)}</p>
@@ -581,7 +626,7 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                 <p>{ele?.MasterManagement_DiamondStoneTypeName}</p>
                                             </div>
                                             <div className={`${styles.Qty} ${netWt ? "lossqtyRetailPrint" : ""} border-end p-1 d-flex align-items-center`}>
-                                                <p>{ele?.QualityName}</p>
+                                                <p>{diasCsMiscPcs?"":ele?.QualityName}</p>
                                             </div>
                                             <div className={`${styles.Pcs} border-end p-1 d-flex align-items-center justify-content-end`}>
                                                 <p className='text-end'>{NumberWithCommas(ele?.Pcs, 0)}</p>
@@ -616,7 +661,7 @@ const RetailPrint1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                                 <p>{ele?.MasterManagement_DiamondStoneTypeName}</p>
                                             </div>
                                             <div className={`${styles.Qty} ${netWt ? "lossqtyRetailPrint" : ""} border-end p-1 d-flex align-items-center`}>
-                                                <p>{ele?.ShapeName}</p>
+                                                <p>{diasCsMiscPcs?"":ele?.ShapeName}</p>
                                             </div>
                                             <div className={`${styles.Pcs} border-end p-1 d-flex align-items-center justify-content-end`}>
                                                 <p className='text-end'>{NumberWithCommas(ele?.Pcs, 0)}</p>

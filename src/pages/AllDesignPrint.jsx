@@ -180,6 +180,7 @@ const AllDesignPrint = () => {
       'material purchase': module?.MaterialPurchase || [], 
       'customer receive': module?.Customer_Receive || [], 
       'material sale return': module?.MaterialSaleReturn || [], 
+      'pd order': module?.PDorder || [], 
     };
   
     return eventMappings[evnname] || [];

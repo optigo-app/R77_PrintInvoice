@@ -9,9 +9,70 @@ import {
   handleImageError,
   isObjectEmpty,
   NumberWithCommas,
+  mergeMetals,
+  mergeFindings,mergeFindingsIntoPrimaryMetal
 } from "../../GlobalFunctions";
 import { OrganizeDataPrint } from "./../../GlobalFunctions/OrganizeDataPrint";
 import cloneDeep from "lodash/cloneDeep";
+
+/* "10.00" / "1,250.50" -> number */
+const parseAmt = (v) => Number(String(v ?? "").replace(/,/g, "")) || 0;
+
+/* Rows shown in the "Other" column of ONE job.
+   Every row carries a numeric `amount`, so the total is always the sum of
+   exactly what is displayed. */
+const getOtherRows = (e, exRate) => {
+  const rows = [];
+
+  // other details (value already formatted, e.g. "10.00")
+  (e?.other_details_array ?? e?.other_details ?? []).forEach((ele) => {
+    rows.push({ label: ele?.label, value: ele?.value, amount: parseAmt(ele?.value) });
+  });
+
+  // misc (non-zero only)
+  (e?.misc ?? [])
+    .filter((ele) => ele?.Amount && ele?.Amount !== 0)
+    .forEach((ele) => {
+      const amount = (Number(ele?.Amount) || 0) / exRate;
+      rows.push({ label: ele?.ShapeName, value: NumberWithCommas(amount, 2), amount });
+    });
+
+  // Handling
+  const handling = (e?.TotalDiamondHandling || 0) / exRate;
+  if (handling !== 0) rows.push({ label: "Handling", value: NumberWithCommas(handling, 2), amount: handling });
+
+  return rows;
+};
+
+/* Labour rows for ONE job, grouped by rate.
+   Making + diamond setting + colorstone setting + finding setting.
+   Same rate  -> amounts are merged into one row.
+   Different rate -> separate row. */
+const getLabourRows = (e, exRate) => {
+  const map = new Map();
+
+  const add = (rate, amount) => {
+    const r = Number(rate) || 0;
+    const a = Number(amount) || 0;
+    if (r === 0 && a === 0) return;
+    const key = r.toFixed(2);
+    const prev = map.get(key);
+    map.set(key, { rate: r, amount: (prev?.amount || 0) + a });
+  };
+
+  // making
+  add(e?.MaKingCharge_Unit, e?.MakingAmount);
+
+  // setting from diamonds, colorstone and finding (each has SettingRate / SettingAmount)
+  e?.diamonds?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+  e?.colorstone?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+  e?.finding?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+
+  return [...map.values()].map((r) => ({
+    rate: r.rate,
+    amount: r.amount / exRate,
+  }));
+};
 
 const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   const [headerData, setHeaderData] = useState({});
@@ -188,6 +249,23 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc', disAmount: "MiscDiscountAmount" },
   ];
 
+  // grand totals of Labour / Other columns = sum of every job's displayed rows
+  const grandExRate = result?.header?.CurrencyExchRate || 1;
+
+  const totalLabourAll =
+    result?.resultArray?.reduce(
+      (sum, e) =>
+        sum + getLabourRows(e, grandExRate).reduce((s, r) => s + r.amount, 0),
+      0
+    ) || 0;
+
+  const totalOtherAll =
+    result?.resultArray?.reduce(
+      (sum, e) =>
+        sum + getOtherRows(e, grandExRate).reduce((s, r) => s + r.amount, 0),
+      0
+    ) || 0;
+
   return (
     <>
       {loader ? (
@@ -303,7 +381,7 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       </thead>
                       {/* <tbody> */}
                       {result?.resultArray?.map((e, i) => {
-                        
+
                         const discountDisplay = discountCriteria
                           .filter(({ key }) => e?.[key] > 0)
                           .map(({ key, isAmountKey, label, disAmount }) => {
@@ -315,8 +393,20 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           })
                           .join(', ');
 
-          
+                        const mergedMetals = mergeMetals(e?.metal);
+                        const mergedFindings = mergeFindings(e?.finding);
 
+                        const { findings: finalFindings, metals: finalMetals } =
+                          mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals,false);
+
+                        /* ---------- LABOUR / OTHER column data ---------- */
+                        const exRate = result?.header?.CurrencyExchRate || 1;
+
+                        const labourRows = getLabourRows(e, exRate);
+                        const labourTotal = labourRows.reduce((sum, r) => sum + r.amount, 0);
+
+                        const otherRows = getOtherRows(e, exRate);
+                        const otherTotal = otherRows.reduce((sum, r) => sum + r.amount, 0);
 
                         return (
                           <tr key={i}>
@@ -425,127 +515,124 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 {/* metal */}
 
                                 <div className="pcltbr1c3 fspcl d-flex flex-column justify-content-start">
-                                  {e?.JobRemark !== "" ? (
-                                    <>
-                                      <div className="w-100 d-flex flex-column justify-content-between h-100">
-                                        <div className="w-100">
-                                          <div className="w-100 d-flex h-50" style={{ borderBottom: "1px solid #989898" }}>
-                                            <div className="dcolsthpcl h-100 fspcl" style={{ width: "22%" }} >
-                                              {/* <div className="d-flex flex-column justify-content-between h-100"> */}
-                                              {/* <div> */}
-                                              {
-                                                // eslint-disable-next-line array-callback-return
-                                                e?.metal?.map((ele, i) => {
-                                                  return (
-                                                    <div className="leftpcl fspcl  text-break pt-1 ps-1" key={i} > {" "} {ele?.ShapeName + " " + ele?.QualityName}{" "} </div>
-                                                  );
-                                                })
-                                              }
-                                              {/* </div> */}
-                                              {/* <div className=" fspcl text-break br_top_pcl text-break bg_pcl fw-bold end_pcl_new end_p_pcl_new" >&nbsp;</div> */}
-                                              {/* </div> */}
-                                            </div>
-                                            <div className="dcolsthpcl h-100 fspcl p_2_pcl end_pcl_new end_p_pcl_new" style={{ width: "18%" }} >
-                                              {e?.grosswt?.toFixed(grosswt2dec ? 2 : 3)}
-                                            </div>
-                                            <div className="dcolsthpcl end_pcl_new end_p_pcl_new fspcl p_2_pcl" style={{ width: "18%" }} >
-                                              {(e?.totals?.metal?.IsPrimaryMetal)?.toFixed(grosswt2dec ? 2 : 3)}
-                                            </div>
-                                            <div className="dcolsthpcl fspcl p_2_pcl" style={{ width: "20%" }} >
-                                              {
-                                                // eslint-disable-next-line array-callback-return
-                                                e?.metal?.map((ele, i) => {
-                                                  return (
-                                                    <div className="end_pcl_new end_p_pcl_new fspcl " key={i} > {" "} {(ele?.Rate?.toFixed(2))}{" "} {/* {NumberWithCommas(e?.goldPrice, 2)} */}{" "} </div>
-                                                  );
-                                                })
-                                              }
-                                            </div>
-                                            <div className="dcolsthpcl fspcl" style={{ borderRight: "0px", width: "22%", }} >
-                                              {
-                                                // eslint-disable-next-line array-callback-return
-                                                e?.metal?.map((ele, i) => {
-                                                  return (
-                                                    <div className="end_pcl_new end_p_pcl_new fspcl p_2_pcl" key={i} > {" "} {formatAmount((ele?.Amount / (result?.header?.CurrencyExchRate)))}{" "} </div>
-                                                  );
-                                                })
-                                              }
-                                            </div>
-                                          </div>
-                                          <div className="ps-1 mt-1 h-50">
-                                            Remark: <br /> <b className="text-break"> {e?.JobRemark}</b>
-                                          </div>
-                                        </div>
-                                        <div className=" fspcl text-break br_top_pcl text-break bg_pcl fw-bold end_pcl_new end_p_pcl_new w-100" >
-                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl " style={{ width: "22%" }}>&nbsp;</div>
-                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl " style={{ width: "18%" }}>{e?.grosswt?.toFixed(3)}</div>
-                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl " style={{ width: "18%" }}> {(e?.totals?.metal?.IsPrimaryMetal)?.toFixed(3)}</div>
-                                          <div className="be_1_pcl end_pcl_new end_p_pcl_new fspcl " style={{ width: "20%" }}>&nbsp;</div>
-                                          <div className="end_pcl_new end_p_pcl_new fspcl " style={{ width: "22%" }}>{formatAmount((e?.totals?.metal?.IsPrimaryMetal_Amount / result?.header?.CurrencyExchRate))}</div>
-                                        </div>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="w-100 d-flex h-100">
-                                      <div style={{ width: "22%" }} className="be_1_pcl pt-1" >
-                                        <div className="d-flex flex-column justify-content-between h-100">
-                                          <div>
-                                            {
-                                              // eslint-disable-next-line array-callback-return
-                                              e?.metal?.map((ele, i) => {
-                                                return (
-                                                  <div className=" fspcl text-break leftpcl" key={i} >
-                                                    {ele?.IsPrimaryMetal === 1 && (ele?.ShapeName + " " + ele?.QualityName)}{" "}
-                                                  </div>
-                                                );
-                                              })
-                                            }
-                                          </div>
-                                          <div className="bg_pcl br_top_pcl">&nbsp;</div>
-                                        </div>
-                                      </div>
-                                      <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1" >
-                                        <div className="d-flex flex-column justify-content-between h-100 w-100" >
-                                          <div className="w-100 end_pcl_new end_p_pcl_new"> {e?.grosswt?.toFixed(grosswt2dec ? 2 : 3)}</div>
-                                          <div className="fw-bold bg_pcl br_top_pcl w-100 end_pcl_new end_p_pcl_new"> {e?.grosswt?.toFixed(grosswt2dec ? 2 : 3)}</div>
-                                        </div>
-                                      </div>
-                                      <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1" >
-                                        <div className="d-flex flex-column h-100 w-100 justify-content-between">
-                                          <div className="w-100 end_pcl_new end_p_pcl_new">{(e?.totals?.metal?.IsPrimaryMetal)?.toFixed(3)}</div>
-                                          <div className="w-100 end_pcl_new end_p_pcl_new bg_pcl br_top_pcl fw-bold">{(e?.totals?.metal?.IsPrimaryMetal)?.toFixed(3)}</div>
-                                        </div>
-                                      </div>
-                                      <div style={{ width: "20%" }} className="be_1_pcl " >
-                                        <div className="d-flex flex-column justify-content-between h-100 w-100">
-                                          <div>
-                                            {
-                                              // eslint-disable-next-line array-callback-return
-                                              e?.metal?.map((ele, i) => {
-                                                return (
-                                                  <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={i} > {ele?.IsPrimaryMetal === 1 && (ele?.Rate !== 0 && ((ele?.Rate?.toFixed(2))))}{" "} </div>);
-                                              })
-                                            }
-                                          </div>
-                                          <div className="bg_pcl br_top_pcl">&nbsp;</div>
-                                        </div>
-                                      </div>
+                                  <div className="w-100 d-flex flex-column justify-content-between h-100">
+                                    {/* Metal Rows (Single Shared Loop) */}
+                                    <div className="flex-grow-1 ">
+                                      {finalMetals?.map((ele, i) => {
+                                        // Check if this is the last metal row AND there are no findings
+                                        const isAbsoluteLastRow = finalFindings?.length ==0 && i== finalMetals?.length - 1;
 
-                                      <div style={{ width: "22%" }} className="d-flex flex-column justify-content-between h-100">
-                                        <div>
-                                          {
-                                            // eslint-disable-next-line array-callback-return
-                                            e?.metal?.map((ele, i) => {
-                                              return (
-                                                <div className="end_pcl_new end_p_pcl_new fspcl pt-1" key={i} >{ele?.IsPrimaryMetal === 1 && (ele?.Amount !== 0 && formatAmount((ele?.Amount / (result?.header?.CurrencyExchRate))))} </div>
-                                              );
-                                            })
-                                          }
-                                        </div>
-                                        <div className="end_pcl_new end_p_pcl_new fspcl bg_pcl br_top_pcl fw-bold">{formatAmount((e?.totals?.metal?.IsPrimaryMetal_Amount / (result?.header?.CurrencyExchRate)))} </div>
+                                        return (
+                                          <div key={i} className={`w-100 d-flex ${isAbsoluteLastRow ? "h-100" : ""}`}>
+                                            {/* Shape & Quality */}
+                                            <div style={{ width: "22%" }} className="be_1_pcl pt-1">
+                                              <div className="fspcl text-break leftpcl ps-1">
+                                                {`${ele?.ShapeName || ''} ${ele?.QualityName || ''}`}
+                                              </div>
+                                            </div>
+
+                                            {/* Gross Weight */}
+                                            <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                              <div className="w-100 end_pcl_new end_p_pcl_new" style={{alignItems:"flex-start"}}>
+                                                {ele?.IsPrimaryMetal === 1 ? e?.grosswt?.toFixed(grosswt2dec ? 2 : 3) : ""}
+                                              </div>
+                                            </div>
+
+                                            {/* Weight */}
+                                            <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                              <div className="w-100 end_pcl_new end_p_pcl_new" style={{alignItems:"flex-start"}}>
+                                                {ele?.Weight?.toFixed(3)}
+                                              </div>
+                                            </div>
+
+                                            {/* Rate */}
+                                            <div style={{ width: "20%" }} className="be_1_pcl">
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Rate !== 0 && ele?.Rate?.toFixed(2)}
+                                              </div>
+                                            </div>
+
+                                            {/* Amount */}
+                                            <div style={{ width: "22%" }} className="d-flex flex-column">
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Amount !== 0 && formatAmount(ele?.Amount / (result?.header?.CurrencyExchRate || 1))}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+
+                                    {finalFindings?.length >0 &&(
+                                      <div className="flex-grow-1 h-100">
+                                      {finalFindings?.map((ele, i) => {
+                                        // Check if this is the last finding row
+                                        
+                                        const isAbsoluteLastRow =   i== finalFindings?.length - 1;
+
+                                        return (
+                                          <div key={i} className={`w-100 d-flex ${isAbsoluteLastRow ? "h-100" : ""}`}>
+                                            {/* Shape & Quality */}
+                                            <div style={{ width: "22%" }} className="be_1_pcl pt-1">
+                                              <div className="fspcl text-break leftpcl ps-1">
+                                                {e?.GroupJob !== '' ? "FINDING ACCESSORIES" : ele?.FindingTypename + " " + ele?.QualityName}
+                                              </div>
+                                            </div>
+
+                                            {/* Gross Weight */}
+                                            <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                              <div className="w-100 end_pcl_new end_p_pcl_new" style={{alignItems:"flex-start"}}>
+                                                {/* {ele?.IsPrimaryMetal === 1 ? e?.grosswt?.toFixed(grosswt2dec ? 2 : 3) : ""} */}
+                                              </div>
+                                            </div>
+
+                                            {/* Weight */}
+                                            <div style={{ width: "18%" }} className="be_1_pcl d-flex justify-content-end pt-1">
+                                              <div className="w-100 end_pcl_new end_p_pcl_new" style={{alignItems:"flex-start"}}>
+                                                {ele?.Wt?.toFixed(3)}
+                                              </div>
+                                            </div>
+
+                                            {/* Rate */}
+                                            <div style={{ width: "20%" }} className="be_1_pcl">
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Rate !== 0 && ele?.Rate?.toFixed(2)}
+                                              </div>
+                                            </div>
+
+                                            {/* Amount */}
+                                            <div style={{ width: "22%" }} className="d-flex flex-column">
+                                              <div className="end_pcl_new end_p_pcl_new fspcl pt-1">
+                                                {ele?.Amount !== 0 && formatAmount(ele?.Amount / (result?.header?.CurrencyExchRate || 1))}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+
+                                    )}
+
+                                    
+
+                                    {/* Remark Section (Renders conditionally if present) */}
+                                    {e?.JobRemark ? (
+                                      <div className="ps-1 mt-1 pb-2">
+                                        Remark: <br /> <b className="text-break">{e?.JobRemark}</b>
+                                      </div>
+                                    ) : null}
+
+                                    {/* Single Common Total / Footer Row */}
+                                    <div className="w-100 d-flex mt-auto bg_pcl br_top_pcl fw-bold end_pcl_new end_p_pcl_new">
+                                      <div style={{ width: "22%" }} className="be_1_pcl fspcl">&nbsp;</div>
+                                      <div style={{ width: "18.2%" ,display: "flex", justifyContent: "flex-end"}} className="be_1_pcl fspcl">{e?.grosswt?.toFixed(grosswt2dec ? 2 : 3)}</div>
+                                      <div style={{ width: "18.1%" ,display: "flex", justifyContent: "flex-end"}} className="be_1_pcl fspcl">{(e?.totals?.metal?.Weight + e?.totals?.finding?.Wt)?.toFixed(3)}</div>
+                                      <div style={{ width: "20%" }} className="be_1_pcl fspcl">&nbsp;</div>
+                                      <div style={{ width: "21.5%", display: "flex", justifyContent: "flex-end" }} className="fspcl">
+                                        {formatAmount(e?.totals?.metal?.Amount + e?.totals?.finding?.Amount / (result?.header?.CurrencyExchRate || 1))}
                                       </div>
                                     </div>
-                                  )}
+                                  </div>
                                 </div>
 
                                 {/* colorstone */}
@@ -615,84 +702,54 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
                                 {/* labour */}
                                 <div className="pcltbr1c6 fspcl ">
+                                  {/* Rate */}
                                   <div className="lopclcol d-flex flex-column justify-content-between h-100  fspcl pt-1 ">
-                                    <div className="d-flex flex-column justify-content-between h-100">
-                                      <div className="end_pcl_new end_p_pcl_new">
-                                        {e?.MaKingCharge_Unit !== 0 && formatAmount(e?.MaKingCharge_Unit)}
-                                      </div>
-                                      <div className="fw-bold end_p_pcl_new bg_pcl br_top_pcl end_pcl_new">
-                                        {(e?.MaKingCharge_Unit !== 0 && e?.MaKingCharge_Unit)
-                                          ? formatAmount(e?.MaKingCharge_Unit)
-                                          : '\u00A0'}
-                                      </div>
+                                    <div>
+                                      {labourRows.map((r, idx) => (
+                                        <div key={idx} className="end_pcl_new end_p_pcl_new">
+                                          {NumberWithCommas(r.rate, 2)}
+                                        </div>
+                                      ))}
                                     </div>
+                                    <div className="fw-bold end_p_pcl_new bg_pcl br_top_pcl end_pcl_new">&nbsp;</div>
                                   </div>
+                                  {/* Amount */}
                                   <div className="lopclcol d-flex flex-column justify-content-between h-100 fspcl pt-1" style={{ borderRight: "0px" }} >
-                                    <div className="end_pcl_new end_p_pcl_new">
-                                      {(e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) !== 0 && formatAmount(((e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) / (result?.header?.CurrencyExchRate)))}
+                                    <div>
+                                      {labourRows.map((r, idx) => (
+                                        <div key={idx} className="end_pcl_new end_p_pcl_new">
+                                          {NumberWithCommas(r.amount, 2)}
+                                        </div>
+                                      ))}
                                     </div>
                                     <div className="end_pcl_new end_p_pcl_new br_top_pcl bg_pcl fw-bold">
-                                      {
-                                        ((e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) === 0 ? <div>&nbsp;</div> : (e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) !== 0 && formatAmount(((e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) / (result?.header?.CurrencyExchRate))))
-                                      }
+                                      {labourTotal !== 0 ? NumberWithCommas(labourTotal, 2) : <div>&nbsp;</div>}
                                     </div>
                                   </div>
                                 </div>
 
                                 {/* othercharge */}
                                 <div className="pcltbr1c6 fspcl">
+                                  {/* Code */}
                                   <div className="lopclcol fspcl pt-1 d-flex flex-column justify-content-between h-100 ">
                                     <div>
-                                      <div className="left_pcl_new2">{e?.totals?.misc?.onlyIsHSCODE0_Amount === 0 ? '' : 'Other'}</div>
-                                      <div className="left_pcl_new2">{e?.TotalDiamondHandling === 0 ? '' : 'Handling'}</div>
-                                      <div>
-                                        {
-                                          e?.other_details?.map((e, i) => {
-
-                                            return (i < 3 && <div key={i} className="text-break left_pcl_new2">{e?.label}</div>)
-                                          })
-                                        }
-                                        {
-                                          e?.misc?.map((el, i) => {
-                                            return (
-                                              ((el?.IsHSCOE === 1 || el?.IsHSCOE === 2 || el?.IsHSCOE === 3) ? <div className="left_pcl_new2">{(el?.Amount === 0 ? '' : (el?.IsHSCOE === 3 ? (el?.ShapeName?.split("_")[1]) : el?.ShapeName))}</div> : '')
-                                            )
-                                          })
-                                        }
-                                      </div>
+                                      {otherRows.map((r, idx) => (
+                                        <div key={idx} className="text-break left_pcl_new2">{r.label}</div>
+                                      ))}
                                     </div>
                                     <div className="bg_pcl br_top_pcl">&nbsp;</div>
                                   </div>
+                                  {/* Amount */}
                                   <div className="lopclcol fspcl pt-1 d-flex flex-column justify-content-between h-100" style={{ borderRight: "0px" }} >
                                     <div>
                                       <div className=" d-flex flex-column justify-content-end align-items-end  fspcl">
-                                        <div >{e?.totals?.misc?.onlyIsHSCODE0_Amount === 0 ? '' : formatAmount((e?.totals?.misc?.onlyIsHSCODE0_Amount / result?.header?.CurrencyExchRate))}</div>
-                                        <div >{e?.TotalDiamondHandling === 0 ? '' : formatAmount((e?.TotalDiamondHandling))}</div>
-                                        <div>
-                                          {
-                                            e?.other_details?.map((el, i) => {
-                                              return ((i < 3) ? <div key={i}>{el?.value}</div> : '')
-                                            })
-                                          }
-                                          {
-                                            e?.misc?.map((el, i) => {
-                                              return (
-                                                ((el?.IsHSCOE === 1 || el?.IsHSCOE === 2 || el?.IsHSCOE === 3) ?
-                                                  <div key={i}>{(el?.Amount === 0 ? '' : formatAmount((el?.Amount / result?.header?.CurrencyExchRate)))}</div>
-                                                  : '')
-                                              )
-                                            })
-                                          }
-
-                                        </div>
+                                        {otherRows.map((r, idx) => (
+                                          <div key={idx}>{r.value}</div>
+                                        ))}
                                       </div>
                                     </div>
                                     <div className="bg_pcl end_pcl_new end_p_pcl_new br_top_pcl fw-bold">
-                                      {
-                                        (e?.other_details?.length === 0 && e?.misc?.length === 0 &&
-                                          e?.TotalDiamondHandling === 0 && e?.totals?.misc?.onlyIsHSCODE0_Amount === 0) ? <div>&nbsp;</div> :
-                                          formatAmount(((e?.other_details_arr_total_amount + (e?.totals?.misc?.Amount / result?.header?.CurrencyExchRate) + e?.TotalDiamondHandling)))
-                                      }
+                                      {otherTotal !== 0 ? NumberWithCommas(otherTotal, 2) : <div>&nbsp;</div>}
                                     </div>
                                   </div>
                                 </div>
@@ -700,7 +757,7 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <div className="pcltbr1c7 fwboldpcl fspcl pt-1" style={{ borderRight: "0px" }} >
                                   <div className="d-flex flex-column justify-content-between h-100  w-100">
                                     <div className="end_pcl_new end_p_pcl_new">{formatAmount(((e?.UnitCost + e?.DiscountAmt) / (result?.header?.CurrencyExchRate)))}</div>
-                                    <div className="bg_pcl br_top_pcl end_pcl_new end_p_pcl_new">{formatAmount(((e?.UnitCost+e?.DiscountAmt) / (result?.header?.CurrencyExchRate)))}</div>
+                                    <div className="bg_pcl br_top_pcl end_pcl_new end_p_pcl_new">{formatAmount(((e?.UnitCost + e?.DiscountAmt) / (result?.header?.CurrencyExchRate)))}</div>
                                   </div>
                                 </div>
                               </div>
@@ -759,11 +816,11 @@ items-center end_p_pcl_new" style={{ width: "22%" }} >
                             <div className="dcolsthpcl  fwboldpcl fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ width: "18%" }} >
                               {/* {result?.mainTotal?.netwtWithLossWt?.toFixed(3)} */}
                               {/* {(result?.mainTotal?.metal?.IsPrimaryMetal + result?.mainTotal?.lossWt)?.toFixed(3)} */}
-                              {(result?.mainTotal?.metal?.IsPrimaryMetal)?.toFixed(3)}
+                              {(result?.mainTotal?.metal?.Weight + result?.mainTotal?.finding?.Wt)?.toFixed(3)}
                             </div>
                             {/* <div className="dcolsthpcl" style={{ width: "20%" }} ></div> */}
                             <div className="dcolsthpcl  fwboldpcl fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px", width: "42%", }} >
-                              {result?.mainTotal.metal?.IsPrimaryMetal_Amount !== 0 && formatAmount(((result?.mainTotal.metal?.IsPrimaryMetal_Amount) / (result?.header?.CurrencyExchRate)))}
+                              {result?.mainTotal?.metal?.Amount + (result?.mainTotal?.finding?.Amount ) !== 0 && formatAmount(((result?.mainTotal?.metal?.Amount + (result?.mainTotal?.finding?.Amount )) / (result?.header?.CurrencyExchRate)))}
                             </div>
                           </div>
                           <div className="stnpcltotrowtb">
@@ -776,17 +833,18 @@ items-center end_p_pcl_new" style={{ width: "22%" }} >
                               {result?.mainTotal.colorstone?.Amount !== 0 && formatAmount((result?.mainTotal.colorstone?.Amount / (result?.header?.CurrencyExchRate)))}
                             </div>
                           </div>
+                          {/* Labour grand total */}
                           <div className="lopcltotrowtb">
                             {/* <div className="lopclcol"></div> */}
                             <div className="lopclcol  fwboldpcl w-100 fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px", }} >
-                              {(result?.mainTotal?.total_Making_Amount + result?.mainTotal?.total_TotalDiaSetcost + result?.mainTotal?.total_TotalCsSetcost) !== 0 && formatAmount(((result?.mainTotal?.total_Making_Amount + result?.mainTotal?.total_TotalDiaSetcost + result?.mainTotal?.total_TotalCsSetcost) / (result?.header?.CurrencyExchRate)))}
+                              {totalLabourAll !== 0 && NumberWithCommas(totalLabourAll, 2)}
                             </div>
                           </div>
+                          {/* Other grand total */}
                           <div className="lopcltotrowtb">
                             {/* <div className="lopclcol"></div> */}
                             <div className="lopclcol  fwboldpcl w-100 fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px", }} >
-                              {(result?.mainTotal?.total_other + result?.mainTotal?.total_diamondHandling + (result?.mainTotal?.totalMiscAmount)) !== 0 &&
-                                formatAmount(((result?.mainTotal?.total_other + result?.mainTotal?.total_diamondHandling + result?.mainTotal?.totalMiscAmount) / (result?.header?.CurrencyExchRate)))}
+                              {totalOtherAll !== 0 && NumberWithCommas(totalOtherAll, 2)}
                             </div>
                           </div>
                           <div className="prpcltotrowtb  fwboldpcl fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px" }} >

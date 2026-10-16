@@ -227,6 +227,7 @@ export const SaleReturn = [
   { printName: 'tax invoice 5 S', etpType: 'print', componentName: 'TaxInvoice5S' },  // amish .........
   { printName: 'retail invoice print s', etpType: 'print', componentName: 'RetailInvoicePrintS' },
   { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
   
 ]
 
@@ -259,6 +260,7 @@ export const QuotationPrints = [
   { printName: 'packing list 7group s', etpType: 'print', componentName: 'PackingList7GroupS' },
   { printName: 'detail print 5', etpType: 'print', componentName: 'DetailPrint5' },
   { printName: 'jewellery invoice 5', etpType: 'print', componentName: 'JewelleryInvoicePrint5' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 ]
 
 export const MemoPrints = [
@@ -325,6 +327,7 @@ export const MemoPrints = [
   { printName: 'detail print1 (p)', etpType: 'print', componentName: 'DetailPrint1' },
   { printName: 'jewellery invoice 5', etpType: 'print', componentName: 'JewelleryInvoicePrint5' },
   // { printName: 'retail', etpType: 'print', componentName: 'RetailOnlyPrint' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 ]
 
 export const MemoReturnPrints = [
@@ -352,6 +355,7 @@ export const MemoReturnPrints = [
   { printName: 'jewellery tax invoice', etpType: 'print', componentName: 'JewelleryTaxInvoice' },
   { printName: 'packing list 7d group', etpType: 'print', componentName: 'PackingList7DGroup' },
   { printName: 'packing list 3 B', etpType: 'print', componentName: 'PackingList3B' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 ]
 
 export const ShipmentArray = [
@@ -394,6 +398,7 @@ export const EstimatePrints = [
   { printName: 'detail print s', etpType: 'print', componentName: 'DetailPrintS' },
   { printName: 'retail invoice print s', etpType: 'print', componentName: 'RetailInvoicePrintS' },
   { printName: 'jewellery tax summary', etpType: 'print', componentName: 'JewelleryTaxSummary' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 ]
 
 export const HallMarkPrints = [
@@ -532,6 +537,7 @@ export const fgPurchase = [
   { printName: 'packing list 3 B', etpType: 'print', componentName: 'PackingList3B' },
   { printName: 'detail print 7', etpType: 'print', componentName: 'DetailPrint7' },
   { printName: 'item wise print d', etpType: 'print', componentName: 'ItemWisePrintD' },
+  { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
 ];
 
 // export const fgPurchaseReturn = [

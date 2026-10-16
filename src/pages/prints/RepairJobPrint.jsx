@@ -867,7 +867,7 @@ function RepairJobPrint({ token, invoiceNo, printName, urls, evn, ApiVer }) {
                                                                         <div style={{ width: "130px", padding: "5px", borderRight: "1px solid #EEEEEE" }}>{el?.Colorname}</div>
                                                                     
                                                                         <div style={{ width: "130px", padding: "5px", borderRight: "1px solid #EEEEEE" }}>{el?.Supplier}</div>
-                                                                        <div style={{ width: "130px", padding: "5px", textAlign: "right", borderRight: "1px solid #EEEEEE" }}>{el?.Wt.toFixed(3)}</div>
+                                                                        <div style={{ width: "130px", padding: "5px", textAlign: "right", borderRight: "1px solid #EEEEEE" }}>{el?.Wt?.toFixed(3)}</div>
                                                                        
                                                                     </div>
                                                                 )

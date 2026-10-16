@@ -9,6 +9,7 @@ import BarcodeGenerator from "../../components/BarcodeGenerator";
 import { GetData } from "../../GlobalFunctions/GetData";
 import { organizeData } from "../../GlobalFunctions/OrganizeBagPrintData";
 import { GetUniquejob } from "../../GlobalFunctions/GetUniqueJob";
+import { ForkLeft } from "@mui/icons-material";
 // import { checkInstruction } from "../../GlobalFunctions";
 
 const PrintDesign16A = ({ queries, headers }) => {
@@ -16,6 +17,7 @@ const PrintDesign16A = ({ queries, headers }) => {
   const queryParams = queryString?.parse(location?.search);
   const resultString = GetUniquejob(queryParams?.str_srjobno);
   const [data, setData] = useState([]);
+  const [POFlag, setPOFlag] = useState(false);
   console.log('data: ', data);
   const chunkSize = 15;
   useEffect(() => {
@@ -208,6 +210,16 @@ const PrintDesign16A = ({ queries, headers }) => {
 
   console.log('datadatadata', data);
 
+  
+  const handlePOCheckbox = () => {
+    if (POFlag) {
+        setPOFlag(false);
+    } else {
+        setPOFlag(true);
+    }
+};
+
+
   return (
     <div>
       {data?.length === 0 ? (
@@ -216,8 +228,25 @@ const PrintDesign16A = ({ queries, headers }) => {
         <>
           <div className="pad_60_allPrint">
             <div className="print_btn">
+
+            <div>
+                  <input
+                    type="checkbox"
+                    id="PO"
+                    className="mx-1"
+                    checked={POFlag}
+                    onChange={handlePOCheckbox}
+                  />
+                  <label
+                    htmlFor="PO"
+                    className="me-3 user-select-none"
+                  >
+                   PO
+                  </label>
+                </div>
               <button
                 className="btn_white blue print_btn"
+                style={{marginLeft:'0px'}}
                 onClick={(e) => handlePrint(e)}
               >
                 Print
@@ -313,6 +342,9 @@ const PrintDesign16A = ({ queries, headers }) => {
                                   </div>
                                   <div className="partybg16A">
                                     <span className="bg16oldlh7">ORD : {(e?.data?.rd?.orderDatef !== "01Jan00" && e?.data?.rd?.orderDatef !== "01Jan1900") && e?.data?.rd?.orderDatef}</span>
+                                {POFlag && <span className="bg16oldlh7"> {e?.data?.rd?.PO?.slice(0,11)}</span>}
+                                
+                                
                                     <div className="lh16bg">
                                       <div style={{ color: "red" }}>
                                         <span className="bg16oldlh7"></span>

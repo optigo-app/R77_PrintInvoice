@@ -23,6 +23,7 @@ export default function Print1JewelleryBook({
   const [msg, setMsg] = useState("");
   const [loader, setLoader] = useState(true);
   const [withImage, setWithImage] = useState(true);
+  const [srFlag, setSrFlag] = useState(true);
   const [checkedItems, setCheckedItems] = useState({
     "On Hand": true,
     "Sold": false,
@@ -115,12 +116,19 @@ export default function Print1JewelleryBook({
 
         const numA = extractNumber(invoiceA);
         const numB = extractNumber(invoiceB);
-
-        return numA - numB;
+        
+        if (numA !== numB) return numA - numB;
+        
+   
+        return String(a?.JobNo ?? "").localeCompare(
+          String(b?.JobNo ?? ""),
+          undefined,
+          { numeric: true }
+        );
       });
     }
     setResult(res);
-    setCurrentPage(1); // reset to first page on new data load
+    setCurrentPage(1); 
   };
 
 
@@ -188,6 +196,11 @@ export default function Print1JewelleryBook({
     if (!isAnyStatusChecked) return; // block toggling when no status is selected
     setWithImage(!withImage);
   }, [withImage, isAnyStatusChecked]);
+
+  const handleSrHideShow = useCallback(() => {
+    if (!isAnyStatusChecked) return; // block toggling when no status is selected
+    setSrFlag(!srFlag);
+  }, [srFlag, isAnyStatusChecked]);
   
 
   const handleCheckedChange = useCallback((e) => {
@@ -212,6 +225,11 @@ export default function Print1JewelleryBook({
   
 
   const imgPath = result?.DT1?.[0]?.ImageUploadLogicalPath || "";
+
+
+  
+  console.log("TCL: visibleItems",visibleItems )
+
 
   return loader ? (
     <Loader />
@@ -251,6 +269,17 @@ export default function Print1JewelleryBook({
               disabled={!isAnyStatusChecked}
             />
             with Image
+          </label>
+          <label htmlFor="SrFlag" className="inline-flex items-center cursor-pointer gap-2">
+            <input
+              type="checkbox"
+              checked={srFlag}
+              onChange={handleSrHideShow}
+              name="SrFlag"
+              id="SrFlag"
+              disabled={!isAnyStatusChecked}
+            />
+           sr 
           </label>
         </div>
 
@@ -297,8 +326,17 @@ export default function Print1JewelleryBook({
 
       <div className="w-full flex items-center justify-center">
         <div className="container disflx">
-          {visibleItems.map((e, i) => (
-            <div key={i} className="col1 brbxAll spfntbH pagBrkIns">
+        {visibleItems
+  ?.sort((a, b) => {
+    const first = String(a?.JobNo ?? "");
+    const second = String(b?.JobNo ?? "");
+    
+    return srFlag
+      ? first.localeCompare(second, undefined, { numeric: true })
+      : second.localeCompare(first, undefined, { numeric: true });
+  })
+  ?.map((e, i) => (
+    <div key={i} className="col1 brbxAll spfntbH pagBrkIns">
               {e?.Customer ? <div className="w-100 brBtom spaclftTpm spacBtom spfntHead">{e?.Customer}</div> : <div className="minheit brBtom"></div>}
               {withImage && e?.ImageName !== "" && (
                 <div className="w-100 brBtom imgwdtheit">

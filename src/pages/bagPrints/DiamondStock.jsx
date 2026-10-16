@@ -83,7 +83,7 @@ function DiamondStock({ queries, headers }) {
                         <div className="frow">
                           <div className="cell label" style={{ width: "34%" }}>Wt.</div>
                           <div className="cell value" style={{ width: "72%" }}>
-                            {item?.TotalRemainingWeight?.toFixed(3)}
+                            {item?.TotalRemainingWeight?.toFixed(2)}
                           </div>
                         </div>
                         <div className="frow">

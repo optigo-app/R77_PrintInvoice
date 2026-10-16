@@ -794,7 +794,7 @@ const BagPrint4A = ({ queries, headers }) => {
                                 <div className="pcs_4A border_right4A"></div>
                                 <div className="worker_4A border_right_4A"></div>
                               </div>
-                              <div className="part_3_container_4A_record border_bottom4A">
+                              {/* <div className="part_3_container_4A_record border_bottom4A">
                                 <div className="lh4A dept_4A border_right4A d-flex align-items-center">
                                   SLS. INS.
                                 </div>
@@ -810,7 +810,7 @@ const BagPrint4A = ({ queries, headers }) => {
                                     QC. INS.
                                   </div>
                                 </div>
-                              </div>
+                              </div> */}
                               <div className="part_3_container_4A_record ">
 
                                 <p
@@ -839,11 +839,11 @@ const BagPrint4A = ({ queries, headers }) => {
                                       ` ${e?.data?.stamping
                                         ? e.data.stamping.slice(
                                           0,
-                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 12 : 20
+                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ?100 : 100
                                         )
                                         : e?.data?.Ustamping?.slice(
                                           0,
-                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 12 : 20
+                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 100 : 100
                                         )
                                       }`,
                                       e?.data?.IsDiamondPcs && ` ${"DPcs"}`,

@@ -12,9 +12,63 @@ import {
   NumberWithCommas,
   otherAmountDetail,
   taxGenrator,
+  mergeMetals,
+  mergeFindings, mergeFindingsIntoPrimaryMetal
 } from "../../GlobalFunctions";
 import Loader from "../../components/Loader";
 import style from "../../assets/css/prints/packingList1.module.css";
+import { OrganizeDataPrint } from "./../../GlobalFunctions/OrganizeDataPrint";
+import { OrganizeInvoicePrintData } from "../../GlobalFunctions/OrganizeInvoicePrintData";
+import cloneDeep from "lodash/cloneDeep";
+
+
+/* "10.00" / "1,250.50" -> number */
+const parseAmt = (v) => Number(String(v ?? "").replace(/,/g, "")) || 0;
+
+/* Rows shown in the "Other" column of ONE job.
+   Every row carries a numeric `amount`, so the total is always the sum of
+   exactly what is displayed. */
+
+const getSettingAmount = (e, exRate) =>
+  ((e?.totals?.diamonds?.SettingAmount || 0) + (e?.totals?.colorstone?.SettingAmount || 0)) / exRate;
+
+
+const getFindingLabourAmount = (e, exRate) =>
+  ((e?.totals?.finding?.SettingAmount || 0)) / exRate;
+
+
+
+const getOtherRows = (e, exRate) => {
+  const rows = [];
+
+  // other details (value already formatted, e.g. "10.00")
+  (e?.other_details_array ?? e?.other_details ?? []).forEach((ele) => {
+    rows.push({ label: ele?.label, value: ele?.value, amount: parseAmt(ele?.value) });
+  });
+
+  // misc (non-zero only)
+  (e?.misc ?? [])
+    .filter((ele) => ele?.Amount && ele?.Amount !== 0)
+    .forEach((ele) => {
+      const amount = (Number(ele?.Amount) || 0) / exRate;
+      rows.push({ label: ele?.ShapeName, value: NumberWithCommas(amount, 2), amount });
+    });
+
+  // Setting (diamond + colorstone)
+  // const setting =
+  //   ((e?.totals?.diamonds?.SettingAmount || 0) + (e?.totals?.colorstone?.SettingAmount || 0)) / exRate;
+  // if (setting !== 0) rows.push({ label: "Setting", value: NumberWithCommas(setting, 2), amount: setting });
+
+  // Labour (finding setting)
+  // const labour = (e?.totals?.finding?.SettingAmount || 0) / exRate;
+  // if (labour !== 0) rows.push({ label: "Labour", value: NumberWithCommas(labour, 2), amount: labour });
+
+  // Handling
+  const handling = (e?.TotalDiamondHandling || 0) / exRate;
+  if (handling !== 0) rows.push({ label: "Handling", value: NumberWithCommas(handling, 2), amount: handling });
+
+  return rows;
+};
 
 const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   const [loader, setLoader] = useState(true);
@@ -65,277 +119,83 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   };
 
   const loadData = (data) => {
-    let exchangerate = data?.BillPrint_Json[0]?.CurrencyExchRate;
-    setJson0Data(data?.BillPrint_Json[0]);
-    let newArr = [];
-    let metalArr = [];
-    let diamondTotal = {
-      Wt: 0,
-      Pcs: 0,
-      Amount: 0,
-    };
-    let metalTotal = {
-      grossWt: 0,
-      Pcs: 0,
-      Amount: 0,
-      NetWt: 0,
-    };
-    let colorStone = {
-      Wt: 0,
-      Pcs: 0,
-      Amount: 0,
-    };
-    let otherAmount = 0;
-    let MakingAmount = 0;
-    let DiscountAmt = 0;
-    let TotalAmount = 0;
-    let netWtLosss = 0;
-    let metalAmounts = 0;
-    let clrStoneSettignAmount = 0;
-    let DiaSettignAmount = 0;
-    data?.BillPrint_Json1.forEach((e, i) => {
-      let discountElements = [];
+    let address = data?.BillPrint_Json[0]?.Printlable?.split("\r\n");
+    data.BillPrint_Json[0].address = address;
+    const datas = OrganizeInvoicePrintData(
+      data?.BillPrint_Json[0],
+      data?.BillPrint_Json1,
+      data?.BillPrint_Json2
+    );
+
+    datas?.resultArray?.forEach((e) => {
+      let dia = [];
+      e?.diamonds?.forEach((el) => {
+        let obj = cloneDeep(el);
+        let findrec = dia?.findIndex((a) => a?.ShapeName === el?.ShapeName && a?.SizeName === el?.SizeName && a?.QualityName === el?.QualityName && a?.Colorname === el?.Colorname && a?.Rate === el?.Rate)
+        if (findrec === -1) {
+          dia.push(obj)
+        } else {
+          dia[findrec].Wt += obj?.Wt;
+          dia[findrec].Pcs += obj?.Pcs;
+          dia[findrec].Amount += obj?.Amount;
+        }
+      })
+      e.diamonds = dia;
+
+      let clr = [];
+      e?.colorstone?.forEach((el) => {
+        let obj = cloneDeep(el);
+        let findrec = clr?.findIndex((a) => a?.ShapeName === el?.ShapeName && a?.SizeName === el?.SizeName && a?.QualityName === el?.QualityName && a?.Colorname === el?.Colorname && a?.Rate === el?.Rate)
+        if (findrec === -1) {
+          clr.push(obj)
+        } else {
+          clr[findrec].Wt += obj?.Wt;
+          clr[findrec].Pcs += obj?.Pcs;
+          clr[findrec].Amount += obj?.Amount;
+        }
+      })
+      e.colorstone = clr;
+
+    })
+
+    let finalArr = [];
+    datas?.resultArray?.forEach((e) => {
+      let obj = { ...e };
+      let discountOn = [];
       if (e?.IsCriteriabasedAmount === 1) {
+        if (e?.IsMetalAmount === 1) {
+          discountOn.push('Metal')
+        }
         if (e?.IsDiamondAmount === 1) {
-          discountElements?.push({ label: "Diamond" });
+          discountOn.push('Diamond')
         }
         if (e?.IsStoneAmount === 1) {
-          discountElements?.push({ label: "Stone" });
-        }
-        if (e?.IsMetalAmount === 1) {
-          discountElements?.push({ label: "Metal" });
-        }
-        if (e?.IsLabourAmount === 1) {
-          discountElements?.push({ label: "Labour" });
-        }
-        if (e?.IsSolitaireAmount === 1) {
-          discountElements?.push({ label: "Solitaire" });
+          discountOn.push('Stone')
         }
         if (e?.IsMiscAmount === 1) {
-          discountElements?.push({ label: "Misc" });
+          discountOn.push('Misc')
         }
-      }
-      let otherTotals =
-        e?.OtherCharges + e?.TotalDiamondHandling + e?.MiscAmount;
-      otherAmount += e?.OtherCharges + e?.TotalDiamondHandling + e?.MiscAmount;
-      let obj = { ...e };
-      let object = {
-        groupjob: e?.GroupJob,
-        netwt: e?.NetWt,
-        grosswt: e?.grosswt,
-        rate: 0,
-        amount: 0,
-      };
-      metalAmounts += e?.MetalAmount;
-      let srJob = e?.SrJobno?.split("/");
-      if (srJob?.length > 1) {
-        srJob = srJob[1];
+        if (e?.IsLabourAmount === 1) {
+          discountOn.push('Labour')
+        }
+        if (e?.IsSolitaireAmount === 1) {
+          discountOn.push('Solitaire')
+        }
       } else {
-        srJob = srJob[0];
-      }
-      obj.srJob = srJob;
-      let otherTotal = [];
-      let diamonds = [];
-      let colors = [];
-      let metals = [];
-      let metalRate = 0;
-      let metalAmount = 0;
-      let otherCharge = otherAmountDetail(e?.OtherAmtDetail);
-      let otherChargess = [];
-      let rowWiseDiamondTotal = {
-        Wt: 0,
-        Pcs: 0,
-        Amount: 0,
-      };
-      let rowWiseColorStoneTotal = {
-        Wt: 0,
-        Pcs: 0,
-        Amount: 0,
-      };
-      let rowWiseMetalTotal = {
-        grossWt: e?.grosswt,
-        NetWt: e?.NetWt,
-        Amount: 0,
-      };
-      metalTotal.grossWt += e?.grosswt;
-      metalTotal.NetWt += e?.NetWt;
-
-      MakingAmount += e?.MakingAmount;
-      DiscountAmt += e?.DiscountAmt;
-      TotalAmount += e?.TotalAmount;
-      let SettingAmount = 0;
-      let netWtLoss = 0;
-      let count = 0;
-      let metalWt = 0;
-      let otherMiscAmount = 0;
-      data?.BillPrint_Json2.forEach((ele) => {
-        if (ele?.StockBarcode === e?.SrJobno) {
-          if (ele?.MasterManagement_DiamondStoneTypeid === 1) {
-            // if (i === 0) {
-            diamondTotal.Wt += ele?.Wt;
-            diamondTotal.Pcs += ele?.Pcs;
-            diamondTotal.Amount += ele?.Amount;
-            netWtLoss += ele?.Wt;
-            DiaSettignAmount += ele?.SettingAmount;
-            // }
-            if (ele?.IsCenterStone === 1) {
-              ele.MasterManagement_DiamondStoneTypeName = "CENTER STONE";
-            }
-            diamonds.push(ele);
-            rowWiseDiamondTotal.Wt += ele?.Wt;
-            rowWiseDiamondTotal.Pcs += ele?.Pcs;
-            rowWiseDiamondTotal.Amount += ele?.Amount;
-            SettingAmount += ele?.SettingAmount;
-          } else if (ele?.MasterManagement_DiamondStoneTypeid === 2) {
-            const groupingKey = `${ele?.ShapeName}-${ele?.QualityName}-${ele?.Colorname}-${ele?.Rate}`;
-            let existingGroup = colors.find(item => item.groupKey === groupingKey);
-            
-            if (existingGroup) {
-              existingGroup.Pcs += ele?.Pcs || 0;
-              existingGroup.Wt += ele?.Wt || 0;
-              existingGroup.Amount += ele?.Amount || 0;
-              existingGroup.SettingAmount += ele?.SettingAmount || 0;
-            } else {
-              colors.push({
-                groupKey: groupingKey,
-                ShapeName: ele?.ShapeName,
-                QualityName: ele?.QualityName,
-                Colorname: ele?.Colorname,
-                Rate: ele?.Rate,
-                Pcs: ele?.Pcs || 0,
-                Wt: ele?.Wt || 0,
-                Amount: ele?.Amount || 0,
-                SettingAmount: ele?.SettingAmount || 0,
-              });
-            }
-            rowWiseColorStoneTotal.Wt += ele?.Wt;
-            rowWiseColorStoneTotal.Pcs += ele?.Pcs;
-            rowWiseColorStoneTotal.Amount += ele?.Amount;
-            clrStoneSettignAmount += ele?.SettingAmount;
-            // if (i === 0) {
-            colorStone.Wt += ele?.Wt;
-            colorStone.Pcs += ele?.Pcs;
-            colorStone.Amount += ele?.Amount;
-            // }
-            SettingAmount += ele?.SettingAmount;
-          } else if (ele?.MasterManagement_DiamondStoneTypeid === 4) {
-            if (ele?.IsPrimaryMetal === 1) {
-              metalWt += ele?.Wt;
-            }
-            count++;
-            metals.push(ele);
-            metalRate += ele?.Rate;
-            object.rate += ele?.Rate;
-            object.amount += ele?.Amount;
-            metalAmount += ele?.Amount;
-            if(ele?.IsPrimaryMetal ==1){
-
-              rowWiseMetalTotal.Amount += ele?.Amount;
-            }
-            if (i === 0) {
-              metalTotal.Pcs += ele?.Pcs;
-              metalTotal.Amount += ele?.Amount;
-            }
-          } else if (ele?.MasterManagement_DiamondStoneTypeid === 3) {
-            if (ele?.IsHSCOE !== 0) {
-              // otherAmount += ele?.Amount;
-              let findOther = otherChargess?.findIndex(
-                (elem, index) => elem?.ShapeName === ele?.ShapeName
-              );
-              if (findOther === -1) {
-                otherChargess.push(ele);
-              } else {
-                otherChargess[findOther].Amount += ele?.Amount;
-              }
-            } else {
-              otherMiscAmount += ele?.Amount;
-            }
-          }
-        }
-      });
-      if (count === 1) {
-        netWtLoss = e?.NetWt + e?.LossWt;
-      } else if (count > 1) {
-        netWtLoss = metalWt;
-      }
-      netWtLosss += netWtLoss;
-      obj.metalRate = metalRate;
-      obj.metalAmount = metalAmount;
-      obj.diamonds = diamonds;
-      obj.colors = colors;
-      obj.metals = metals;
-      obj.netWtLoss = netWtLoss;
-      obj.otherMiscAmount = otherMiscAmount;
-      obj.otherTotal = otherTotal;
-      obj.otherCharge = otherCharge;
-      obj.otherChargess = otherChargess;
-      obj.otherTotals = otherTotals;
-      obj.discountElements = discountElements;
-      obj.OtherCharges += otherChargess.reduce(
-        (acc, cObj) => acc + cObj?.Amount,
-        0
-      );
-      obj.rowWiseDiamondTotal = rowWiseDiamondTotal;
-      obj.rowWiseColorStoneTotal = rowWiseColorStoneTotal;
-      obj.rowWiseMetalTotal = rowWiseMetalTotal;
-      obj.SettingAmount = SettingAmount;
-      newArr.push(obj);
-      if (e?.GroupJob !== "") {
-        let findRecord = metalArr.findIndex(
-          (elem) => elem.groupjob === e?.GroupJob
-        );
-        if (findRecord === -1) {
-          metalArr.push(object);
-        } else {
-          metalArr[findRecord].netwt += object.netwt;
-          metalArr[findRecord].rate += object.rate;
-          metalArr[findRecord].amount += object.amount;
-          metalArr[findRecord].grosswt += object.grosswt;
+        if (e?.Discount !== 0) {
+          discountOn.push('Total Amount')
         }
       }
-    });
-    let taxValue = taxGenrator(data?.BillPrint_Json[0], TotalAmount);
-    let taxess =
-      taxValue?.reduce(
-        (acc, cObj) =>
-          acc + +cObj?.amount / data?.BillPrint_Json[0]?.CurrencyExchRate,
-        0
-      ) +
-      data?.BillPrint_Json[0]?.AddLess /
-        data?.BillPrint_Json[0]?.CurrencyExchRate;
 
-    setTotal({
-      ...total,
-      netWtLoss: netWtLosss,
-      metalAmount: metalAmounts,
-      diamondTotal: diamondTotal,
-      colorStone: colorStone,
-      metalTotal: metalTotal,
-      otherAmount: otherAmount,
-      MakingAmount: MakingAmount,
-      DiscountAmt: DiscountAmt,
-      TotalAmount: TotalAmount,
-      amountAfterDiscount:
-        TotalAmount / data?.BillPrint_Json[0]?.CurrencyExchRate + taxess,
-      DiaSettignAmount: DiaSettignAmount,
-      clrStoneSettignAmount: clrStoneSettignAmount,
-    });
+      obj.discountOn = discountOn;
+      obj.str_discountOn = discountOn?.join(', ');
+      obj.str_discountOn = obj?.str_discountOn + " Amount";
 
-    setTaxes(taxValue);
+      finalArr.push(obj);
+    })
+    datas.resultArray = finalArr;
 
-    // newArr.sort((a, b) => {
-    //     const nameA = (a?.JewelCodePrefix + a?.srJob).toUpperCase();
-    //     const nameB = (b?.JewelCodePrefix + b?.srJob).toUpperCase();
-    //     if (nameA < nameB) {
-    //         return -1;
-    //     }
-    //     if (nameA > nameB) {
-    //         return 1;
-    //     }
-    //     return 0;
-    // });
-
-    newArr?.sort((a, b) => {
+    datas.resultArray?.sort((a, b) => {
       // First, compare based on Categoryname
       if (a.Categoryname < b.Categoryname) return -1;
       if (a.Categoryname > b.Categoryname) return 1;
@@ -343,52 +203,43 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       // If Categoryname is the same, compare based on SrJobno
       if (a.SrJobno < b.SrJobno) return -1;
       if (a.SrJobno > b.SrJobno) return 1;
+
       // If both Categoryname and SrJobno are the same, return 0
       return 0;
     });
+    const json0 = data?.BillPrint_Json[0];
+    const exchangerate = json0?.CurrencyExchRate || 1;
 
+    let TotalAmount = 0;
+    let DiscountAmt = 0;
+    let MakingAmount = 0;
+    let otherAmount = 0;
 
+    datas?.resultArray?.forEach((e) => {
+      TotalAmount += e?.TotalAmount || 0;
+      DiscountAmt += e?.DiscountAmt || 0;
+      MakingAmount += e?.MakingAmount || 0;
+      otherAmount += (e?.OtherCharges || 0) + (e?.TotalDiamondHandling || 0);
+    });
 
-    const processJewelryData = (newOne) => {
-      return newOne.map((obj) => {
-        const diamondMap = new Map();
-        obj.diamonds.forEach((diamond) => {
-          const key = `${diamond.ShapeName}_${diamond.QualityName}_${diamond.Colorname}_${diamond.SizeName}_${diamond.Rate}`;
-          if (diamondMap.has(key)) {
-            let existingDiamond = diamondMap.get(key);
-            existingDiamond.Wt += diamond.Wt; // Merge weight
-            existingDiamond.Amount += diamond.Amount; // Merge amount
-            existingDiamond.Pcs += diamond.Pcs; // Merge pieces
-          } else {
-            diamondMap.set(key, { ...diamond });
-          }
-        });
-    
-        const colorMap = new Map();
-        obj.colors.forEach((color) => {
-          const key = `${color.ShapeName}_${color.QualityName}_${color.Colorname}_${color.SizeName}_${color.Rate}`;
-          if (colorMap.has(key)) {
-            let existingColor = colorMap.get(key);
-            existingColor.Wt += color.Wt; // Merge weight
-            existingColor.Amount += color.Amount; // Merge amount
-            existingColor.Pcs += color.Pcs; // Merge pieces
-          } else {
-            colorMap.set(key, { ...color });
-          }
-        });
-        
-        return { 
-          ...obj, 
-          diamonds: Array.from(diamondMap.values()), 
-          colors: Array.from(colorMap.values()) 
-        };
-      });
-    };
-    
-    const updatedData = processJewelryData(newArr);
-    // console.log('Updated Data:', updatedData);
-    setData(updatedData);
-    // setData(newArr);
+    const taxValue = taxGenrator(json0, TotalAmount);
+
+    const taxess =
+      taxValue?.reduce((acc, cObj) => acc + +cObj?.amount / exchangerate, 0) +
+      json0?.AddLess / exchangerate;
+
+    setTotal((prev) => ({
+      ...prev,
+      TotalAmount,
+      DiscountAmt,
+      MakingAmount,
+      otherAmount,
+      amountAfterDiscount: TotalAmount / exchangerate + taxess,
+    }));
+
+    setTaxes(taxValue);
+    setData(datas);
+    setLoader(false);
   };
 
   useEffect(() => {
@@ -455,16 +306,92 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
   };
 
   // console.log("data", data);
-  
+
   const discountCriteria = [
-    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond' ,disAmount:"DiamondDiscountAmount" },
-    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal' ,disAmount:"MetalDiscountAmount" },
-    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone' ,disAmount:"StoneDiscountAmount" },
-    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour' ,disAmount:"LabourDiscountAmount" },
-    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire' ,disAmount:"SolitaireDiscountAmount1" },
-    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc' ,disAmount:"MiscDiscountAmount" },
+    { key: 'DiamondDiscount', isAmountKey: 'IsDiamondDiscInAmount', label: 'Diamond', disAmount: "DiamondDiscountAmount" },
+    { key: 'MetalDiscount', isAmountKey: 'IsMetalDiscInAmount', label: 'Metal', disAmount: "MetalDiscountAmount" },
+    { key: 'StoneDiscount', isAmountKey: 'IsStoneDiscInAmount', label: 'Colorstone', disAmount: "StoneDiscountAmount" },
+    { key: 'LabourDiscount', isAmountKey: 'IsLabourDiscInAmount', label: 'Labour', disAmount: "LabourDiscountAmount" },
+    { key: 'SolitaireDiscount', isAmountKey: 'IsSolitaireDiscInAmount', label: 'Solitaire', disAmount: "SolitaireDiscountAmount1" },
+    { key: 'MiscDiscount', isAmountKey: 'IsMiscDiscInAmount', label: 'Misc', disAmount: "MiscDiscountAmount" },
   ];
-  
+
+
+
+
+  console.log("TCL: data", data)
+
+  console.log("TCL: total", total)
+
+  const totalMiscAmount = data?.resultArray?.reduce((sum, e) => {
+    return sum +
+      (e?.totals?.misc?.isHSCODE123_amt || 0)
+
+  }, 0) || 0;
+
+
+  console.log("TCL:totalMiscAmount ", totalMiscAmount)
+
+  // grand totals built from the per-job rows (same formulas as each job's grey total row)
+  const grandExRate = data?.header?.CurrencyExchRate || 1;
+
+  const totalLabourAll =
+    data?.resultArray?.reduce(
+      (sum, e) =>
+        sum +
+        ((Number(e?.MakingAmount) || 0) +
+          (Number(e?.TotalCsSetcost) || 0) +
+          (Number(e?.totals?.finding?.SettingAmount) || 0) +
+          (Number(e?.TotalDiaSetcost) || 0)) / grandExRate,
+      // / grandExRate,
+      0
+    ) || 0;
+
+  const totalPriceAll =
+    data?.resultArray?.reduce(
+      (sum, e) => sum + (Number(e?.UnitCost) || 0) / grandExRate,
+      0
+    ) || 0;
+
+  // grand total of the "Other" column = sum of every job's displayed rows
+  const totalOtherAll =
+    data?.resultArray?.reduce(
+      (sum, e) =>
+        sum +
+        getOtherRows(e, data?.header?.CurrencyExchRate || 1).reduce((s, r) => s + r.amount, 0),
+      0
+    ) || 0;
+
+  /* Labour rows for ONE job, grouped by rate.
+ Making + diamond setting + colorstone setting + finding setting.
+ Same rate  -> amounts are merged into one row.
+ Different rate -> separate row. */
+  const getLabourRows = (e, exRate) => {
+    const map = new Map();
+
+    const add = (rate, amount) => {
+      const r = Number(rate) || 0;
+      const a = Number(amount) || 0;
+      if (r === 0 && a === 0) return;
+      const key = r.toFixed(2);
+      const prev = map.get(key);
+      map.set(key, { rate: r, amount: (prev?.amount || 0) + a });
+    };
+
+    // making
+    add(e?.MaKingCharge_Unit, e?.MakingAmount);
+
+    // setting from diamonds, colorstone and finding (each has SettingRate / SettingAmount)
+    e?.diamonds?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+    e?.colorstone?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+    e?.finding?.forEach((el) => add(el?.SettingRate, el?.SettingAmount));
+
+    return [...map.values()].map((r) => ({
+      rate: r.rate,
+      amount: r.amount / exRate,
+    }));
+  };
+
   return (
     <>
       {loader ? (
@@ -503,9 +430,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
 
             {/* Print Logo */}
             <div className="pt-2">
-              {isImageWorking && json0Data?.PrintLogo !== "" && (
+              {isImageWorking && data?.header?.PrintLogo !== "" && (
                 <img
-                  src={json0Data?.PrintLogo}
+                  src={data?.header?.PrintLogo}
                   alt=""
                   className="w-100 h-auto ms-auto d-block object-fit-contain mx-auto"
                   onError={handleImageErrors}
@@ -514,25 +441,25 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   style={{ maxWidth: "108px" }}
                 />
               )}
-              {/* <img src={json0Data?.PrintLogo} alt="" className={`logoimg  d-block mx-auto`} /> */}
+              {/* <img src={data?.header?.PrintLogo} alt="" className={`logoimg  d-block mx-auto`} /> */}
               <p
                 className={`text-center pt-1 fw-bold ${style?.font_12} ${style?.packinhList1_top_line}`}
               >
-                {json0Data?.CompanyAddress} {json0Data?.CompanyAddress2}{" "}
-                {json0Data?.CompanyCity} - {json0Data?.CompanyPinCode}
+                {data?.header?.CompanyAddress} {data?.header?.CompanyAddress2}{" "}
+                {data?.header?.CompanyCity} - {data?.header?.CompanyPinCode}
               </p>
-              {json0Data?.PrintHeadLabel !== "" && (
+              {data?.header?.PrintHeadLabel !== "" && (
                 <p
                   className={`fw-bold text-center pt-1 pb-2  `}
                   style={{ fontSize: "17px" }}
                 >
-                  {json0Data?.PrintHeadLabel}
+                  {data?.header?.PrintHeadLabel}
                 </p>
               )}
-              {json0Data?.PrintRemark !== "" && (
+              {data?.header?.PrintRemark !== "" && (
                 <p
                   className={`fw-bold text-center ${style?.font_11}`}
-                  dangerouslySetInnerHTML={{ __html: json0Data?.PrintRemark }}
+                  dangerouslySetInnerHTML={{ __html: data?.header?.PrintRemark }}
                 ></p>
               )}
             </div>
@@ -544,7 +471,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
               <div className={`col-6 ${style?.font_14}`}>
                 <p className={``}>
                   <span className="fw-bold">Party:</span>{" "}
-                  {json0Data?.customerfirmname}
+                  {data?.header?.customerfirmname}
                 </p>
               </div>
               <div
@@ -554,13 +481,13 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 <div className="d-flex justify-content-end pb-1">
                   <p className={`${style?.font_11}`} style={{ width: "90px" }}>Invoice No :</p>
                   <p className={`${style?.font_11} text-end fw-bold`} style={{ width: "70px" }}>
-                    {json0Data?.InvoiceNo}
+                    {data?.header?.InvoiceNo}
                   </p>
                 </div>
                 <div className="d-flex justify-content-end pb-2">
                   <p className={`${style?.font_11}`} style={{ width: "90px" }}>Date :</p>
                   <p className={`${style?.font_11} text-end fw-bold`} style={{ width: "70px" }}>
-                    {json0Data?.EntryDate}
+                    {data?.header?.EntryDate}
                   </p>
                 </div>
               </div>
@@ -622,7 +549,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         Gr Wt
                       </p>
                       <p className={`${style?.wid_20} text-center border-end`}>
-                        {data?.find((e) => e?.LossWt !== 0) ? "N + L" : "Net Wt"}
+                        {data?.resultArray?.find((e) => e?.LossWt !== 0) ? "N + L" : "Net Wt"}
                       </p>
                       <p className={`${style?.wid_20} text-center border-end`}>
                         Rate
@@ -698,19 +625,30 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             </div>
 
             {/* Table Data */}
-            {data?.length > 0 &&
-              data?.map((e, i) => {
-                
+            {data?.resultArray?.length > 0 &&
+              data?.resultArray?.map((e, i) => {
+                const exRate = data?.header?.CurrencyExchRate || 1;
+
+                /* ---------- OTHER column data ---------- */
+                const otherRows = getOtherRows(e, exRate);
+                const otherTotal = otherRows.reduce((sum, r) => sum + r.amount, 0);
+
                 const discountDisplay = discountCriteria
-                .filter(({ key }) => e?.[key] > 0)
-                .map(({ key, isAmountKey, label,disAmount }) => {
-                  const num = Number(e[key]);  
-                  const am= Number(e[disAmount])
-                  const decimals = e[isAmountKey] === 1 ? 3 : 2;  
-                  const val = num.toFixed(decimals);  
-                  return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
-                })
-                .join(', ');
+                  .filter(({ key }) => e?.[key] > 0)
+                  .map(({ key, isAmountKey, label, disAmount }) => {
+                    const num = Number(e[key]);
+                    const am = Number(e[disAmount])
+                    const decimals = e[isAmountKey] === 1 ? 3 : 2;
+                    const val = num.toFixed(decimals);
+                    return e[isAmountKey] === 0 ? `${val}% @${label} Amount ` : `${val} @${label} Amount`;
+                  })
+                  .join(', ');
+
+                const mergedMetals = mergeMetals(e?.metal);
+                const mergedFindings = mergeFindings(e?.finding);
+
+                const { findings: finalFindings, metals: finalMetals } =
+                  mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals, false);
                 return (
                   <div
                     key={i}
@@ -733,8 +671,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {atob(evn)?.toLowerCase() === "quote"
                                 ? e?.designno
                                 : e?.JewelCodePrefix?.slice(0, 2) +
-                                  e?.Category_Prefix?.slice(0, 2) +
-                                  e?.SrJobno?.split("/")[1]}
+                                e?.Category_Prefix?.slice(0, 2) +
+                                e?.SrJobno?.split("/")[1]}
                             </p>
                             <img
                               src={e?.DesignImage}
@@ -747,7 +685,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             )}
                           </div>
                         </div>
-                        
+
                         {/* Diamond */}
                         <div
                           className={` ${style?.diamond} border-end d-flex flex-wrap`}
@@ -770,8 +708,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               {e?.diamonds.map((el, indd) => {
                                 return (
                                   <p key={indd} className="text-center">
-                                    {el?.CustomSize !== "" && el?.SizeName?.toLowerCase() === "custom" 
-                                      ? `C:${el?.CustomSize}` 
+                                    {el?.CustomSize !== "" && el?.SizeName?.toLowerCase() === "custom"
+                                      ? `C:${el?.CustomSize}`
                                       : el?.SizeName
                                     }
                                   </p>
@@ -818,7 +756,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 return (
                                   <p key={indd}>
                                     {NumberWithCommas(
-                                      el?.Amount / json0Data?.CurrencyExchRate,
+                                      el?.Amount / data?.header?.CurrencyExchRate,
                                       2
                                     )}
                                   </p>
@@ -827,9 +765,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Metal */}
-                        <div
+                        {/* <div
                           className={` ${style?.metal} border-end d-flex flex-wrap`}
                         >
                           <div
@@ -884,7 +822,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                     {indd === 0 &&
                                       NumberWithCommas(
                                         el?.Amount /
-                                          json0Data?.CurrencyExchRate,
+                                          data?.header?.CurrencyExchRate,
                                         2
                                       )}
                                   </p>
@@ -892,6 +830,96 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                           </div>
+                          {e?.JobRemark !== "" && (
+                            <div>
+                              <p>Remark:</p>
+                              <p className="fw-bold">{e?.JobRemark}</p>
+                            </div>
+                          )}
+                        </div> */}
+                        <div className={`${style?.metal} border-end d-flex flex-wrap`}>
+                          {finalMetals.map((el, indd) => (
+                            <div
+                              key={indd}
+                              className={`d-flex w-100 ${e?.JobRemark !== "" ? "border-bottom" : ""
+                                }`}
+                            >
+
+                              <div
+                                className={`${style?.wid_20} border-end ${style?.no_word_break}`}
+                              >
+                                <p>  {`${el?.ShapeName || ''} ${el?.QualityName || ''}`}</p>
+                              </div>
+
+                              <div className={`${style?.wid_20} text-end border-end`}>
+                                <p>{el?.IsPrimaryMetal === 1 ? NumberWithCommas(e?.grosswt, 3) : ""}</p>
+                              </div>
+
+                              <div className={`${style?.wid_20} text-end border-end`}>
+                                <p>{NumberWithCommas(el?.Weight, 3)}</p>
+                              </div>
+
+                              <div className={`${style?.wid_20} text-end border-end`}>
+                                <p>{NumberWithCommas(el?.Rate, 2)}</p>
+                              </div>
+
+                              <div className={`${style?.wid_20} text-end`}>
+                                <p>
+                                  {
+                                    NumberWithCommas(
+                                      el?.Amount / data?.header?.CurrencyExchRate,
+                                      2
+                                    )
+                                  }
+                                </p>
+                              </div>
+
+                            </div>
+                          ))}
+
+                          {finalFindings?.length > 0 && (
+                            finalFindings.map((el, indd) => (
+                              <div
+                                key={indd}
+                                className={`d-flex w-100 ${e?.JobRemark !== "" ? "border-bottom" : ""
+                                  }`}
+                              >
+
+                                <div
+                                  className={`${style?.wid_20} border-end ${style?.no_word_break}`}
+                                >
+                                  <p> {e?.GroupJob !== '' ? "FINDING ACCESSORIES" : el?.FindingTypename + " " + el?.QualityName}</p>
+                                </div>
+
+                                <div className={`${style?.wid_20} text-end border-end`}>
+                                  <p> </p>
+                                </div>
+
+                                <div className={`${style?.wid_20} text-end border-end`}>
+                                  <p>{NumberWithCommas(el?.Wt, 3)}</p>
+                                </div>
+
+                                <div className={`${style?.wid_20} text-end border-end`}>
+                                  <p>{NumberWithCommas(el?.Rate, 2)}</p>
+                                </div>
+
+                                <div className={`${style?.wid_20} text-end`}>
+                                  <p>
+                                    {NumberWithCommas(
+                                      el?.Amount / data?.header?.CurrencyExchRate,
+                                      2
+                                    )
+                                    }
+                                  </p>
+                                </div>
+
+                              </div>
+                            ))
+
+                          )}
+
+
+
                           {e?.JobRemark !== "" && (
                             <div>
                               <p>Remark:</p>
@@ -908,14 +936,14 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div
                               className={`${style?.wid_20} border-end position-relative h-100 pb-3`}
                             >
-                              {e?.colors.map((el, indd) => {
+                              {e?.colorstone.map((el, indd) => {
                                 return <p key={indd}>{el?.ShapeName}</p>;
                               })}
                             </div>
                             <div
                               className={`${style?.wid_20} text-end border-end position-relative h-100 pb-3`}
                             >
-                              {e?.colors.map((el, indd) => {
+                              {e?.colorstone.map((el, indd) => {
                                 return (
                                   <p key={indd}>
                                     {NumberWithCommas(el?.Wt, 2)}
@@ -926,7 +954,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div
                               className={`${style?.wid_20} text-end border-end position-relative h-100 pb-3`}
                             >
-                              {e?.colors.map((el, indd) => {
+                              {e?.colorstone.map((el, indd) => {
                                 return (
                                   <p key={indd}>
                                     {NumberWithCommas(el?.Pcs, 0)}
@@ -937,7 +965,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div
                               className={`${style?.wid_20} text-end border-end position-relative h-100 pb-3`}
                             >
-                              {e?.colors.map((el, indd) => {
+                              {e?.colorstone.map((el, indd) => {
                                 return (
                                   <p key={indd}>
                                     {NumberWithCommas(el?.Rate, 2)}
@@ -948,11 +976,11 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div
                               className={`${style?.wid_20} text-end position-relative h-100 pb-3`}
                             >
-                              {e?.colors.map((el, indd) => {
+                              {e?.colorstone.map((el, indd) => {
                                 return (
                                   <p key={indd}>
                                     {NumberWithCommas(
-                                      el?.Amount / json0Data?.CurrencyExchRate,
+                                      el?.Amount / data?.header?.CurrencyExchRate,
                                       2
                                     )}
                                   </p>
@@ -963,122 +991,74 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         </div>
 
                         {/* Labour */}
-                        <div
-                          className={` ${style?.labour} border-end d-flex flex-wrap`}
-                        >
+                        {/* Labour */}
+                        {/* <div className={` ${style?.labour} border-end d-flex flex-wrap`}>
                           <div className="d-flex w-100">
-                            <div
-                              className={`col-6 text-end border-end position-relative h-100 pb-3`}
-                            >
+                            <div className={`col-6 text-end border-end position-relative h-100 pb-3`}>
                               <p>{NumberWithCommas(e?.MaKingCharge_Unit, 2)}</p>
+
                             </div>
-                            <div
-                              className={` col-6 text-end position-relative h-100 pb-3`}
-                            >
+                            <div className={` col-6 text-end position-relative h-100 pb-3`}>
                               <p>
-                                {NumberWithCommas(
-                                  (e?.MakingAmount + e?.SettingAmount) /
-                                    json0Data?.CurrencyExchRate,
-                                  2
-                                )}
+                                <p>
+                                  {e?.MakingAmount !== 0 && e?.MakingAmount
+                                    ? NumberWithCommas(e?.MakingAmount + getSettingAmount(e, exRate) + getFindingLabourAmount(e, exRate), 2)
+                                    : '\u00A0'}
+                                </p>
                               </p>
+
                             </div>
                           </div>
-                        </div>
+                        </div> */}
+                        {/* Labour */}
+                        {(() => {
+                          const labourRows = getLabourRows(e, exRate);
+                          return (
+                            <div className={` ${style?.labour} border-end d-flex flex-wrap`}>
+                              <div className="d-flex w-100">
+                                <div className="col-6 text-end border-end position-relative h-100 pb-3">
+                                  {labourRows.length > 0
+                                    ? labourRows.map((r, idx) => (
+                                      <p key={idx}>{NumberWithCommas(r.rate, 2)}</p>
+                                    ))
+                                    : <p>&nbsp;</p>}
+                                </div>
+                                <div className="col-6 text-end position-relative h-100 pb-3">
+                                  {labourRows.length > 0
+                                    ? labourRows.map((r, idx) => (
+                                      <p key={idx}>{NumberWithCommas(r.amount, 2)}</p>
+                                    ))
+                                    : <p>&nbsp;</p>}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         {/* Other */}
-                        <div
-                          className={` ${style?.other} border-end d-flex flex-wrap`}
-                        >
-                          <div className="d-flex w-100">
-                            <div
-                              className={` col-6 border-end position-relative h-100 pb-3`}
-                            >
-                              {e?.otherChargess?.map((ele, ind) => {
-                                return (
-                                  ele?.Amount !== 0 && (
-                                    <p
-                                      key={ind}
-                                      className={`${style?.min_height} ${style?.spbrWord} text-end`}
-                                    >
-                                      {ele?.ShapeName}
-                                    </p>
-                                  )
-                                );
-                              })}
-                              {e?.otherMiscAmount !== 0 && (
-                                <p className={`${style?.min_height} ${style?.spbrWord} text-end`}>Other</p>
-                              )}
-                              {e?.otherCharge?.map((ele, ind) => {
-                                return (
-                                  +ele?.value !== 0 &&
-                                  ind <= 2 && (
-                                    <p
-                                      key={ind}
-                                      className={`${style?.min_height} ${style?.spbrWord} text-end`}
-                                    >
-                                      {ele?.label}
-                                    </p>
-                                  )
-                                );
-                              })}
-
-                              {e?.TotalDiamondHandling !== 0 && (
-                                <p
-                                  className={`${style?.min_height} ${style?.spbrWord} text-end`}
-                                >
-                                  Charges Handling
-                                </p>
-                              )}
-                            </div>
-                            <div
-                              className={` col-6 text-end position-relative h-100 pb-3`}
-                            >
-                              {e?.otherChargess?.map((ele, ind) => {
-                                return (
-                                  ele?.Amount !== 0 && (
-                                    <p
-                                      key={ind}
-                                      className={`${style?.min_height}`}
-                                    >
-                                      {NumberWithCommas(
-                                        ele?.Amount /
-                                          json0Data?.CurrencyExchRate,
-                                        2
-                                      )}
-                                    </p>
-                                  )
-                                );
-                              })}
-
-                              {e?.otherMiscAmount !== 0 && (
-                                <p className={`${style?.min_height}`}>
-                                  {NumberWithCommas(
-                                    e?.otherMiscAmount /
-                                      json0Data?.CurrencyExchRate,
-                                    2
-                                  )}
-                                </p>
-                              )}
-                              {e?.otherCharge?.map((ele, ind) => {
-                                return (
-                                  +ele?.value !== 0 &&
-                                  ind <= 2 && (
-                                    <p
-                                      key={ind}
-                                      className={`${style?.min_height}`}
-                                    >
-                                      {NumberWithCommas(+ele?.value, 2)}
-                                    </p>
-                                  )
-                                );
-                              })}
-                              {e?.TotalDiamondHandling !== 0 && (
-                                <p className={`${style?.min_height}`}>
-                                  {NumberWithCommas(e?.TotalDiamondHandling, 2)}
-                                </p>
-                              )}
-                            </div>
+                        <div className={` ${style?.other} border-end d-flex flex-wrap`}>
+                          <div
+                            className="w-100 pb-3"
+                            style={{
+                              backgroundImage:
+                                "linear-gradient(var(--bs-border-color, #dee2e6), var(--bs-border-color, #dee2e6))",
+                              backgroundSize: "1px 100%",
+                              backgroundPosition: "50% 0",
+                              backgroundRepeat: "no-repeat",
+                            }}
+                          >
+                            {otherRows.map((r, idx) => (
+                              <div className="d-flex w-100" key={idx}>
+                                {/* label */}
+                                <div className={` col-6 position-relative`}>
+                                  <p className="text-break pdl_pcls">{r.label}</p>
+                                </div>
+                                {/* value */}
+                                <div className={` col-6 text-end position-relative`}>
+                                  <p className="pdr_pcls">{r.value}</p>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
@@ -1092,7 +1072,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             >
                               <p>
                                 {NumberWithCommas(
-                                  e?.UnitCost / json0Data?.CurrencyExchRate,
+                                  e?.UnitCost / data?.header?.CurrencyExchRate,
                                   2
                                 )}{" "}
                               </p>
@@ -1126,18 +1106,18 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                             <div className={`col-2 text-end border-end `}>
                               <p className={`w-100 border-top  fw-bold`}>
-                                {e?.rowWiseDiamondTotal.Wt !== 0 &&
+                                {e?.totals?.diamonds.Wt !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseDiamondTotal.Wt,
+                                    e?.totals?.diamonds.Wt,
                                     3
                                   )}
                               </p>
                             </div>
                             <div className={`col-2 text-end border-end  `}>
                               <p className={`w-100 border-top  fw-bold`}>
-                                {e?.rowWiseDiamondTotal.Pcs !== 0 &&
+                                {e?.totals?.diamonds.Pcs !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseDiamondTotal.Pcs,
+                                    e?.totals?.diamonds.Pcs,
                                     0
                                   )}
                               </p>
@@ -1147,10 +1127,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                             <div className={`col-2 text-end `}>
                               <p className={`w-100 border-top  fw-bold`}>
-                                {e?.rowWiseDiamondTotal.Amount !== 0 &&
+                                {e?.totals?.diamonds.Amount !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseDiamondTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    e?.totals?.diamonds.Amount /
+                                    data?.header?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1170,9 +1150,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               className={`${style?.wid_20} text-end border-end`}
                             >
                               <p className={`fw-bold w-100 border-top  `}>
-                                {e?.rowWiseMetalTotal.grossWt !== 0 &&
+                                {e?.grosswt !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseMetalTotal.grossWt,
+                                    e?.grosswt,
                                     3
                                   )}
                               </p>
@@ -1181,8 +1161,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               className={`${style?.wid_20} text-end border-end`}
                             >
                               <p className={`fw-bold w-100 border-top  `}>
-                                {e?.netWtLoss !== 0 &&
-                                  NumberWithCommas(e?.netWtLoss, 3)}
+                                {
+                                  NumberWithCommas(e?.totals?.metal?.Weight + e?.totals?.finding?.Wt, 3)}
                               </p>
                             </div>
                             <div
@@ -1193,10 +1173,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             {console.log("e?.rowWiseMetalTotal", e?.rowWiseMetalTotal)}
                             <div className={`${style?.wid_20} text-end`}>
                               <p className={`fw-bold w-100 border-top  `}>
-                                {e?.rowWiseMetalTotal.Amount !== 0 &&
+                                {e?.totals?.metal.Amount !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseMetalTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    (e?.totals?.metal.Amount + e?.totals?.finding?.Amount) /
+                                    data?.header?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1214,9 +1194,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               className={`${style?.wid_20} text-end border-end `}
                             >
                               <p className={`fw-bold w-100 border-top `}>
-                                {e?.rowWiseColorStoneTotal.Wt !== 0 &&
+                                {e?.totals?.colorstone.Wt !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseColorStoneTotal.Wt,
+                                    e?.totals?.colorstone.Wt,
                                     2
                                   )}
                               </p>
@@ -1225,9 +1205,9 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               className={`${style?.wid_20} text-end border-end `}
                             >
                               <p className={`fw-bold w-100 border-top `}>
-                                {e?.rowWiseColorStoneTotal.Pcs !== 0 &&
+                                {e?.totals?.colorstone.Pcs !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseColorStoneTotal.Pcs,
+                                    e?.totals?.colorstone.Pcs,
                                     0
                                   )}
                               </p>
@@ -1239,10 +1219,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                             <div className={`${style?.wid_20} text-end`}>
                               <p className={`fw-bold w-100 border-top `}>
-                                {e?.rowWiseColorStoneTotal.Amount !== 0 &&
+                                {e?.totals?.colorstone.Amount !== 0 &&
                                   NumberWithCommas(
-                                    e?.rowWiseColorStoneTotal.Amount /
-                                      json0Data?.CurrencyExchRate,
+                                    e?.totals?.colorstone.Amount /
+                                    data?.header?.CurrencyExchRate,
                                     2
                                   )}
                               </p>
@@ -1258,15 +1238,17 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             </div>
                             <div className={` col-6 text-end`}>
                               <p className={`fw-bold w-100 border-top`}>
-                                {NumberWithCommas(
-                                  (e?.MakingAmount + e?.SettingAmount) /
-                                    json0Data?.CurrencyExchRate,
-                                  2
-                                )}
+
+                                {/* {console.log("TCL:e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost ", e?.MakingAmount , e?.TotalCsSetcost , e?.TotalDiaSetcost)} */}
+                                {
+                                  ((e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost) === 0 ? <div>&nbsp;</div> : (e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost + e?.totals?.finding?.SettingAmount) !== 0 && NumberWithCommas(((e?.MakingAmount + e?.TotalCsSetcost + e?.TotalDiaSetcost + e?.totals?.finding?.SettingAmount) / (data?.header?.CurrencyExchRate)), 2))
+                                }
                               </p>
                             </div>
                           </div>
                         </div>
+
+                        {/* Other — per-job total */}
                         <div
                           className={` lightGrey ${style?.other} border-end d-flex flex-wrap`}
                         >
@@ -1278,10 +1260,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               <p
                                 className={`w-100 border-top fw-bold  fw-bold`}
                               >
-                                {NumberWithCommas(
-                                  e?.otherTotals / json0Data?.CurrencyExchRate,
-                                  2
-                                )}
+                                {otherTotal !== 0 ? NumberWithCommas(otherTotal, 2) : <span>&nbsp;</span>}
                               </p>
                             </div>
                           </div>
@@ -1293,7 +1272,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className={`text-end w-100`}>
                               <p className={`w-100 border-top  fw-bold`}>
                                 {NumberWithCommas(
-                                  e?.UnitCost / json0Data?.CurrencyExchRate,
+                                  e?.UnitCost / data?.header?.CurrencyExchRate,
                                   2
                                 )}
                               </p>
@@ -1302,7 +1281,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         </div>
                       </div>
                     </div>
-                    
+
 
                     {/* Per Job Discount Row */}
                     {e?.DiscountAmt !== 0 && (
@@ -1423,7 +1402,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           >
                             <p className={` fw-bold`}>
                               {NumberWithCommas(
-                                e?.DiscountAmt / json0Data?.CurrencyExchRate,
+                                e?.DiscountAmt / data?.header?.CurrencyExchRate,
                                 2
                               )}
                             </p>
@@ -1438,7 +1417,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <p>
                                   {NumberWithCommas(
                                     e?.TotalAmount /
-                                      json0Data?.CurrencyExchRate,
+                                    data?.header?.CurrencyExchRate,
                                     2
                                   )}
                                 </p>
@@ -1476,14 +1455,14 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       className={`col-2 text-end border-end d-flex align-items-center justify-content-end`}
                     >
                       <p className="">
-                        {NumberWithCommas(total?.diamondTotal?.Wt, 2)}
+                        {NumberWithCommas(data?.mainTotal?.diamonds?.Wt, 2)}
                       </p>
                     </div>
                     <div
                       className={`col-2 text-end border-end d-flex align-items-center justify-content-end`}
                     >
                       <p className="">
-                        {NumberWithCommas(total?.diamondTotal?.Pcs, 0)}
+                        {NumberWithCommas(data?.mainTotal?.diamonds?.Pcs, 0)}
                       </p>
                     </div>
                     <div className={`col-2 text-end border-end`}>
@@ -1494,8 +1473,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     >
                       <p className="">
                         {NumberWithCommas(
-                          total?.diamondTotal?.Amount /
-                            json0Data?.CurrencyExchRate,
+                          data?.mainTotal?.diamonds?.Amount /
+                          data?.header?.CurrencyExchRate,
                           2
                         )}
                       </p>
@@ -1512,12 +1491,12 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <div
                       className={`${style?.wid_20} text-end border-end d-flex align-items-center justify-content-end`}
                     >
-                      <p>{NumberWithCommas(total?.metalTotal?.grossWt, 3)}</p>
+                      <p>{NumberWithCommas(data?.mainTotal?.grosswt, 3)}</p>
                     </div>
                     <div
                       className={`${style?.wid_20} text-end border-end d-flex align-items-center justify-content-end`}
                     >
-                      <p>{NumberWithCommas(total?.netWtLoss, 3)}</p>
+                      <p>{NumberWithCommas(data?.mainTotal?.metal?.Weight + data?.mainTotal?.finding?.Wt, 3)}</p>
                     </div>
                     <div className={`${style?.wid_20} text-end border-end`}>
                       <p></p>
@@ -1527,7 +1506,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     >
                       <p>
                         {NumberWithCommas(
-                          total?.metalAmount / json0Data?.CurrencyExchRate,
+                          data?.mainTotal?.metal?.Amount + (data?.mainTotal?.finding?.Amount) / data?.header?.CurrencyExchRate,
                           2
                         )}
                       </p>
@@ -1544,12 +1523,12 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     <div
                       className={`${style?.wid_20} text-end border-end d-flex align-items-center justify-content-end`}
                     >
-                      <p>{NumberWithCommas(total?.colorStone?.Wt, 2)}</p>
+                      <p>{NumberWithCommas(data?.mainTotal?.colorstone?.Wt, 2)}</p>
                     </div>
                     <div
                       className={`${style?.wid_20} text-end border-end d-flex align-items-center justify-content-end`}
                     >
-                      <p>{NumberWithCommas(total?.colorStone?.Pcs, 0)}</p>
+                      <p>{NumberWithCommas(data?.mainTotal?.colorstone?.Pcs, 0)}</p>
                     </div>
                     <div
                       className={`${style?.wid_20} text-end border-end d-flex align-items-center justify-content-end`}
@@ -1561,8 +1540,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     >
                       <p>
                         {NumberWithCommas(
-                          total?.colorStone?.Amount /
-                            json0Data?.CurrencyExchRate,
+                          data?.mainTotal?.colorstone?.Amount /
+                          data?.header?.CurrencyExchRate,
                           2
                         )}
                       </p>
@@ -1582,13 +1561,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       className={`${style?.pad_1} col-6 text-end d-flex align-items-center justify-content-end`}
                     >
                       <p>
-                        {NumberWithCommas(
-                          (total?.MakingAmount +
-                            total?.DiaSettignAmount +
-                            total?.clrStoneSettignAmount) /
-                            json0Data?.CurrencyExchRate,
-                          2
-                        )}
+                        {NumberWithCommas(totalLabourAll, 2)}
                       </p>
                     </div>
                   </div>
@@ -1604,10 +1577,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       className={`${style?.pad_1} col-6 text-end d-flex align-items-center justify-content-end`}
                     >
                       <p>
-                        {NumberWithCommas(
-                          total?.otherAmount / json0Data?.CurrencyExchRate,
-                          2
-                        )}
+                        {NumberWithCommas(totalOtherAll, 2)}
                       </p>
                     </div>
                   </div>
@@ -1620,10 +1590,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       className={`${style?.pad_1} text-end w-100 d-flex align-items-center justify-content-end`}
                     >
                       <p>
-                        {NumberWithCommas(
-                          total?.TotalAmount / json0Data?.CurrencyExchRate,
-                          2
-                        )}
+                        {NumberWithCommas(totalPriceAll, 2)}
                       </p>
                     </div>
                   </div>
@@ -1644,8 +1611,8 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                     </p>
                   );
                 })}
-                {json0Data?.AddLess !== 0 && (
-                  <p className="">{json0Data?.AddLess > 0 ? "Add" : "Less"}</p>
+                {data?.header?.AddLess !== 0 && (
+                  <p className="">{data?.header?.AddLess > 0 ? "Add" : "Less"}</p>
                 )}
                 <p className="">Grand Total </p>
               </div>
@@ -1656,7 +1623,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   <div className={`${style?.pad_1} text-end w-100`}>
                     <p>
                       {NumberWithCommas(
-                        total?.DiscountAmt / json0Data?.CurrencyExchRate,
+                        total?.DiscountAmt / data?.header?.CurrencyExchRate,
                         2
                       )}
                     </p>
@@ -1664,16 +1631,16 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       return (
                         <p className="" key={i}>
                           {NumberWithCommas(
-                            +e?.amount / json0Data?.CurrencyExchRate,
+                            +e?.amount / data?.header?.CurrencyExchRate,
                             2
                           )}
                         </p>
                       );
                     })}
-                    {json0Data?.AddLess !== 0 && (
+                    {data?.header?.AddLess !== 0 && (
                       <p className="">
                         {NumberWithCommas(
-                          json0Data?.AddLess / json0Data?.CurrencyExchRate,
+                          data?.header?.AddLess / data?.header?.CurrencyExchRate,
                           2
                         )}
                       </p>

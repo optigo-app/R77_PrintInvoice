@@ -64,39 +64,85 @@ export const apiCall = async (token, invoiceNo, printName, urls, evn, ApiVer) =>
 };
 
 export  function mergeFindings(data) {
-    const map = new Map();
+  const map = new Map();
+  
+  console.log("TCL: mergeFindings -> data", data)
 
-    data.forEach((item) => {
-      const key = [
-        item.Supplier,
-        item.Rate,
-        item.ShapeName,
-        item.Colorname,
-        item.QualityName,
-        item.FindingAccessories,
-        item.FindingTypename,
-      ].join("|");
+  data.forEach((item) => {
+    const key = [
+      item.Supplier,
+      item.Rate,
+      item.ShapeName,
+      item.Colorname,
+      item.QualityName,
+      item.FindingAccessories,
+      item.FindingTypename,
+    ].join("|");
 
-      if (map.has(key)) {
-        const existing = map.get(key);
+    if (map.has(key)) {
+      const existing = map.get(key);
 
-        existing.Pcs += Number(item.Pcs || 0);
-        existing.Wt += Number(item.Wt || 0);
-        existing.FineWt += Number(item.FineWt || 0);
-        existing.Amount += Number(item.Amount || 0);
-      } else {
-        map.set(key, {
-          ...item,
-          Pcs: Number(item.Pcs || 0),
-          Wt: Number(item.Wt || 0),
-          FineWt: Number(item.FineWt || 0),
-          Amount: Number(item.Amount || 0),
-        });
-      }
-    });
+      existing.Pcs += Number(item.Pcs || 0);
+      existing.Wt += Number(item.Wt || 0);
+      existing.Weight += Number(item.Weight || 0);
 
-    return [...map.values()];
-  }
+      existing.FineWt += Number(item.FineWt || 0);
+      existing.Amount += Number(item.Amount || 0);
+    } else {
+      map.set(key, {
+        ...item,
+        Pcs: Number(item.Pcs || 0),
+        Wt: Number(item.Wt || 0),
+        Weight: Number(item.Weight || 0),
+        FineWt: Number(item.FineWt || 0),
+        Amount: Number(item.Amount || 0),
+      });
+    }
+  });
+
+  return [...map.values()];
+}
+
+// export function mergeMetals(data) {
+//   const normalize = (v) =>
+//     String(v ?? "").trim().toLowerCase();
+
+//   const map = new Map();
+
+//   data.forEach((item) => {
+//     const key = [
+//       normalize(item.ShapeName),
+//       normalize(item.QualityName),
+//       // normalize(item.Colorname),
+//       normalize(item.Supplier),
+//       Number(item.Rate || 0),
+//       Number(item.IsPrimaryMetal || 0),
+//     ].join("|");
+    
+ 
+
+//     if (map.has(key)) {
+//       const existing = map.get(key);
+
+//       existing.Pcs += Number(item.Pcs || 0);
+//       existing.Wt += Number(item.Wt || 0);
+//       existing.FineWt += Number(item.FineWt || 0);
+//       existing.Amount += Number(item.Amount || 0);
+//     } else {
+//       map.set(key, {
+//         ...item,
+//         Pcs: Number(item.Pcs || 0),
+//         Wt: Number(item.Wt || 0),
+//         FineWt: Number(item.FineWt || 0),
+//         Amount: Number(item.Amount || 0),
+//       });
+//     }
+//   });
+
+//   return [...map.values()].sort(
+//     (a, b) => Number(b.IsPrimaryMetal) - Number(a.IsPrimaryMetal)
+//   );
+// }
 
 export function mergeMetals(data) {
   const normalize = (v) =>
@@ -105,31 +151,37 @@ export function mergeMetals(data) {
   const map = new Map();
 
   data.forEach((item) => {
+    // Removed IsPrimaryMetal from the map key
     const key = [
       normalize(item.ShapeName),
       normalize(item.QualityName),
-      normalize(item.Colorname),
+      // normalize(item.Colorname),
       normalize(item.Supplier),
       Number(item.Rate || 0),
-      Number(item.IsPrimaryMetal || 0),
     ].join("|");
-    
- 
+
+    const currentIsPrimary = Number(item.IsPrimaryMetal || 0);
 
     if (map.has(key)) {
       const existing = map.get(key);
 
       existing.Pcs += Number(item.Pcs || 0);
-      existing.Wt += Number(item.Wt || 0);
+      existing.Weight += Number(item.Weight || 0);
       existing.FineWt += Number(item.FineWt || 0);
       existing.Amount += Number(item.Amount || 0);
+
+      // If any aggregated record is a primary metal (1), mark the merged object as 1
+      if (currentIsPrimary === 1) {
+        existing.IsPrimaryMetal = 1;
+      }
     } else {
       map.set(key, {
         ...item,
         Pcs: Number(item.Pcs || 0),
-        Wt: Number(item.Wt || 0),
+        Weight: Number(item.Weight || 0),
         FineWt: Number(item.FineWt || 0),
         Amount: Number(item.Amount || 0),
+        IsPrimaryMetal: currentIsPrimary === 1 ? 1 : 0,
       });
     }
   });
@@ -138,6 +190,50 @@ export function mergeMetals(data) {
     (a, b) => Number(b.IsPrimaryMetal) - Number(a.IsPrimaryMetal)
   );
 }
+
+export const mergeFindingsIntoPrimaryMetal = (findings = [], metals = [], matchSupplier = true) => {
+  let remainingFindings = [...findings];
+
+  const updatedMetals = metals.map((metal) => {
+    if (metal.IsPrimaryMetal !== 1) return metal;
+
+    const matched = remainingFindings.filter(
+      (f) =>
+        f?.ShapeName?.toLowerCase() === metal?.ShapeName?.toLowerCase() &&
+        f?.QualityName === metal?.QualityName &&
+        f?.Rate === metal?.Rate &&
+        (!matchSupplier || f?.Supplier === metal?.Supplier)
+    );
+
+    if (matched.length === 0) return metal;
+
+    remainingFindings = remainingFindings.filter((f) => !matched.includes(f));
+
+    const totals = matched.reduce(
+      (acc, f) => ({
+        Pcs: acc.Pcs + (f.Pcs || 0),
+        Wt: acc.Wt + (f.Wt || 0),
+        FineWt: acc.FineWt + (f.FineWt || 0),
+        Amount: acc.Amount + (f.Amount || 0),
+        RMwt: acc.RMwt + (f.RMwt || 0),
+        Weight: acc.Weight + (f.Wt || 0),   // changed from f.Weight
+      }),
+      { Pcs: 0, Wt: 0, FineWt: 0, Amount: 0, RMwt: 0, Weight: 0 }
+    );
+
+    return {
+      ...metal,
+      Pcs: (metal.Pcs || 0) + totals.Pcs,
+      Wt: (metal.Wt || 0) + totals.Wt,
+      FineWt: (metal.FineWt || 0) + totals.FineWt,
+      Amount: (metal.Amount || 0) + totals.Amount,
+      RMwt: (metal.RMwt || 0) + totals.RMwt,
+      Weight: (metal.Weight || 0) + totals.Weight,
+    };
+  });
+
+  return { findings: remainingFindings, metals: updatedMetals };
+};
 
 export const mergedBySeetingRate = (data) => Object.values(
   data.reduce((acc, item) => {
