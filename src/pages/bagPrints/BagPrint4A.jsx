@@ -10,6 +10,7 @@ import { handleImageError } from "../../GlobalFunctions/HandleImageError";
 import { organizeData } from "../../GlobalFunctions/OrganizeBagPrintData";
 import { checkInstruction, fixedValues } from "../../GlobalFunctions";
 import { GetUniquejob } from "../../GlobalFunctions/GetUniqueJob";
+import { flex } from "@mui/system";
 
 const BagPrint4A = ({ queries, headers }) => {
   const [data, setData] = useState([]);
@@ -17,6 +18,7 @@ const BagPrint4A = ({ queries, headers }) => {
   const location = useLocation();
   const queryParams = queryString.parse(location.search);
   const resultString = GetUniquejob(queryParams?.str_srjobno);
+  const [quoteflag, setQuoteflag] = useState('');
   useEffect(() => {
     if (Object.keys(queryParams)?.length !== 0) {
       atob(queryParams?.imagepath);
@@ -227,12 +229,39 @@ const BagPrint4A = ({ queries, headers }) => {
     }
   }, [data]);
 
+  const handleQuotationCheckbox = () => {
+    if (quoteflag) {
+      setQuoteflag(false);
+    } else {
+      setQuoteflag(true);
+    }
+  };
+  
+  console.log("TCL: BagPrint4A -> data", data)
   return (
     <>
       {data?.length === 0 ? (
         <Loader />
       ) : (
         <>
+          <div style={{display:'flex',justifyContent:"flex-end",alignItems:"center"}} className="d-none-print">
+          <div>
+            <input
+              type="checkbox"
+              id="DIaType"
+              className="mx-1"
+              checked={quoteflag}
+              onChange={handleQuotationCheckbox}
+            />
+            <label
+              htmlFor="DIaType"
+              className="me-3 user-select-none"
+              style={{fontSize:"12px"}}
+            >
+              Quotation No.
+            </label>
+          </div>
+          
           <div className="print_btn ">
             <button
               className="btn_white blue print_btn"
@@ -240,6 +269,9 @@ const BagPrint4A = ({ queries, headers }) => {
             >
               Print
             </button>
+          </div>
+
+         
           </div>
           <section className="print4A pad_60_allPrint">
             {Array.from(
@@ -411,6 +443,8 @@ const BagPrint4A = ({ queries, headers }) => {
                                             </React.Fragment>
                                           ) : (
                                             <React.Fragment>
+                                              
+                                               
 
                                               {
                                                 (elem?.Shapename === "METAL DETAIL" || elem?.Shapename === "DIAMOND DETAIL" || elem?.Shapename === "COLORSTONE DETAIL" || elem?.Shapename === "MISC DETAIL" || elem?.Shapename === "FINDING DETAIL")
@@ -419,6 +453,13 @@ const BagPrint4A = ({ queries, headers }) => {
                                                     <div
                                                       className="record_line_4A border_bottom4A"
                                                     >
+                                                      {elem?.Shapename === "METAL DETAIL"&&  quoteflag && (
+                                                        <div className="quotationNo">
+                                                          {e?.data?.Quotation_SKUNo}
+                                                        </div>
+
+                                                      )}
+
                                                       <div className="code4A border_right4A code4A_text w-100 fw-bold d-flex justify-content-center align-items-center" style={{ height: "17px" }}>
                                                         {elem?.Shapename}
                                                       </div>
@@ -839,7 +880,7 @@ const BagPrint4A = ({ queries, headers }) => {
                                       ` ${e?.data?.stamping
                                         ? e.data.stamping.slice(
                                           0,
-                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ?100 : 100
+                                          e?.data?.IsDiamondWt && e?.data?.IsDiamondPcs ? 100 : 100
                                         )
                                         : e?.data?.Ustamping?.slice(
                                           0,

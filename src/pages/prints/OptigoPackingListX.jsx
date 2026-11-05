@@ -45,6 +45,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     const [json2data, setJson2data] = useState([]);
     const [metalType, setMetaltype] = useState([]);
     const [discountflag, setDiscountflag] = useState(false);
+    const [sizeFlag, setSizeFlag] = useState(true);
 
     useEffect(() => {
         const sendData = async () => {
@@ -689,6 +690,12 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             setDiscountflag(true);
         }
     };
+    const handleSizeFlag = () => {
+        if (sizeFlag) setSizeFlag(false);
+        else {
+            setSizeFlag(true);
+        }
+    };
 
     const handleImageErrors = () => {
         setIsImageWorking(false);
@@ -762,7 +769,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                 const Rate = currentItem.Rate || 0;
 
 
-                const key = [shapeName, QualityName, ColorName, SizeName, Rate, isRateOnPcs]
+                const key = [shapeName, QualityName, ColorName, sizeFlag? SizeName : "", Rate, isRateOnPcs]
                     .filter(Boolean)
                     .join("_");
                 // const key = currentItem.ShapeName;
@@ -804,7 +811,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             const isSolGem = String(current.IsSolGem ?? "0");
             const typename = String(current?.MaterialTypeName || "").toLowerCase();
 
-            const key = [shapeName, QualityName, ColorName, SizeName, Rate, isSolGem, typename, isRateOnPcs]
+            const key = [shapeName, QualityName, ColorName, sizeFlag? SizeName : "", Rate, isSolGem, typename, isRateOnPcs]
                 .filter(Boolean)
                 .join("_");
 
@@ -878,7 +885,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
             .reduce((acc, item) => {
                 const shape = item.ShapeName;
                 const size = parseFloat(item.SizeName) || 0;
-                const purewt = (item.Weight * size) / 100;
+                const purewt = Number(((item.Weight * size) / 100).toFixed(3));
 
                 if (!acc[shape]) {
                     acc[shape] = {
@@ -973,6 +980,18 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                     <div className="container_pcls" >
                         {/* print btn and flag */}
                         <div className=" d-flex align-items-center justify-content-end my-5 whole_none_pcl3">
+                        <div className="px-2">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSizeFlag}
+                                    value={sizeFlag}
+                                    checked={sizeFlag}
+                                    id="sizeFlag"
+                                />
+                                <label htmlFor="sizeFlag" className="user-select-none mx-1">
+                                    Size
+                                </label>
+                            </div>
                             <div className="px-2">
                                 <input
                                     type="checkbox"
@@ -1239,9 +1258,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         <div className="dcol1_pcls centerall_pcls bright_pcls">
                                             Code
                                         </div>
+
+                                        {sizeFlag&&(
+
                                         <div className="dcol3_5_pcls centerall_pcls bright_pcls">
                                             Size
                                         </div>
+                                        )}
 
                                         <div className="dcol3_pcls centerall_pcls bright_pcls">
                                             Pcs
@@ -1291,9 +1314,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                         <div className="dcol1_pcls centerall_pcls bright_pcls">
                                             Code
                                         </div>
-                                        <div className="dcol3_5_pcls centerall_pcls bright_pcls">
+                                        {sizeFlag &&(
+                                            <div className="dcol3_5_pcls centerall_pcls bright_pcls">
                                             Size
                                         </div>
+
+                                        )}
+                                        
 
                                         <div className="dcol3_pcls centerall_pcls bright_pcls">
                                             Pcs
@@ -1366,10 +1393,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                 const labourTotal = labourRows.reduce((sum, row) => sum + (row.amount || 0), 0);
 
                                 console.log("TCL: labourTotal", labourTotal)
-                                // const labourTotal = e?.GroupJob !== ""
-                                // ? (result?.labour?.filter((el) => el?.GroupjobNo === e?.GroupJob)
-                                //   ?.reduce((sum, item) => sum + (item.MakingCharge || 0), 0) || 0)
-                                // : 0;
+
 
                                 const extraCharge =
                                     (e?.OtherCharges || 0) +
@@ -1564,10 +1588,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                     {el?.MaterialTypeName?.slice(0, 3)} {el?.Shape_Code}  {el?.Quality_Code} {el?.Color_Code}
                                                                 </div>
 
+                                                            {sizeFlag &&(
 
                                                                 <div className="dcol3_5_pcls end_pcls pdr_pcls" style={{ justifyContent: "center" }}>
                                                                     {el?.SizeName === "Custom" ? "C:" + el?.CustomSize : el?.SizeName}
                                                                 </div>
+                                                            )}
+
 
 
 
@@ -1659,7 +1686,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                     <div className="mcol3_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
                                                                         {el?.IsPrimaryMetal == 1
                                                                             ? (
-                                                                                el?.Weight
+                                                                                el?.Weight - e?.LossWt - (evn == "RkcgUHVyY2hhc2U=" ? e?.totals?.finding?.Wt : 0) - (evn == "RkcgUHVyY2hhc2U=" ? e?.totals?.metal?.IsNotPrimaryMetalWt : 0)
                                                                             )?.toFixed(3)
                                                                             : (el?.Weight)?.toFixed(3)}
                                                                     </div>
@@ -1672,9 +1699,9 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                                     {el?.IsPrimaryMetal == 1 ? e?.LossPer + "%" : ""} <br />
                                                                                     {el?.IsPrimaryMetal == 1 ? e?.LossWt?.toFixed(3) : ""}
                                                                                 </>
-                                                                            )} */}
+                                                                            )} Number(((el.Weight * size) / 100).toFixed(3)); */}
                                                                             {(
-                                                                                (Number(el?.Weight || 0) * Number(el?.SizeName || 0)) / 100
+                                                                                 Number(((el.Weight * el?.SizeName) / 100).toFixed(3))
                                                                             ).toFixed(3)}
 
 
@@ -1733,10 +1760,16 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                                 justifyContent: "flex-end",
                                                                             }}
                                                                         >
-
+                                                                             {(
+                                                                                 Number(((data.Weight * data?.SizeName) / 100).toFixed(3))
+                                                                            ).toFixed(3)}
 
                                                                         </div>
                                                                     )}
+                                                                    <div className="mcol4_pcls end_pcls pdr_pcls" style={{ width: metalLossFlag ? "20%" : "25%" }}>
+
+
+                                                                    </div>
                                                                     <div
                                                                         style={{
                                                                             width: metalLossFlag ? "20%" : "25%",
@@ -1864,9 +1897,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                                     {el?.IsSolGem === 1 ? "G:" : ""}
                                                                     {el?.ShapeName}
                                                                 </div>
-                                                                <div className="dcol3_5_pcls end_pcls pdr_pcls" style={{ justifyContent: "center" }}>
-                                                                    {el?.SizeName === "Custom" ? "C:" + el?.CustomSize : el?.SizeName}
-                                                                </div>
+
+                                                                {sizeFlag &&(
+                                                                     <div className="dcol3_5_pcls end_pcls pdr_pcls" style={{ justifyContent: "center" }}>
+                                                                     {el?.SizeName === "Custom" ? "C:" + el?.CustomSize : el?.SizeName}
+                                                                 </div>
+
+                                                                )}
+                                                               
 
                                                                 <div className="dcol3_pcls end_pcls pdr_pcls">
                                                                     {el?.Pcs}
@@ -2545,6 +2583,12 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                                 {/* <p className="px-1"> {fixedValues(result?.mainTotal?.metal?.IsPrimaryMetalWt, 3)} gm</p> */}
                                                 <p className="px-1"> {fixedValues(result?.mainTotal?.NetWt, 3)} gm</p>
 
+                                            </div>
+                                            <div className="d-flex justify-content-between px-1">
+                                                <div className="fw-bold px-1">LOSSS WT</div>
+                                                <div className="px-1">
+                                                    {result?.mainTotal?.LossWt?.toFixed(3)} gm
+                                                </div>
                                             </div>
                                             <div className="d-flex justify-content-between">
                                                 <p className="fw-bold px-1">DIAMOND WT</p>

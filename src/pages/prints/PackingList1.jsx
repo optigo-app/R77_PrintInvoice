@@ -527,12 +527,12 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                       Diamond
                     </p>
                     <div className="d-flex w-100 border-top">
-                      <p className={`col-2 text-center border-end `}>Shape</p>
-                      <p className={`col-2  border-end text-center `}>Size</p>
-                      <p className={`col-2  border-end text-center `}>Wt</p>
-                      <p className={`col-2  border-end text-center `}>Pcs</p>
-                      <p className={`col-2  border-end text-center `}>Rate</p>
-                      <p className={`col-2 text-center`}>Amount</p>
+                      <p className={`${style?.dia_shape} text-center border-end `}>Shape</p>
+                      <p className={`${style?.dia_size}  border-end text-center `}>Size</p>
+                      <p className={`${style?.dia_wt}  border-end text-center `}>Wt</p>
+                      <p className={`${style?.dia_pcs}  border-end text-center `}>Pcs</p>
+                      <p className={`${style?.dia_rate}  border-end text-center `}>Rate</p>
+                      <p className={`${style?.dia_amt} text-center`}>Amount</p>
                     </div>
                   </div>
                 </div>
@@ -692,7 +692,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                         >
                           <div className="d-flex w-100 ">
                             <div
-                              className={`col-2 border-end pb-3 position-relative h-100`}
+                              className={`${style?.dia_shape} border-end pb-3 position-relative h-100`}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -703,7 +703,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                             <div
-                              className={`col-2 border-end pb-3 position-relative h-100`}
+                              className={`${style?.dia_size} border-end pb-3 position-relative h-100`}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -717,7 +717,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                             <div
-                              className={`col-2 text-end border-end pb-3 position-relative h-100`}
+                              className={`${style?.dia_wt} text-end border-end pb-3 position-relative h-100`}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -728,7 +728,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                             <div
-                              className={`col-2 text-end border-end pb-3 position-relative h-100 `}
+                              className={`${style?.dia_pcs} text-end border-end pb-3 position-relative h-100 `}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -739,7 +739,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                             <div
-                              className={`col-2 text-end border-end pb-3 position-relative h-100`}
+                              className={`${style?.dia_rate} text-end border-end pb-3 position-relative h-100`}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -750,7 +750,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                               })}
                             </div>
                             <div
-                              className={`col-2 text-end pb-3 position-relative h-100`}
+                              className={`${style?.dia_amt} text-end pb-3 position-relative h-100`}
                             >
                               {e?.diamonds.map((el, indd) => {
                                 return (
@@ -1098,13 +1098,13 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                           className={` lightGrey ${style?.diamond} border-end d-flex flex-wrap`}
                         >
                           <div className="d-flex w-100 ">
-                            <div className={`col-2 border-end `}>
+                            <div className={`${style?.dia_shape} border-end `}>
                               <p className={`w-100 border-top  fw-bold`}></p>
                             </div>
-                            <div className={`col-2 border-end `}>
+                            <div className={`${style?.dia_size} border-end `}>
                               <p className={`w-100 border-top  fw-bold`}></p>
                             </div>
-                            <div className={`col-2 text-end border-end `}>
+                            <div className={`${style?.dia_wt} text-end border-end `}>
                               <p className={`w-100 border-top  fw-bold`}>
                                 {e?.totals?.diamonds.Wt !== 0 &&
                                   NumberWithCommas(
@@ -1113,7 +1113,7 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                   )}
                               </p>
                             </div>
-                            <div className={`col-2 text-end border-end  `}>
+                            <div className={`${style?.dia_pcs} text-end border-end  `}>
                               <p className={`w-100 border-top  fw-bold`}>
                                 {e?.totals?.diamonds.Pcs !== 0 &&
                                   NumberWithCommas(
@@ -1122,10 +1122,10 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                   )}
                               </p>
                             </div>
-                            <div className={`col-2 text-end border-end `}>
+                            <div className={`${style?.dia_rate} text-end border-end `}>
                               <p className={`w-100 border-top  fw-bold`}></p>
                             </div>
-                            <div className={`col-2 text-end `}>
+                            <div className={`${style?.dia_amt} text-end `}>
                               <p className={`w-100 border-top  fw-bold`}>
                                 {e?.totals?.diamonds.Amount !== 0 &&
                                   NumberWithCommas(
@@ -1303,24 +1303,24 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             className={` ${style?.diamond} border-end d-flex flex-wrap lightGrey`}
                           >
                             <div className="d-flex w-100 ">
-                              <div className={`col-2  h-100`}>
+                              <div className={`${style?.dia_shape}  h-100`}>
                                 <p></p>
                               </div>
-                              <div className={`col-2  h-100`}>
+                              <div className={`${style?.dia_size}  h-100`}>
                                 <p></p>
                               </div>
-                              <div className={`col-2 text-end  h-100`}>
+                              <div className={`${style?.dia_wt} text-end  h-100`}>
                                 <p></p>
                               </div>
-                              <div className={`col-2 text-end  h-100 `}>
+                              <div className={`${style?.dia_pcs} text-end  h-100 `}>
                                 <p></p>
                               </div>
                               <div
-                                className={`col-2 text-end border-end  h-100`}
+                                className={`${style?.dia_rate} text-end border-end  h-100`}
                               >
                                 <p className={``}></p>
                               </div>
-                              <div className={`col-2 text-end  h-100`}>
+                              <div className={`${style?.dia_amt} text-end  h-100`}>
                                 <p className={` `}></p>
                               </div>
                             </div>
@@ -1445,31 +1445,31 @@ const PackingList1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   className={` fw-bold ${style?.diamond} border-end d-flex flex-wrap`}
                 >
                   <div className="d-flex w-100 ">
-                    <div className={`col-2 border-end`}>
+                    <div className={`${style?.dia_shape} border-end`}>
                       <p></p>
                     </div>
-                    <div className={`col-2 text-end border-end`}>
+                    <div className={`${style?.dia_size} text-end border-end`}>
                       <p></p>
                     </div>
                     <div
-                      className={`col-2 text-end border-end d-flex align-items-center justify-content-end`}
+                      className={`${style?.dia_wt} text-end border-end d-flex align-items-center justify-content-end`}
                     >
                       <p className="">
                         {NumberWithCommas(data?.mainTotal?.diamonds?.Wt, 2)}
                       </p>
                     </div>
                     <div
-                      className={`col-2 text-end border-end d-flex align-items-center justify-content-end`}
+                      className={`${style?.dia_pcs} text-end border-end d-flex align-items-center justify-content-end`}
                     >
                       <p className="">
                         {NumberWithCommas(data?.mainTotal?.diamonds?.Pcs, 0)}
                       </p>
                     </div>
-                    <div className={`col-2 text-end border-end`}>
+                    <div className={`${style?.dia_rate} text-end border-end`}>
                       <p></p>
                     </div>
                     <div
-                      className={`col-2 text-end d-flex align-items-center justify-content-end`}
+                      className={`${style?.dia_amt} text-end d-flex align-items-center justify-content-end`}
                     >
                       <p className="">
                         {NumberWithCommas(

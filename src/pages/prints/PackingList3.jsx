@@ -577,7 +577,6 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
   // console.log("diamondArr", diamondArr); 
 
  
-
   const MetalData = Object.values(
     json2Data
       ?.filter(item => item.MasterManagement_DiamondStoneTypeid === 4 || item.MasterManagement_DiamondStoneTypeid === 5)
@@ -970,7 +969,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
 
 
                   const { findings: finalFindings, metals: finalMetals } =
-                  mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals);
+                  mergeFindingsIntoPrimaryMetal(mergedFindings, mergedMetals,false);
 
                   
 
@@ -1040,6 +1039,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                           </span>
                         </div>
                       )}
+                       
                       {e?.Size !== "" && (
                         <div className="centerall_pcls w-100 text-break">
                           <span className="">Size : {e?.Size}</span>
@@ -1116,7 +1116,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             <div className="d-flex w-100" key={ind}>
                               <div className="dcol1_pcls spbrWord start_center_pcls pdl_pcls">
                               {el?.IsSolGem === 1 ? "S:" : ""}
-                                {el?.ShapeName + " " + el?.QualityName + " " + el?.Colorname}
+                                {el?.ShapeName + " " + el?.QualityName + " " + el?.Colorname} <br />({el?.LotNo})
                               </div>
 
                               <div className="dcol2_pcls start_center_pcls pdl_pcls">

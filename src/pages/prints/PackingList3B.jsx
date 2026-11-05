@@ -182,6 +182,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
     console.log("TCL:  datas.labour",  datas.labour)
 
     
+ 
 
     datas.header.PrintRemark = datas.header.PrintRemark?.replace(/<br\s*\/?>/gi, "");
 
@@ -825,6 +826,9 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
       }, {})
   );
 
+  
+  console.log("TCL: MetalData", MetalData)
+
 
   // const SolCertNo = (json2data || [])
   // .filter(x => x?.MasterManagement_DiamondStoneTypeid === 1)
@@ -1390,6 +1394,14 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                             </span>
                           </div>
                         )}
+                         {e?.MFG_DesignNo !== "" && (
+                          <div className="centerall_pcls w-100 text-break">
+                            MFG Design : {" "}
+                            <span className="fw-bold" style={{ marginLeft: "2px" }}>
+                              {e?.MFG_DesignNo}
+                            </span>
+                          </div>
+                        )}
                         {e?.lineid !== "" && (
                           <div className="centerall_pcls w-100 text-break">
                             line id : {" "}
@@ -1544,13 +1556,13 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                   <div className="mcol3_pcls end_pcls pdr_pcls">
                                     {el?.IsPrimaryMetal == 1
                                       ? (
-                                        el?.Weight - e?.LossWt
+                                        el?.Wt - (evn=="RkcgUHVyY2hhc2U="?0: e?.LossWt) - (evn=="RkcgUHVyY2hhc2U="? e?.totals?.finding?.Wt:0) -  (evn=="RkcgUHVyY2hhc2U="? e?.totals?.metal?.IsNotPrimaryMetalWt:0)
                                       )?.toFixed(3)
                                       : (el?.Wt)?.toFixed(3)}
                                   </div>
                                   <div className="mcol3_pcls end_pcls pdr_pcls">
                                     {(
-                                      (Number(el?.Weight || 0) * Number(el?.SizeName || 0)) / 100
+                                      (Number(el?.Weight - (evn=="RkcgUHVyY2hhc2U=" && el?.IsPrimaryMetal == 1? e?.totals?.finding?.Wt:0) || 0) * Number(el?.SizeName || 0)) / 100
                                     ).toFixed(3)}
                                   </div>
                                   <div className="mcol3_pcls end_pcls pdr_pcls">
@@ -1865,7 +1877,8 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                               //   </div>
                               // </div>
                               labourRows.map((row, idx) => (
-                                <div className="d-flex w-100" key={idx}>
+                                row.rate>0 &&(
+                                  <div className="d-flex w-100" key={idx}>
                                   <div className="lcol1_pcls start_center_pcls pdl_pcls">
                                     Labour
                                   </div>
@@ -1876,6 +1889,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                                     {formatAmount(row.amount / result?.header?.CurrencyExchRate, 2)}
                                   </div>
                                 </div>
+                                )
                               ))
                             )
                           )}
@@ -2027,16 +2041,18 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                       {/* Total Amount */}
                       <div className={duty ? "col7_pcls_duty   d-flex flex-column justify-content-between" : "col7_pcls   d-flex flex-column justify-content-between"}>
                         <div className="start_pcls pdr_pcls fw-bold">
+                          
+                          {console.log("TCL: e?.DiscountAmt",evn )}
                           {formatAmount(
                             // e?.TotalAmount / result?.header?.CurrencyExchRate
-                            (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                            (e?.UnitCost + e?.CustomDuty_Amount + (evn=="UXVvdGU="? e?.DiscountAmt:0)) / result?.header?.CurrencyExchRate
                           )}
                         </div>
                         <div className="start_pcls btop_pcls bg_pcls pdr_pcls fw-bold">
                           &nbsp;
                           {formatAmount(
                             // e?.TotalAmount / result?.header?.CurrencyExchRate
-                            (e?.UnitCost + e?.CustomDuty_Amount) / result?.header?.CurrencyExchRate
+                            (e?.UnitCost + e?.CustomDuty_Amount  + (evn=="UXVvdGU="? e?.DiscountAmt:0)) / result?.header?.CurrencyExchRate
                           )}
                         </div>
                       </div>
@@ -2081,7 +2097,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
                         )}
                         <div className={duty ? "col7_pcls_duty  end_pcls" : "col7_pcls end_pcls pdr_pcls"}>
                           {formatAmount(
-                            (e?.UnitCost + e?.CustomDuty_Amount -e?.DiscountAmt) /
+                            (e?.UnitCost + e?.CustomDuty_Amount -e?.DiscountAmt + (evn=="UXVvdGU="? e?.DiscountAmt:0)) /
                             result?.header?.CurrencyExchRate
                           )}
                         </div>
@@ -2669,7 +2685,7 @@ const PackingList3 = ({ token, invoiceNo, printName, urls, evn, ApiVer }) => {
         </p>
       )}
     </>
-  );
+  );  
 };
 
 export default PackingList3;

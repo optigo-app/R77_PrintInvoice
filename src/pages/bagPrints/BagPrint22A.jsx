@@ -176,9 +176,35 @@ export default function DiamondColourCodeForm({ queries, headers }) {
         return list.find(item => item.serialjobno === jobno) || null;
     }
 
+    // ---------- helpers for metal purity / color boxes ----------
+    // "18", "18K", "18KT", "18 kt" -> "18K" ; "P950" stays "P950"
+    const normalizePurity = (p) => {
+        const clean = (p || "").toString().trim().toUpperCase().replace(/\s+/g, "");
+        const m = clean.match(/^(\d{1,2})(K|KT)?$/);
+        return m ? `${m[1]}K` : clean;
+    };
+
+    // "Y" / "Yellow" -> "Y", "W" / "White" -> "W", "R" / "Rose" -> "R"
+    const normalizeColor = (c) => {
+        const clean = (c || "").toString().trim().toUpperCase();
+        if (clean.startsWith("Y")) return "Y";
+        if (clean.startsWith("W")) return "W";
+        if (clean.startsWith("R")) return "R";
+        return clean;
+    };
+
+    const getBgColor = (code) => {
+        const cleanCode = (code || "").toString().trim().toUpperCase();
+        if (cleanCode.startsWith("Y")) return "#ffff00";
+        if (cleanCode.startsWith("W")) return "#ffffff";
+        if (cleanCode.startsWith("R")) return "#b86b7b";
+        return "white";
+    };
+
 
     console.log("TCL: DiamondColourCodeForm -> rd3Data", rd3Data)
 
+    console.log("TCL: rd2Data", rd2Data)
     const RecastaJobNo = (job) => {
         return rd3Data?.find(item => item?.SerialJobno === job)?.recastjobno || "";
 
@@ -205,27 +231,68 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                         )
                                     ];
 
+                                    const uniqueRd2Data = Object.values(
+                                        rd2Data.reduce((acc, curr) => {
+                                            if (!acc[curr.serialjobno]) {
+                                                acc[curr.serialjobno] = { ...curr };
+                                            } else {
+                                                acc[curr.serialjobno].FinalWt = (acc[curr.serialjobno].FinalWt || 0) + (curr.FinalWt || 0);
+                                            }
+                                            return acc;
+                                        }, {})
+                                    );
+
                                     console.log(uniqueMaterialTypes);
-                                    console.log("TCL: DiamondColourCodeForm -> e", e)
+
                                     const metalColor = e?.data?.rd?.MetalType?.split("-")
 
                                     const colorCodeString = e?.data?.rd?.MetalColorCo || "";
+                                    const getBaseJobNo = (jobno) => {
+                                        if (!jobno) return jobno;
+                                        return jobno.replace(/S\d+$/i, '');
+                                    };
 
-                                    const activeColors = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.MetalColor?.split(/[-_]/).filter(Boolean);
+                                    const currentJobNo = e?.data?.rd?.serialjobno;
+                                    const isBaseJob = !/S\d+$/i.test(currentJobNo || '');
+                                    const currentBase = getBaseJobNo(currentJobNo);
 
-                                    const boxText = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.Metal_Type_Color?.split(" ")[1]
+                                    // Base job  -> whole family (base + S1 + S2 ...)
+                                    // Split job -> only its own row
+                                    const rd2RowsForThisCard = isBaseJob
+                                        ? uniqueRd2Data.filter(r => getBaseJobNo(r?.serialjobno) === currentBase)
+                                        : uniqueRd2Data.filter(r => r?.serialjobno === currentJobNo);
+                                    const rd2DataPurity = isBaseJob ? rd2RowsForThisCard : [];
 
                                     const MultimetalColor = getJobWiseMetalData(e?.data?.rd?.serialjobno)?.MetalColor || "";
 
-                                    const getBgColor = (code) => {
-                                        const cleanCode = code.trim().toUpperCase();
+                                    // One box per unique (purity + color). 18 / 18K / 18KT and Y / Yellow are treated as equal.
+                                    const karatBoxes = (() => {
+                                        const seen = new Set();
+                                        const boxes = [];
 
-                                        if (cleanCode.startsWith("Y")) return "#ffff00";
-                                        if (cleanCode.startsWith("W")) return "#ffffff";
-                                        if (cleanCode.startsWith("R")) return "#b86b7b";
+                                        (rd2RowsForThisCard || []).forEach((row) => {
+                                            // "PLATINUM P950 White" -> ["PLATINUM", "P950", "White"]
+                                            // "GOLD 18K YELLOW-WHITE" -> purity "18K", colors "YELLOW", "WHITE"
+                                            const parts = (row?.Metal_Type_Color || "").trim().split(/\s+/);
+                                            const rawPurity = parts[1] || "";
+                                            const colors = parts
+                                                .slice(2)
+                                                .join(" ")
+                                                .split(/[-_]/)
+                                                .map((c) => c.trim())
+                                                .filter(Boolean);
 
-                                        return 'white'; // Fallback gray
-                                    };
+                                            colors.forEach((color) => {
+                                                const key = `${normalizePurity(rawPurity)}|${normalizeColor(color)}`;
+                                                if (!seen.has(key)) {
+                                                    seen.add(key);
+                                                    boxes.push({ text: rawPurity, color: getBgColor(color), key });
+                                                }
+                                            });
+                                        });
+
+                                        return boxes;
+                                    })();
 
                                     const jobWiseMetalData = getJobWiseMetalData(e?.data?.rd?.serialjobno);
 
@@ -241,13 +308,13 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                     }
                                     if (rowChunks.length === 0) rowChunks.push([]);
 
-                                    // ---------- reusable dcf-wrapper card (unchanged styling/markup) ----------
+                                    // ---------- reusable dcf-wrapper card ----------
                                     const renderDcfWrapper = (chunkRows, cardKey, isFirstPageOfJob) => {
-                                        
-                                        
+
+
                                         const dummyCount = Math.max(
                                             0,
-                                            totalRowsWanted -  chunkRows.length
+                                            totalRowsWanted - chunkRows.length
                                         );
                                         const dummyRows = Array.from({ length: dummyCount });
 
@@ -299,13 +366,13 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="dcf-cell dcf-label">Bag No.</div>
                                                     <div className="dcf-cell dcf-value-red" style={{ fontSize: "12px", color: "red" }}> {rd3Data?.find(item => item?.serialjobno === e?.data?.rd?.serialjobno)?.recastjobno || e?.data?.rd?.serialjobno}</div>
 
-                                                    <div style={{ width: '50%', display: 'flex', justifyContent: "flex-end", gap: '2px' }}>
-                                                        {activeColors?.map((code, index) => (
+                                                    <div style={{ width: '49%', display: 'flex', justifyContent: "flex-end", gap: '0px' }}>
+                                                        {karatBoxes.map((box) => (
                                                             <div
-                                                                key={index}
+                                                                key={box.key}
                                                                 className="dcf-cell dcf-karat"
                                                                 style={{
-                                                                    backgroundColor: getBgColor(code),
+                                                                    backgroundColor: box.color,
                                                                     border: '1px solid #000',
                                                                     padding: '2px 8px',
                                                                     minWidth: '35px',
@@ -315,7 +382,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                                     justifyContent: 'center'
                                                                 }}
                                                             >
-                                                                {boxText}
+                                                                {box.text}
                                                             </div>
                                                         ))}
                                                     </div>
@@ -373,26 +440,6 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                     <div className="dcf-cell dcf-col-pcs dcf-header-cell">Pcs</div>
                                                     <div className="dcf-cell dcf-col-wt dcf-header-cell">Wt.</div>
                                                 </div>
-
-                                                {/* RD2 metal rows — now OUTSIDE chunkRows.map, so it renders even when chunkRows is empty */}
-                                                {/* { isFirstPageOfJob && uniqueRd2Data?.length > 0 && (
-                                                    uniqueRd2Data.map((rd2Item, rd2Index) => (
-                                                        <div className="dcf-row dcf-actual-issue-row" key={`rd2-${cardKey}-${rd2Index}`} style={{ height: "16px" }}>
-                                                            <div className="dcf-cell dcf-col-material lineHeight1" style={{ fontWeight: "400" }}>metal</div>
-                                                            <div className="dcf-cell dcf-col-rmtype lineHeight1" style={{ fontWeight: "400" }}></div>
-                                                            <div className="dcf-cell dcf-col-rmshape dcf-green-text lineHeight1" style={{ fontWeight: "400" }}>
-                                                                {rd2Item?.Metal_Type_Color}
-                                                            </div>
-                                                            <div className="dcf-cell dcf-col-pcs lineHeight1" style={{ fontWeight: "400" }}> </div>
-                                                            <div className="dcf-cell dcf-col-wt lineHeight1" style={{ fontWeight: "400" }}>{rd2Item?.FinalWt?.toFixed(2)}</div>
-                                                            <div className="dcf-cell dcf-col-pcs lineHeight1" style={{ fontWeight: "400" }}> </div>
-                                                            <div className="dcf-cell dcf-col-wt lineHeight1" style={{ fontWeight: "400" }}> </div>
-                                                        </div>
-                                                    ))
-                                                )} */}
-                                                {/* RD2 metal rows — matched by serialjobno, shown once on the first page of each job */}
-                                                {/* RD2 metal rows — base job shows whole family, split job shows only itself */}
-                                                 
 
                                                 {chunkRows.map((item, index) => (
                                                     <React.Fragment key={`chunk-${cardKey}-${index}`}>
@@ -465,49 +512,24 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                         );
                                     };
 
-                                    // ---------- reusable pcf-wrapper card (your ORIGINAL markup, unchanged, now real data) ----------
                                     // ---------- reusable pcf-wrapper card ----------
                                     const renderPcfWrapper = (cardKey) => {
 
-                                        const uniqueRd2Data = Object.values(
-                                            rd2Data.reduce((acc, curr) => {
-                                                if (!acc[curr.serialjobno]) {
-                                                    acc[curr.serialjobno] = { ...curr };
-                                                } else {
-                                                    acc[curr.serialjobno].FinalWt = (acc[curr.serialjobno].FinalWt || 0) + (curr.FinalWt || 0);
-                                                }
-                                                return acc;
-                                            }, {})
-                                        );
-
-                                        const getBaseJobNo = (jobno) => {
-                                            if (!jobno) return jobno;
-                                            return jobno.replace(/S\d+$/i, '');
-                                        };
-
-                                        const currentJobNo = e?.data?.rd?.serialjobno;
-                                        const isBaseJob = !/S\d+$/i.test(currentJobNo || '');
-                                        const currentBase = getBaseJobNo(currentJobNo);
-
-                                        const rd2RowsForThisCard = isBaseJob
-                                            ? uniqueRd2Data.filter(r => getBaseJobNo(r?.serialjobno) === currentBase)
-                                            : uniqueRd2Data.filter(r => r?.serialjobno === currentJobNo);
-
-                                        // Base (common) job  -> same rows as the DCF card (family rows, without the base total row)
+                                        // Base (common) job  -> family rows without the base total row
                                         // Split jobs S1/S2/S3 -> nothing, so it shows only on the common job
                                         const pcfMetalRows = isBaseJob ? rd2RowsForThisCard.slice(1) : [];
-                                        const rd2DataPurity = isBaseJob ? rd2RowsForThisCard : [];
-                                       
 
-                                        
-                                         
+                                        // Unique purities for "Stamping" (18 / 18K / 18KT count as one)
                                         const purityList = [
-                                            ...new Set(
-                                              rd2DataPurity
-                                                ?.map(item => item?.Metal_Type_Color?.split(" ")[1])
-                                                .filter(Boolean)
-                                            )
-                                          ];
+                                            ...new Map(
+                                                rd2DataPurity
+                                                    ?.map(item => item?.Metal_Type_Color?.split(" ")[1])
+                                                    .filter(Boolean)
+                                                    .map(p => [normalizePurity(p), p])
+                                                    .reverse()
+                                            ).values()
+                                        ].reverse();
+                                        console.log("TCL: renderPcfWrapper -> purityList", purityList)
 
                                         return (
                                             <div style={{ width: '50%' }} className="pcf-page" key={cardKey}>
@@ -628,12 +650,12 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                                     } />
                                                             </div>
                                                             <div className="pcf-karat-row" style={{ justifyContent: 'end' }}>
-                                                                {activeColors?.map((code, index) => (
+                                                                {karatBoxes.map((box) => (
                                                                     <div
-                                                                        key={index}
+                                                                        key={box.key}
                                                                         className="dcf-cell dcf-karat"
                                                                         style={{
-                                                                            backgroundColor: getBgColor(code),
+                                                                            backgroundColor: box.color,
                                                                             border: '1px solid #000',
                                                                             padding: '3px',
                                                                             flex: "0 0 33px",
@@ -642,7 +664,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                                             justifyContent: 'center'
                                                                         }}
                                                                     >
-                                                                        {boxText}
+                                                                        {box.text}
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -752,7 +774,7 @@ export default function DiamondColourCodeForm({ queries, headers }) {
                                                         <div className="pcf-cell pcf-col-wrkr"></div>
                                                         <div className="pcf-cell pcf-col-inwt"></div>
                                                         <div className="pcf-cell pcf-col-outwt"></div>
-                                                        <div className="pcf-cell pcf-col-scrap"></div>
+                                                        <div className="pcf-cell pcf-col-scrap">Mfg Design - {e?.data?.rd?.mfgdesign}</div>
                                                     </div>
 
                                                     <div className="pcf-row">

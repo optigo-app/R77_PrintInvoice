@@ -1145,6 +1145,7 @@ const PackingListExcel = ({ urls, token, invoiceNo, printName, evn, ApiVer }) =>
                                   e?.PO !== "" && `PO: ${e.PO}`,
                                   e?.lineid && `Line: ${e.lineid}`,
                                   e?.Tunch !== "" && `Tunch: ${e?.Tunch?.toFixed(3)}`,
+                                  e?.MFG_DesignNo !== "" && `MFG DesignNo: ${e?.MFG_DesignNo}`,
                                 ].filter(Boolean).join("  |  ")}
                                 <br />
 

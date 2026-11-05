@@ -1109,7 +1109,8 @@ const EstimatePrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       ?.reduce((acc, item) => {
         const shape = item.ShapeName;
         const size = parseFloat(item.SizeName) || 0;
-        const purewt = (item.Weight * size) / 100;
+        const purewt = Number(((item.Weight * size) / 100).toFixed(3));
+        // const purewt = item.FineWt || 0;
 
         if (!acc[shape]) {
           acc[shape] = {
@@ -1129,6 +1130,7 @@ const EstimatePrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
       }, {})
   );
 
+console.log("TCL: MetalData", MetalData)
   // Groups findings (without mixing different qualities / rates / suppliers)
   const groupFindings = (findings = []) => {
     const result = [];
@@ -1152,8 +1154,8 @@ const EstimatePrint = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     });
     return result;
   };
- 
 
+ 
 
 
   const displayRows = pendingFlag

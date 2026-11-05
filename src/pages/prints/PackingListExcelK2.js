@@ -104,6 +104,8 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             let maxDwt = 0;
             let diamondTotalWt = 0;
             let colorStoneTotalWt = 0;
+            let labGrownWt = 0;      // NEW
+            let naturalDiaWt = 0;    // NEW
             let QualityNameMax = "";
             let ColornameMax = "";
 
@@ -129,6 +131,13 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
 
                 diamondTotalWt += a?.Wt || 0;
 
+                // NEW: split by material type
+                if (a?.MaterialTypeName === "LabGrown") {
+                    labGrownWt += a?.Wt || 0;
+                } else {
+                    naturalDiaWt += a?.Wt || 0;
+                }
+
                 if (a?.Wt > maxDwt) {
                     maxDwt = a?.Wt;
                     QualityNameMax = a?.QualityName || "";
@@ -142,6 +151,8 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
 
             el.colorStoneTotalWt = colorStoneTotalWt;
             el.diamondTotalWt = diamondTotalWt;
+            el.labGrownWt = labGrownWt;        // NEW
+            el.naturalDiaWt = naturalDiaWt;    // NEW
             overallDiaWtSum += diamondTotalWt;
 
             dia.sort((a, b) => a?.QualityName?.localeCompare(b?.QualityName));
@@ -168,6 +179,8 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                     totalMetalpuritywt: el?.NetWt || el?.GrossWt || 0,
                     totalPcs: 1,
                     totalDiamondWt: el?.diamondTotalWt || 0,
+                    totalNaturalDiaWt: el?.naturalDiaWt || 0,     // NEW
+                    totalLabGrownDiaWt: el?.labGrownWt || 0,      // NEW
                     totalColorStoneWt: el?.colorStoneTotalWt || 0,
                     descriptionofGoods: `${el?.MetalPurity || ""} ${el?.MetalType || ""}`
                 });
@@ -175,6 +188,8 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                 metalPurityWiseData[findIndex].totalMetalpuritywt += el?.NetWt || el?.GrossWt || 0;
                 metalPurityWiseData[findIndex].totalPcs += 1;
                 metalPurityWiseData[findIndex].totalDiamondWt += el?.diamondTotalWt || 0;
+                metalPurityWiseData[findIndex].totalNaturalDiaWt += el?.naturalDiaWt || 0;     // NEW
+                metalPurityWiseData[findIndex].totalLabGrownDiaWt += el?.labGrownWt || 0;      // NEW
                 metalPurityWiseData[findIndex].totalColorStoneWt += el?.colorStoneTotalWt || 0;
             }
         });
@@ -421,11 +436,11 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={12} style={{ textTransform: 'upperCase' }}>Total Diamond Weight: {weightTotals.other?.toFixed(3)} CARATS</td>
+                                                    <td colSpan={12} style={{ textTransform: 'upperCase' }}>Total Diamond Weight: {item?.totalNaturalDiaWt?.toFixed(3)} CARATS</td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Lab Grown Diamond Weight: {weightTotals.labGrown?.toFixed(3)} CARATS</td>
+                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Lab Grown Diamond Weight: {item?.totalLabGrownDiaWt?.toFixed(3)} CARATS</td>
                                                 </tr>
                                                 <tr>
                                                     <td />

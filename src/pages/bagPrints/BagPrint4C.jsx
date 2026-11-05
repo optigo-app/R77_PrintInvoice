@@ -18,6 +18,7 @@ const BagPrint4C = ({ queries, headers }) => {
     const location = useLocation();
     const queryParams = queryString.parse(location.search);
     const resultString = GetUniquejob(queryParams?.str_srjobno);
+    const [quoteflag, setQuoteflag] = useState('');
     
     useEffect(() => {
         if (Object.keys(queryParams)?.length !== 0) {
@@ -142,6 +143,14 @@ const BagPrint4C = ({ queries, headers }) => {
             }, 5000);
         }
     }, [data]);
+
+    const handleQuotationCheckbox = () => {
+        if (quoteflag) {
+          setQuoteflag(false);
+        } else {
+          setQuoteflag(true);
+        }
+      };
     return (
         <>
             {data.length === 0 ? (
@@ -149,6 +158,22 @@ const BagPrint4C = ({ queries, headers }) => {
             ) : (
                 <>
                     <div className="print_btn pb-4">
+                    <div>
+            <input
+              type="checkbox"
+              id="DIaType"
+              className="mx-1"
+              checked={quoteflag}
+              onChange={handleQuotationCheckbox}
+            />
+            <label
+              htmlFor="DIaType"
+              className="me-3 user-select-none"
+              style={{fontSize:"12px"}}
+            >
+              Quotation No.
+            </label>
+          </div>
                         <button
                             className="btn_white blue print_btn"
                             onClick={(e) => handlePrint(e)}
@@ -270,7 +295,7 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                                         className="code4A border_right4A code4A_text"
                                                                                         // style={{ width: "124.45pt" }}
                                                                                     >
-                                                                                        <div className="code_4A_change  height_23_4A code4A_text height_11_Print4a">
+                                                                                        <div className="code_4A_change  height_23_4A code4A_text height_11_Print4a"  style={{lineHeight:"0.8",wordBreak:"break-word"}}>
                                                                                             {e?.data?.MetalType} {e?.data?.MetalColorCo}
                                                                                         </div>
                                                                                     </div>
@@ -378,7 +403,14 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                                             <div className="diamond_4A border_bottom4A diamond_text_4A dflex4Ak">
                                                                                                 {fixedValues(e?.data?.ActualGrossweight, 3)}
                                                                                             </div>
-                                                                                            <div className="diamond_custom_4BCC "></div>
+                                                                                            <div className="diamond_custom_4BCC "  style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+                                                                                            { quoteflag && (
+                                                        <div className="quotationNoBagPrint4C">
+                                                          {e?.data?.Quotation_SKUNo}
+                                                        </div>
+
+                                                      )}
+                                                                                            </div>
                                                                                         </div>
                                                                                     </div>
                                                                                     {/* <div className="barcode_img_4A barcode_img_4B"> */}
@@ -416,7 +448,7 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                 <div className="jobDiaGoldText4A lh_4C_new">
                                                                     {e?.data?.Designcode}
                                                                 </div>
-                                                                <div className="jobDiaGoldText4A lh_4C_new border_right4A pe-1 h-100 d-flex align-items-center" style={{ paddingRight: "2px" }}>
+                                                                <div className="jobDiaGoldText4A lh_4C_new border_right4A pe-1 h-100 d-flex align-items-center" style={{ paddingRight: "2px" ,lineHeight:0.8}}>
                                                                     {e?.data?.MetalType} {e?.data?.MetalColorCo}
                                                                 </div>
                                                             </div>
@@ -491,7 +523,7 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                     className="code4A border_right4A code4A_text"
                                                                     style={{ width: "95pt" }}
                                                                 >
-                                                                    <div className="code_4A_change height_23_4A code4A_text height_11_Print4a" style={{ width: "89.6pt" }}>
+                                                                    <div className="code_4A_change height_23_4A code4A_text height_11_Print4a" style={{ width: "89.6pt" ,lineHeight:"0.8",wordBreak:"break-word"}}>
                                                                         {e?.data?.MetalType} {e?.data?.MetalColorCo}
                                                                     </div>
                                                                 </div>
@@ -577,7 +609,11 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                             {e?.additional?.dia?.ActualPcs}/
                                                                             {e?.additional?.dia?.ActualWeight?.toFixed(3)}
                                                                         </div>
-                                                                        <div className="diamond_custom_4BCC border_bottom4A"></div>
+                                                                        <div className="diamond_custom_4BCC border_bottom4A" >
+                                                                       
+
+
+                                                                        </div>
                                                                     </div>
                                                                     {/* <div className="BARCODE_TEXT_4A border_right4A"> */}
                                                                     <div className="BARCODE_TEXT_4A ">
@@ -598,7 +634,14 @@ const BagPrint4C = ({ queries, headers }) => {
                                                                         <div className="diamond_4A border_bottom4A diamond_text_4A dflex4Ak">
                                                                             {fixedValues(e?.data?.ActualGrossweight, 3)}
                                                                         </div>
-                                                                        <div className="diamond_custom_4BCC "></div>
+                                                                        <div className="diamond_custom_4BCC " style={{display:"flex",justifyContent:"center",alignItems:"center"}}>
+                                                                        { quoteflag && (
+                                                        <div className="quotationNoBagPrint4C">
+                                                          {e?.data?.Quotation_SKUNo}
+                                                        </div>
+
+                                                      )}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 {/* <div className="barcode_img_4A barcode_img_4B"> */}
@@ -632,7 +675,7 @@ const BagPrint4C = ({ queries, headers }) => {
                                                         <div className="jobDiaGoldText4A lh_4C_new">
                                                             {e?.data?.Designcode}
                                                         </div>
-                                                        <div className="jobDiaGoldText4A lh_4C_new border_right4A pe-1 h-100 d-flex align-items-center">
+                                                        <div className="jobDiaGoldText4A lh_4C_new border_right4A pe-1 h-100 d-flex align-items-center"style={{ lineHeight:0.8 }} >
                                                             {e?.data?.MetalType} {e?.data?.MetalColorCo}
                                                         </div>
                                                     </div>

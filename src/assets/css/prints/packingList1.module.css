@@ -70,6 +70,24 @@ html {
     min-width: 20%;
 }
 
+/* ---------- Diamond sub-column widths (total = 100%) ---------- */
+.dia_shape,
+.dia_size,
+.dia_wt,
+.dia_pcs,
+.dia_rate,
+.dia_amt {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+}
+
+.dia_shape { width: 15%; min-width: 15%; }
+.dia_size  { width: 15%; min-width: 15%; }
+.dia_wt    { width: 18%; min-width: 18%; }  /* fits values like 100.101 */
+.dia_pcs   { width: 14%; min-width: 14%; }  /* reduced from 16.66% */
+.dia_rate  { width: 16%; min-width: 16%; }
+.dia_amt   { width: 22%; min-width: 22%; }  /* increased from 16.66% */
+
 .min_height{
     min-height: 18px;
     /* height: 15px; */

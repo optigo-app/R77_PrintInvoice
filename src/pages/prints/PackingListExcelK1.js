@@ -16,17 +16,15 @@ import {
 import { OrganizeDataPrint } from "../../GlobalFunctions/OrganizeDataPrint";
 import Loader from "../../components/Loader";
 import { ToWords } from "to-words";
-import ReactHTMLTableToExcel from 'react-html-table-to-excel';
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
 
 const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const toWords = new ToWords();
     const [result, setResult] = useState(null);
-    console.log("TCL: result", result)
     const [categoryNameWise, setCategoryNameWise] = useState([]);
     const [msg, setMsg] = useState("");
     const [loader, setLoader] = useState(true);
     const [documentDetail, setDocumentDetail] = useState([]);
-    const [weightTotals, setWeightTotals] = useState({ labGrown: 0, other: 0 });
 
     useEffect(() => {
         const sendData = async () => {
@@ -43,7 +41,6 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                     }
                 } else {
                     setLoader(false);
-                    // setMsg(data?.Message);
                     const err = checkMsg(data?.Message);
                     console.log(data?.Message);
                     setMsg(err);
@@ -66,35 +63,19 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             data?.BillPrint_Json2
         );
 
-        
-          
-        const totalsDiaWt = data?.BillPrint_Json2?.reduce((acc, item) => {
-            // Only process if StoneTypeid is 1
-            if (item?.MasterManagement_DiamondStoneTypeid === 1) {
-                if (item.MaterialTypeName === "LabGrown") {
-                    acc.labGrown += (item.Wt || 0);
-                } else {
-                    acc.other += (item.Wt || 0);
-                }
-            }
-            return acc; 
-        }, { labGrown: 0, other: 0 }) || { labGrown: 0, other: 0 };
-        
-        setWeightTotals(totalsDiaWt);
-
-        
- 
-
+        /* ---------- document details ---------- */
         const docsString = data?.BillPrint_Json[0]?.DocumentDetail;
         const docArr = docsString?.split("#@#");
-        const documentDetail = docArr?.map(doc => {
-            const [key, value] = doc.split("#-#");
-            return { key, value };
-        });
+        const documentDetail =
+            docArr?.map((doc) => {
+                const [key, value] = doc.split("#-#");
+                return { key, value };
+            }) || [];
         setDocumentDetail(documentDetail);
 
+        /* ---------- category wise ---------- */
         let cateWise = [];
-        datas?.resultArray?.forEach(e => {
+        datas?.resultArray?.forEach((e) => {
             let findRecord = cateWise?.findIndex((el) => el?.Categoryname === e?.Categoryname);
             if (findRecord === -1) {
                 cateWise.push(e);
@@ -103,6 +84,7 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             }
         });
 
+        /* ---------- per item diamond / colorstone calculations ---------- */
         let overallDiaWtSum = 0;
 
         datas?.resultArray?.forEach((el) => {
@@ -110,15 +92,18 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             let maxDwt = 0;
             let diamondTotalWt = 0;
             let colorStoneTotalWt = 0;
+            let labGrownWt = 0; // NEW: lab grown diamond weight of this item
+            let naturalDiaWt = 0; // NEW: natural diamond weight of this item
             let QualityNameMax = "";
             let ColornameMax = "";
 
             el?.diamonds?.forEach((a) => {
-                let findrecord = dia?.findIndex((ele) =>
-                    ele?.ShapeName === a?.ShapeName &&
-                    ele?.QualityName === a?.QualityName &&
-                    ele?.Colorname === a?.Colorname &&
-                    ele?.Rate === a?.Rate
+                let findrecord = dia?.findIndex(
+                    (ele) =>
+                        ele?.ShapeName === a?.ShapeName &&
+                        ele?.QualityName === a?.QualityName &&
+                        ele?.Colorname === a?.Colorname &&
+                        ele?.Rate === a?.Rate
                 );
 
                 if (findrecord === -1) {
@@ -135,6 +120,13 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
 
                 diamondTotalWt += a?.Wt || 0;
 
+                // NEW: split by material type (done on the raw row, before merging)
+                if (a?.MaterialTypeName === "LabGrown") {
+                    labGrownWt += a?.Wt || 0;
+                } else {
+                    naturalDiaWt += a?.Wt || 0;
+                }
+
                 if (a?.Wt > maxDwt) {
                     maxDwt = a?.Wt;
                     QualityNameMax = a?.QualityName || "";
@@ -148,6 +140,8 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
 
             el.colorStoneTotalWt = colorStoneTotalWt;
             el.diamondTotalWt = diamondTotalWt;
+            el.labGrownWt = labGrownWt; // NEW
+            el.naturalDiaWt = naturalDiaWt; // NEW
             overallDiaWtSum += diamondTotalWt;
 
             dia.sort((a, b) => a?.QualityName?.localeCompare(b?.QualityName));
@@ -162,11 +156,11 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             el.diaWtSum = overallDiaWtSum;
         });
 
-        // ✅ Grouping by MetalPurity
+        /* ---------- grouping by MetalPurity ---------- */
         let metalPurityWiseData = [];
         datas?.resultArray?.forEach((el) => {
             let key = el?.MetalPurity;
-            let findIndex = metalPurityWiseData.findIndex(item => item.MetalPurity === key);
+            let findIndex = metalPurityWiseData.findIndex((item) => item.MetalPurity === key);
             if (findIndex === -1) {
                 metalPurityWiseData.push({
                     MetalPurity: key,
@@ -174,14 +168,19 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                     totalMetalpuritywt: el?.NetWt || el?.GrossWt || 0,
                     totalPcs: 1,
                     totalDiamondWt: el?.diamondTotalWt || 0,
+                    totalNaturalDiaWt: el?.naturalDiaWt || 0, // NEW
+                    totalLabGrownDiaWt: el?.labGrownWt || 0, // NEW
                     totalColorStoneWt: el?.colorStoneTotalWt || 0,
-                    descriptionofGoods: `${el?.MetalPurity || ""} ${el?.MetalType || ""}`
+                    descriptionofGoods: `${el?.MetalPurity || ""} ${el?.MetalType || ""}`,
                 });
             } else {
-                metalPurityWiseData[findIndex].totalMetalpuritywt += el?.NetWt || el?.GrossWt || 0;
-                metalPurityWiseData[findIndex].totalPcs += 1;
-                metalPurityWiseData[findIndex].totalDiamondWt += el?.diamondTotalWt || 0;
-                metalPurityWiseData[findIndex].totalColorStoneWt += el?.colorStoneTotalWt || 0;
+                const row = metalPurityWiseData[findIndex];
+                row.totalMetalpuritywt += el?.NetWt || el?.GrossWt || 0;
+                row.totalPcs += 1;
+                row.totalDiamondWt += el?.diamondTotalWt || 0;
+                row.totalNaturalDiaWt += el?.naturalDiaWt || 0; // NEW
+                row.totalLabGrownDiaWt += el?.labGrownWt || 0; // NEW
+                row.totalColorStoneWt += el?.colorStoneTotalWt || 0;
             }
         });
 
@@ -191,55 +190,50 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
             return designNoA - designNoB;
         });
 
-        // ✅ Set to datas.maintotal
         datas.mainCusTotal = {
             ...datas.maintotal,
-            metalPurityWiseData
+            metalPurityWiseData,
         };
 
         setCategoryNameWise(cateWise);
         setResult(datas);
     }
 
-
-
-
-    console.log('result: ', result);
+    /* ---------- passport lookup (documentDetail is an array of {key, value}) ---------- */
+    const passportNo =
+        documentDetail?.find((d) => d?.key?.toLowerCase()?.includes("passport"))?.value ?? "";
 
     const cellStyle = {
-        textTransform: 'uppercase',
-        borderLeft: '1px solid black',
-        borderRight: '1px solid black',
-        padding: '8px',
+        textTransform: "uppercase",
+        borderLeft: "1px solid black",
+        borderRight: "1px solid black",
+        padding: "8px",
     };
 
     const cellBodyStyle = {
-        border: '1px solid black',
-        padding: '2px',
-        textAlign: 'center',
-        verticalAlign: 'bottom',
-        textTransform: 'uppercase',
-        wordBreak: 'break-word',
-        whiteSpace: 'normal',
-    }
+        border: "1px solid black",
+        padding: "2px",
+        textAlign: "center",
+        verticalAlign: "bottom",
+        textTransform: "uppercase",
+        wordBreak: "break-word",
+        whiteSpace: "normal",
+    };
 
     const cellMainTotalStyle = {
-        border: '1px solid black',
-        padding: '2px',
-        textAlign: 'center',
-        wordBreak: 'break-word',
-        whiteSpace: 'normal',
+        border: "1px solid black",
+        padding: "2px",
+        textAlign: "center",
+        wordBreak: "break-word",
+        whiteSpace: "normal",
     };
 
     if (result) {
         setTimeout(() => {
-            const button = document.getElementById('test-table-xls-button');
-            button.click();
-          }, 500);
-      }
-
-          
-     
+            const button = document.getElementById("test-table-xls-button");
+            button?.click();
+        }, 500);
+    }
 
     return (
         <>
@@ -256,65 +250,64 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                                     table="table-to-xls"
                                     filename={`Packinglist_k1_${result?.header?.InvoiceNo}_${Date.now()}`}
                                     sheet={`Packinglist_k1_${result?.header?.InvoiceNo}`}
-                                    buttonText="Download as XLS" />
+                                    buttonText="Download as XLS"
+                                />
                                 <table id="table-to-xls">
                                     <tbody>
                                         <tr />
                                         <tr>
                                             <td />
-                                            <td colSpan={10} style={{ ...cellStyle, textAlign: 'center', borderTop: '1px solid black' }}>
-                                                <h3 style={{ margin: 0, textDecoration: 'underline' }}>Temporary Export-Import</h3>
+                                            <td colSpan={10} style={{ ...cellStyle, textAlign: "center", borderTop: "1px solid black" }}>
+                                                <h3 style={{ margin: 0, textDecoration: "underline" }}>Temporary Export-Import</h3>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={8} style={{ ...cellStyle, textAlign: 'left', borderRight: 'none !important' }}>
-                                            </td>
-                                            <td colSpan={2} style={{ ...cellStyle, textAlign: 'left', borderLeft: 'none !important' }}>
-                                                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                            <td colSpan={8} style={{ ...cellStyle, textAlign: "left", borderRight: "none !important" }}></td>
+                                            <td colSpan={2} style={{ ...cellStyle, textAlign: "left", borderLeft: "none !important" }}>
+                                                {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={8} style={{ ...cellStyle, textAlign: 'left', borderRight: 'none !important' }}>
-                                            </td>
-                                            <td colSpan={2} style={{ ...cellStyle, textAlign: 'left', borderLeft: 'none !important' }}>
+                                            <td colSpan={8} style={{ ...cellStyle, textAlign: "left", borderRight: "none !important" }}></td>
+                                            <td colSpan={2} style={{ ...cellStyle, textAlign: "left", borderLeft: "none !important" }}>
                                                 Invoice No: {result?.header?.InvoiceNo}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={3} style={{ ...cellStyle, textAlign: 'left', borderRight: 'none !important' }}>
+                                            <td colSpan={3} style={{ ...cellStyle, textAlign: "left", borderRight: "none !important" }}>
                                                 To:
                                             </td>
-                                            <td colSpan={7} style={{ ...cellStyle, textAlign: 'left', borderLeft: 'none !important' }}>
+                                            <td colSpan={7} style={{ ...cellStyle, textAlign: "left", borderLeft: "none !important" }}>
                                                 {result?.header?.customerstreet}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={5} style={{ ...cellStyle, textAlign: 'left', borderRight: 'none !important' }}>
+                                            <td colSpan={5} style={{ ...cellStyle, textAlign: "left", borderRight: "none !important" }}>
                                                 Contact Person: {result?.header?.CustName}
                                             </td>
-                                            <td colSpan={5} style={{ ...cellStyle, textAlign: 'left', borderLeft: 'none !important' }}>
-                                                Passport No: {documentDetail?.Passport}
+                                            <td colSpan={5} style={{ ...cellStyle, textAlign: "left", borderLeft: "none !important" }}>
+                                                Passport No: {passportNo}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={10} style={{ ...cellStyle, textAlign: 'left' }}>
+                                            <td colSpan={10} style={{ ...cellStyle, textAlign: "left" }}>
                                                 Mobile No: <span>{result?.header?.customermobileno}</span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={10} style={{ ...cellStyle, textAlign: 'left' }}>
+                                            <td colSpan={10} style={{ ...cellStyle, textAlign: "left" }}>
                                                 Delivery: {result?.header?.Delivery_Mode}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={10} style={{ ...cellStyle, textAlign: 'left' }}>
+                                            <td colSpan={10} style={{ ...cellStyle, textAlign: "left" }}>
                                                 <h4 style={{ margin: 0 }}>List of Items:</h4>
                                             </td>
                                         </tr>
@@ -322,16 +315,16 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                                         {/* Items Header Row */}
                                         <tr>
                                             <th />
-                                            <th style={{ ...cellBodyStyle, width: '60px' }}>Sr. No</th>
-                                            <th style={{ ...cellBodyStyle, width: '80px' }}>Tag No</th>
-                                            <th style={{ ...cellBodyStyle, width: '80px' }}>Code No</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Item</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Diam Quality</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Dia Weight Carat</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Color St Weight Carat</th>
-                                            <th style={{ ...cellBodyStyle, width: '80px' }}>Gold Purity</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Gold Weight Grams</th>
-                                            <th style={{ ...cellBodyStyle, width: '100px' }}>Price {result?.header?.CurrencyCode}</th>
+                                            <th style={{ ...cellBodyStyle, width: "60px" }}>Sr. No</th>
+                                            <th style={{ ...cellBodyStyle, width: "80px" }}>Tag No</th>
+                                            <th style={{ ...cellBodyStyle, width: "80px" }}>Code No</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Item</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Diam Quality</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Dia Weight Carat</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Color St Weight Carat</th>
+                                            <th style={{ ...cellBodyStyle, width: "80px" }}>Gold Purity</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Gold Weight Grams</th>
+                                            <th style={{ ...cellBodyStyle, width: "100px" }}>Price {result?.header?.CurrencyCode}</th>
                                         </tr>
 
                                         {/* Item Rows */}
@@ -340,95 +333,110 @@ const PackingListExcelK1 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) 
                                                 <td />
                                                 <td style={{ ...cellBodyStyle }}>{idx + 1}</td>
                                                 <td style={{ ...cellBodyStyle }}>{item.designno}</td>
-                                                <td style={{
-                                                    ...cellBodyStyle,
-                                                    width: '80px'
-                                                }}>'{item.SrJobno}{item.Counter_Tray !== "" && (item.Counter_Tray)}</td>
+                                                <td style={{ ...cellBodyStyle, width: "80px" }}>
+                                                    '{item.SrJobno}
+                                                    {item.Counter_Tray !== "" && item.Counter_Tray}
+                                                </td>
                                                 <td style={{ ...cellBodyStyle }}>{item.Categoryname}</td>
-                                                <td style={{ ...cellBodyStyle }}>{item?.ColornameMax} {item?.QualityNameMax}</td>
-                                                <td style={{ ...cellBodyStyle }}>{(item?.diamondTotalWt)?.toFixed(3)}</td>
-                                                <td style={{ ...cellBodyStyle }}>{(item?.colorStoneTotalWt)?.toFixed(3)}</td>
+                                                <td style={{ ...cellBodyStyle }}>
+                                                    {item?.ColornameMax} {item?.QualityNameMax}
+                                                </td>
+                                                <td style={{ ...cellBodyStyle }}>{item?.diamondTotalWt?.toFixed(3)}</td>
+                                                <td style={{ ...cellBodyStyle }}>{item?.colorStoneTotalWt?.toFixed(3)}</td>
                                                 <td style={{ ...cellBodyStyle }}>{item.MetalPurity}</td>
                                                 <td style={{ ...cellBodyStyle }}>{item.NetWt}</td>
-                                                <td style={{ ...cellBodyStyle }}>{formatAmount((item?.TotalAmount / result?.header?.CurrencyExchRate).toFixed(2))}</td>
+                                                <td style={{ ...cellBodyStyle }}>
+                                                    {formatAmount((item?.TotalAmount / result?.header?.CurrencyExchRate).toFixed(2))}
+                                                </td>
                                             </tr>
                                         ))}
                                         <tr>
                                             <td colSpan={6} />
-                                            <td style={{ ...cellMainTotalStyle, borderBottom: 'none' }}>
+                                            <td style={{ ...cellMainTotalStyle, borderBottom: "none" }}>
                                                 {(result?.mainTotal?.diamonds?.Wt ?? 0).toFixed(2)}
                                             </td>
-                                            <td style={{ ...cellMainTotalStyle, borderBottom: 'none' }}>
+                                            <td style={{ ...cellMainTotalStyle, borderBottom: "none" }}>
                                                 {(result?.mainTotal?.colorstone?.Wt ?? 0).toFixed(2)}
                                             </td>
-                                            <td /> {/* keep if needed */}
-                                            <td style={{ ...cellMainTotalStyle, borderBottom: 'none' }}>
+                                            <td />
+                                            <td style={{ ...cellMainTotalStyle, borderBottom: "none" }}>
                                                 {(result?.mainTotal?.metal?.Wt ?? 0).toFixed(2)}
                                             </td>
-                                            <td style={{ ...cellMainTotalStyle, borderBottom: 'none' }}>
-                                                {((result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate))?.toFixed(2)}
+                                            <td style={{ ...cellMainTotalStyle, borderBottom: "none" }}>
+                                                {(result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate)?.toFixed(2)}
                                             </td>
                                         </tr>
 
                                         {/* Row for units */}
                                         <tr>
                                             <td colSpan={6} />
-                                            <td style={{ ...cellMainTotalStyle, borderTop: 'none' }}>CARATS</td>
-                                            <td style={{ ...cellMainTotalStyle, borderTop: 'none' }}>CARATS</td>
+                                            <td style={{ ...cellMainTotalStyle, borderTop: "none" }}>CARATS</td>
+                                            <td style={{ ...cellMainTotalStyle, borderTop: "none" }}>CARATS</td>
                                             <td />
-                                            <td style={{ ...cellMainTotalStyle, borderTop: 'none' }}>GRAMS</td>
-                                            <td style={{ ...cellMainTotalStyle, borderTop: 'none' }}>{result?.header?.CurrencyCode ?? ''}</td>
+                                            <td style={{ ...cellMainTotalStyle, borderTop: "none" }}>GRAMS</td>
+                                            <td style={{ ...cellMainTotalStyle, borderTop: "none" }}>{result?.header?.CurrencyCode ?? ""}</td>
                                         </tr>
                                         <tr>
                                             <td />
-                                            <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Value : {result?.header?.CurrencyCode}{". "}{toWords?.convert(+fixedValues((result?.mainTotal?.total_amount) / result?.header?.CurrencyExchRate, 2))}</td>
+                                            <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                Total Value : {result?.header?.CurrencyCode}
+                                                {". "}
+                                                {toWords?.convert(+fixedValues(result?.mainTotal?.total_amount / result?.header?.CurrencyExchRate, 2))}
+                                            </td>
                                         </tr>
+
+                                        {/* Purity wise summary */}
                                         {result?.mainCusTotal?.metalPurityWiseData?.map((item, idx) => (
                                             <React.Fragment key={idx}>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Description of Goods: {item?.descriptionofGoods}</td>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                        Description of Goods: {item?.descriptionofGoods}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total No of Pcs: {item?.totalPcs} PCS</td>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                        Total No of Pcs: {item?.totalPcs} PCS
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
                                                         Total {item?.descriptionofGoods} Weight: {item?.totalMetalpuritywt?.toFixed(3)} GRAMS
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Diamond Weight: {weightTotals.other?.toFixed(3)} CARATS</td>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                        Total Diamond Weight: {item?.totalNaturalDiaWt?.toFixed(3)} CARATS
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Lab Grown Diamond Weight: {weightTotals.labGrown?.toFixed(3)} CARATS</td>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                        Total Lab Grown Diamond Weight: {item?.totalLabGrownDiaWt?.toFixed(3)} CARATS
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td />
-                                                    <td colSpan={10} style={{ textTransform: 'upperCase' }}>Total Colored Stone Weight: {item?.totalColorStoneWt?.toFixed(3)} CARATS</td>
+                                                    <td colSpan={10} style={{ textTransform: "upperCase" }}>
+                                                        Total Colored Stone Weight: {item?.totalColorStoneWt?.toFixed(3)} CARATS
+                                                    </td>
                                                 </tr>
 
-                                                {/* ✅ Blank row */}
+                                                {/* Blank row */}
                                                 <tr>
                                                     <td colSpan={11}>&nbsp;</td>
                                                 </tr>
                                             </React.Fragment>
                                         ))}
-
-
                                     </tbody>
                                 </table>
-
                             </div>
                         </>
                     ) : (
-                        <p className="text-danger fs-2 fw-bold mt-5 text-center w-50 mx-auto fsh2_s2">
-                            {msg}
-                        </p>
+                        <p className="text-danger fs-2 fw-bold mt-5 text-center w-50 mx-auto fsh2_s2">{msg}</p>
                     )}
                 </>
             )}

@@ -1050,6 +1050,8 @@ const PrintDesign16A = ({ queries, headers }) => {
                                     </div>
                                     <div className="partybg16A">
                                       <span className="bg16oldlh7">ORD : {(e?.data?.rd?.orderDatef !== "01Jan00" && e?.data?.rd?.orderDatef !== "01Jan1900") && e?.data?.rd?.orderDatef}</span>
+                                      {POFlag && <span className="bg16oldlh7"> {e?.data?.rd?.PO?.slice(0,11)}</span>}
+                                      
                                       <div>
                                         <div style={{ color: "red" }}>
                                           <span className="bg16oldlh7"></span>

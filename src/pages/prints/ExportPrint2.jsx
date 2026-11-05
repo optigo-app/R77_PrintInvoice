@@ -15,6 +15,7 @@ const ExportPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
     const [datass, setDatass] = useState({});
     const [metals, setMetals] = useState([]);
     const [footer, setFooter] = useState(null);
+    const [billjson6, setBilljson6] = useState([]);
     const [totals, setTotals] = useState({
         Wt: 0,
         Pcs: 0,
@@ -39,6 +40,7 @@ const ExportPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         let footers = FooterComponent("1", data?.BillPrint_Json[0]);
         setFooter(footers);
         setHeaderData(data?.BillPrint_Json[0]);
+        setBilljson6(data?.BillPrint_Json6);
         setDatass(datas);
         // Your array
         // let dataArray = lodash.cloneDeep(datas?.resultArray);
@@ -174,6 +176,42 @@ const ExportPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
         sendData();
 
     }, []);
+
+    
+    console.log("TCL:SmallTable ", smallTable)
+    
+    console.log("TCL: billjson6", billjson6)
+
+    const norm = (v) => String(v ?? "").trim().toLowerCase();
+
+const getBOE = (type, e) => {
+    const typeKeys = {
+        metal: ["metal"],
+        diamond: ["diamond"],
+        colorstone: ["color"],            // matches COLORSTONE / COLOR STONE
+        finding: ["finding", "misc"],     // finding / misc
+    }[type] || [];
+
+    const matched = (billjson6 || []).filter((b) => {
+        const matName = norm(b?.MaterialName);
+        if (!typeKeys.some((k) => matName.includes(k))) return false;
+
+        const shape   = norm(e?.ShapeName ?? e?.shapename);
+        const quality = norm(e?.QualityName);
+
+        if (norm(b?.Shape) !== shape || norm(b?.Quality) !== quality) return false;
+
+        // color & size only apply to diamond / colorstone
+        if (type === "diamond" || type === "colorstone") {
+            if (norm(b?.Color) !== norm(e?.Colorname)) return false;
+            if (norm(b?.Size) !== norm(e?.SizeName)) return false;
+        }
+        return true;
+    });
+
+    // unique BOE numbers, comma separated
+    return [...new Set(matched.map((b) => b?.BOE).filter(Boolean))].join(", ");
+};
 
     return (
         loader ? <Loader /> : msg === "" ? <div className={`container max_width_container pad_60_allPrint mt-2 ${style?.exportprint2} exportprint2`}>
@@ -434,7 +472,7 @@ const ExportPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className="col-4 p-1"><p className="fw-bold">INV. 1014922 DTD : 11/07/2019</p></div>
                         </div>
                     </div> */}
-                    <div className="d-flex col-6 border-start border-top border-end border-black">
+                    <div className="d-flex col-6 border-start border-top border-end border-black" style={{borderBottom:"1px solid black"}}>
                         <div className="col-5 border-end border-black">
                             {smallTable?.metalList?.map((e, i) => {
                                 return <p className={`p-1 border-bottom border-black fw-bold ${style?.minHeight_19_8}`} key={i}>{e?.label}</p>
@@ -464,19 +502,19 @@ const ExportPrint2 = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             })}
                         </div>
                         <div className="col-5">
-                            {smallTable?.metalList?.map((e, i) => {
-                                return <p className={`py-1 border-bottom border-black ${style?.minHeight_19_8}`} key={i}></p>
-                            })}
-                            {smallTable?.diaList?.map((e, i) => {
-                                return <p className={`py-1 border-bottom border-black ${style?.minHeight_19_8}`} key={i}></p>
-                            })}
-                            {smallTable?.csList?.map((e, i) => {
-                                return <p className={`py-1 border-bottom border-black ${style?.minHeight_19_8}`} key={i}></p>
-                            })}
-                            {smallTable?.findList?.map((e, i) => {
-                                return <p className={`py-1 border-bottom border-black ${style?.minHeight_19_8}`} key={i}></p>
-                            })}
-                        </div>
+    {smallTable?.metalList?.map((e, i) => {
+        return <p className={`p-1 border-bottom border-black fw-bold ${style?.minHeight_19_8}`} key={i}>{getBOE("metal", { ShapeName: e?.ShapeName, QualityName: e?.QualityName })}</p>
+    })}
+    {smallTable?.diaList?.map((e, i) => {
+        return <p className={`p-1 border-bottom border-black fw-bold ${style?.minHeight_19_8}`} key={i}>{getBOE("diamond", e)}</p>
+    })}
+    {smallTable?.csList?.map((e, i) => {
+        return <p className={`p-1 border-bottom border-black fw-bold ${style?.minHeight_19_8}`} key={i}>{getBOE("colorstone", e)}</p>
+    })}
+    {smallTable?.findList?.map((e, i) => {
+        return <p className={`p-1 border-bottom border-black fw-bold ${style?.minHeight_19_8}`} key={i}>{getBOE("finding", e)}</p>
+    })}
+</div>
                     </div>
                     <div className="col-6 ps-2">
                     <div className={`${footer1.footer1Info} no_break footerTarget`}>

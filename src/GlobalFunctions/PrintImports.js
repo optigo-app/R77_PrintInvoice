@@ -261,6 +261,7 @@ export const QuotationPrints = [
   { printName: 'detail print 5', etpType: 'print', componentName: 'DetailPrint5' },
   { printName: 'jewellery invoice 5', etpType: 'print', componentName: 'JewelleryInvoicePrint5' },
   { printName: 'packing list ox', etpType: 'print', componentName: 'OptigoPackingListX' },
+  { printName: 'packing list 3 B', etpType: 'print', componentName: 'PackingList3B' },
 ]
 
 export const MemoPrints = [
@@ -594,6 +595,7 @@ export const outsourcePrint = [
   { printName: 'ret. mat.', etpType: 'print', componentName: 'OutsourceRetMat' },
   { printName: 'outsource job print', etpType: 'print', componentName: 'OutsourceJobPrint' },
   { printName: 'outsource job print 2', etpType: 'print', componentName: 'OutsourceJobPrint2' },
+  { printName: 'Outsource Job Print 3', etpType: 'print', componentName: 'OutsourceJobPrint3' },
 ];
 
 

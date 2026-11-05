@@ -622,10 +622,11 @@ const JewelleryInvoiceT1 = ({
                                             <div>{headerData?.CompanyCity}-{headerData?.CompanyPinCode},
                                                 {" "}{headerData?.CompanyState}({headerData?.CompanyCountry})</div>
                                             <div>
-                                                {[
-                                                    headerData?.CompanyTellNo && `T ${headerData.CompanyTellNo}`,
+                                                {/* {[
+                                                    headerData?.CompanyTellNo && `Mo. ${headerData.CompanyTellNo}`,
                                                     headerData?.CompanyTollFreeNo && `TOLL FREE ${headerData.CompanyTollFreeNo}`
-                                                ].filter(Boolean).join(" | ")}
+                                                ].filter(Boolean).join(" | ")} */}
+                                                { headerData?.CompanyTellNo && `Mo. ${headerData.CompanyTellNo}`}
                                             </div>
                                             <div>{headerData?.CompanyEmail} {headerData?.CompanyWebsite ? " | " : ""} {headerData?.CompanyWebsite}</div>
                                             <div> {[

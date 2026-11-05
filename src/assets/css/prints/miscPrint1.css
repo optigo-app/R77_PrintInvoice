@@ -9,6 +9,13 @@
     word-break: break-all;
     font-family: Calibri;
 }
+  .pclheader {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    flex-direction: column;
+}
 
 .discriptionMisc1{
     /* width: 65px;
@@ -16,7 +23,10 @@
     width: 10%;
     min-width: 10%;
 }
-
+.fs_head_pcl{
+    font-size: 15px !important;
+    font-weight: bold;
+}
 .adpcMisc1, .kpcsMisc1, .kundMisc1, .motiMisc1, .bmotiMisc1, .mopMisc1, .minaMisc1, .stoneMisc1{
     /* width: 44px;
     min-width: 44px; */
@@ -76,5 +86,7 @@
     }
     .d_none_pcl1{
         display: none !important;
+    }.fs_head_pcl{
+        font-size: 13px !important;
     }
 }

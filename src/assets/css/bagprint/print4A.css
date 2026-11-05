@@ -19,7 +19,12 @@
 .border_right_2_4A {
     border-right: 1pt solid #000;
 }
-
+.print_btn {
+    margin: 0 !important;
+}
+.d-none-print{
+    padding: 17px 0;
+}
 
 /* .container4AD{
     height: 382px;
@@ -103,6 +108,12 @@
 
 .ordDt4A {
     width: 37pt;
+}
+
+.quotationNo{
+    position: absolute;
+    font-size: 12px;
+    left: 3px;
 }
 
 .delDt4A {
@@ -560,6 +571,9 @@
     }
       .print4Apart_1{
         margin-bottom: 0;
+    }
+    .d-none-print{
+        display: none !important;
     }
 
   

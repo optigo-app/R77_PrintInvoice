@@ -47,7 +47,7 @@ function DiamondStock({ queries, headers }) {
     }
   };
 
-  
+
   console.log("TCL: DiamondStock -> data", data)
 
   return (
@@ -108,17 +108,21 @@ function DiamondStock({ queries, headers }) {
                             {item?.rfbag}
                           </div>
                         </div>
-                       
-                        
+
+
                         <div className="frow">
-                          <div className="cell label" style={{ width: "38%" }}></div>
-                          <div className="cell value" style={{ width: "62%" }}> {item?.labname}</div>
+                          <div className="cell label" style={{ width: "100%", display: "flex" }}>
+                            {item?.labname && <span className="value">{item.labname}</span>}
+                            {item?.labname && item?.materialtypename && " - "}
+                            {item?.materialtypename && <span className="value">{item.materialtypename}</span>}
+                          </div>
+
                           {/* <div className="cell value" style={{ width: "62%" }}>{item?.shape}</div> */}
                         </div>
                       </div>
                     </div>
 
-                    
+
                     <div className="frow">
                       <div className="cell label" style={{ width: "13%" }}>Cla</div>
                       <div className="cell value" style={{ width: "25%" }}>{item?.quality}</div>
@@ -133,7 +137,7 @@ function DiamondStock({ queries, headers }) {
                       <div className="cell value" style={{ width: "25%" }}>{item?.cutname}</div>
                       <div className="cell label" style={{ width: "18%" }}>Shape</div>
                       <div className="cell value ellipsis" style={{ width: "44%" }}>
-                      {item?.shape}
+                        {item?.shape}
                       </div>
                     </div>
 

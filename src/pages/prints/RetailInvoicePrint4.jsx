@@ -1278,7 +1278,7 @@ console.log("TCL: OldGolddetails", OldGolddetails)
                           })}
                         {/* <p className="pb-1 px-1">Recv. in Bank</p> */}
                         <p className="pb-1 px-1 text-end">Advance</p>
-                        <p className="pb-1 px-1 text-end">Net Bal. Amount</p>
+                        <p className="pb-1 px-1 text-end"> (Due Amt.) Net Bal. Amount</p>
                         <p className="fw-bold p-1 border-top text-end">
                           GRAND TOTAL
                         </p>

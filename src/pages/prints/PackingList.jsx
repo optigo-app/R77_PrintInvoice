@@ -336,9 +336,9 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                 <div className="diamhpclcol">
                                   <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ width: "27%" }} > Shape </div>
                                   <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ width: "27%" }} > Size </div>
-                                  <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ width: "22%" }} > Wt </div>
+                                  <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ width: "20%" }} > Wt </div>
                                   <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ width: "22%" }} > Rate </div>
-                                  <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ borderRight: "0px", width: "27%" }} > Amount </div>
+                                  <div className="dcolsthpcl centerpcl fwboldpcl fspcl" style={{ borderRight: "0px", width: "29%" }} > Amount </div>
                                 </div>
                               </div>
                               <div className="diamheadpcl">
@@ -465,7 +465,7 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                       <div className=" fspcl text-break br_top_pcl text-break bg_pcl" >&nbsp;</div>
                                     </div>
                                   </div>
-                                  <div className="dcolsthpcl fspcl pt-1" style={{ width: "22%" }} >
+                                  <div className="dcolsthpcl fspcl pt-1" style={{ width: "20%" }} >
                                     <div className="d-flex flex-column justify-content-between h-100">
                                       <div>
                                         {
@@ -495,7 +495,7 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                                       <div className=" fspcl text-break br_top_pcl text-break bg_pcl fw-bold end_pcl_new end_p_pcl_new" >&nbsp;</div>
                                     </div>
                                   </div>
-                                  <div className="dcolsthpcl fspcl pt-1" style={{ borderRight: "0px", width: "27%" }} >
+                                  <div className="dcolsthpcl fspcl pt-1" style={{ borderRight: "0px", width: "29%" }} >
                                     <div className="d-flex flex-column justify-content-between h-100">
                                       <div>
                                         {
@@ -800,11 +800,11 @@ const PackingList = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                             <div className="dcolsthpcl" style={{ width: "27%", backgroundColor: '#F5F5F5 !important' }} ></div>
                             <div className="dcolsthpcl" style={{ width: "27%", backgroundColor: '#F5F5F5 !important' }} ></div>
                             <div className="dcolsthpcl  fwboldpcl fspcl d-flex justify-content-end align-import { value } from './ExportDeclarationForm';
-items-center end_p_pcl_new" style={{ width: "22%" }} >
+items-center end_p_pcl_new" style={{ width: "20%" }} >
                               {result?.mainTotal?.diamonds?.Wt !== 0 && result?.mainTotal?.diamonds?.Wt?.toFixed(3)}
                             </div>
                             {/* <div className="dcolsthpcl" style={{ width: "22%" }} ></div> */}
-                            <div className="dcolsthpcl  fwboldpcl fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px", width: "49%", }} >
+                            <div className="dcolsthpcl  fwboldpcl fspcl d-flex justify-content-end align-items-center end_p_pcl_new" style={{ borderRight: "0px", width: "51%", }} >
                               {result?.mainTotal?.diamonds?.Amount !== 0 && formatAmount(((result?.mainTotal?.diamonds?.Amount) / (result?.header?.CurrencyExchRate)))}
                             </div>
                           </div>

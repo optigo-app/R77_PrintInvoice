@@ -554,12 +554,27 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
             </div>
 
             {/* print head text */}
-            <div className={`${style?.headText_pcls} mb-1 d-flex align-items-center`}>
+            {/* <div className={`${style?.headText_pcls} mb-1 d-flex align-items-center`}>
               {json0Data?.PrintHeadLabel === "" ? "PACKING LIST" : json0Data?.PrintHeadLabel}
+            </div> */}
+            <div className="pclheader" style={{marginBottom: "20px"}}>
+            <div className="orailpcl">
+                    {isImageWorking && (json0Data?.PrintLogo !== "" && <img src={json0Data?.PrintLogo} alt="" className='w-100 h-auto ms-auto d-block object-fit-contain' onError={handleImageErrors} height={120} width={150} style={{ maxWidth: "100px" }} />)}
+                  </div>
+                  <div className="addresspcl fspcl">
+                    {json0Data?.CompanyAddress}{" "}
+                    {json0Data?.CompanyAddress2}{" "}
+                    {json0Data?.CompanyCity} -{" "}
+                    {json0Data?.CompanyPinCode}{" "}
+                  </div>
+                  <div className="pclheaderplist mb_5_pcl fs_head_pcl" style={{}}>
+                  {json0Data?.PrintHeadLabel === "" ? "PACKING LIST" : json0Data?.PrintHeadLabel}
+                  </div>
             </div>
 
+
             {/* Comapny Header */}
-            <div className={`px-1 ${style?.spbrWord} ${style?.com_fs_pcl3} ${style?.mainHeadWD}`}>
+            {/* <div className={`px-1 ${style?.spbrWord} ${style?.com_fs_pcl3} ${style?.mainHeadWD}`}>
               <div className={`justify-content-start ${style?.spbrWord} ${style?.fs_14_pcls}`}>
                 <div className={`${style?.fs_16_pcls} fw-bold py-1 ${style?.spbrWord}`}>
                   {json0Data?.CompanyFullName}
@@ -573,8 +588,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   {json0Data?.CompanyState !== "" && `, ${json0Data?.CompanyState}`}(
                   {json0Data?.CompanyCountry}){" "}
                 </div>
-                {/* <div>{json0Data?.CompanyAddress2}</div> */}
-                {/* <div>{json0Data?.CompanyCity}</div> */}
+                
                 <div>
                   <span>{json0Data?.CompanyTellNo !== "" && `T : ${json0Data?.CompanyTellNo}`}</span>{" "}
                   <span>
@@ -588,7 +602,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                 </div>
               </div>
 
-              {/* Company Logo */}
+            
               {json0Data?.PrintLogo !== "" && (
                 <img
                   src={json0Data?.PrintLogo}
@@ -600,7 +614,7 @@ const PackingList1S = ({ urls, token, invoiceNo, printName, evn, ApiVer }) => {
                   style={{ maxWidth: "116px" }}
                 />
               )}
-            </div>
+            </div> */}
 
             {/* customer header */}
             <div className={`d-flex mt-1 mb-1 ${style?.brall_pcls} ${style?.spbrWord}`}>

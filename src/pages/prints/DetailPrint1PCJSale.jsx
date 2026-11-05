@@ -31,6 +31,7 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
     const [tunchDetails, setTunchDetails] = useState(true);
     const [pcsDetails, setPcsDetails] = useState(true);
     const [summaryDetails, setSummaryDetails] = useState(true);
+    const [hsnFlag, setHsnFlag] = useState(false);
 
     const [brokarage, setBrokarage] = useState([]);
     const [msg, setMsg] = useState("");
@@ -571,6 +572,12 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
       setCompanyDetails(true);
     }
   };
+  const handleHsnFlag = () => {
+    if (hsnFlag) setHsnFlag(false);
+    else {
+      setHsnFlag(true);
+    }
+  };
 
   const handleTunchDetails = () => {
     if (tunchDetails) setTunchDetails(false);
@@ -606,6 +613,17 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                     <div className="pad_60_allPrint">
                         {/* buttons */}
                         <div className="d-flex justify-content-end align-items-center print_sec_sum4 mb-4 pt-4">
+
+                        <div className="form-check d-flex align-items-center detailPrint1L_font_13">
+                                <input
+                                    className="border-dark me-2"
+                                    type="checkbox"
+                                    checked={hsnFlag}
+                                    onChange={(e) => handleHsnFlag(e)}
+                                    name="hsnFlag"
+                                />
+                                <label className="pt-1">HSN </label>
+                            </div>
                             
                             <div className="form-check d-flex align-items-center detailPrint1L_font_13">
                                 <input
@@ -686,7 +704,7 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                   {json0Data?.CompanyAddress2 !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.CompanyAddress2}</p>)}
                                   <p className="lhDetailPrint1 pb-1">
                                       {json0Data?.CompanyCity !== "" && `${json0Data?.CompanyCity}`}{json0Data?.CompanyPinCode !== "" && `-${json0Data?.CompanyPinCode},`}
-                                      {json0Data?.CompanyState !== "" && `${json0Data?.CompanyState}`}{json0Data?.CompanyCountry !== "" && `${(json0Data?.CompanyCountry)}`}
+                                      {json0Data?.CompanyState !== "" && `${json0Data?.CompanyState}`}{json0Data?.CompanyCountry !== "" && `, ${(json0Data?.CompanyCountry)}`}
                                   </p>
                                   {json0Data?.CompanyTellNo !== "" && (<p className="lhDetailPrint1 pb-1">T {json0Data?.CompanyTellNo}</p>)}
                                   <p className="lhDetailPrint1 pb-1">
@@ -725,7 +743,7 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                         {json0Data?.PinCode && ` - ${json0Data.PinCode}`}
                                     </p>
                                 )}
-                                {json0Data?.customeremail1 !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.customeremail1}</p>)}
+                                {json0Data?.customeremail1 !== "" && !hsnFlag && (<p className="lhDetailPrint1 pb-1">{json0Data?.customeremail1}</p>)}
                                 {json0Data?.vat_cst_pan !== "" && (<p className="lhDetailPrint1 pb-1">{json0Data?.vat_cst_pan}</p>)}
                                 {json0Data?.Cust_CST_STATE_No !== "" && (<p className="lhDetailPrint1 pb-1">
                                     {json0Data?.Cust_CST_STATE}-{json0Data?.Cust_CST_STATE_No}
@@ -768,6 +786,12 @@ const DetailPrint1PCJSale = ({ token, invoiceNo, printName, urls, evn, ApiVer })
                                         <p className="fw-bold col-2 me-2">DATE </p>
                                         <p className="col-10">{json0Data?.EntryDate}</p>
                                     </div>
+                                )}
+                                 {hsnFlag && json0Data?.HSN_No !== "" && (
+                                     <div className="d-flex pb-1">
+                                     <p className="fw-bold col-2 me-2">HSN NO </p>
+                                     <p className="col-10">{json0Data?.HSN_No}</p>
+                                 </div>
                                 )}
 
                             </div>
